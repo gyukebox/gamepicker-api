@@ -49,8 +49,8 @@ router.get('/search/:query',(req,res) => {
     const conn = mysql.createConnection(dbConfig);
     if(!req.params.query) {
         console.log('aa');
-        
         res.send([{}]);
+        conn.end();
     } else {
         const query = `SELECT id, title, img_link FROM games WHERE title LIKE '%${req.params.query}%'`;
         conn.query('SET NAMES utf8');
@@ -58,9 +58,8 @@ router.get('/search/:query',(req,res) => {
             if(err) console.log(err);
             else    res.send(rows);
         });
+        conn.end();
     }
-    
-    conn.end();
 })
 
 module.exports = router;

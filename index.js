@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const auth = require('./routes/auth');
+const passport = require('passport');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())
@@ -10,9 +11,9 @@ app.use(cors());
 
 const port = process.env.PORT || 3333;
 
-app.use(express.static(path.json(__dirname, 'public')));
-app.use(auth.initialize());
+app.use(passport.initialize());
 
+app.use('/login',require('./routes/login'))
 app.use('/users',require('./routes/user'));
 app.use('/game',require('./routes/game'));
 

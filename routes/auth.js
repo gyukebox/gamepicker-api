@@ -3,30 +3,23 @@ const passportJWT = require('passport-jwt');
 const config = require('../config/jwt-config');
 const ExtractJwt = passportJWT.ExtractJwt;
 const Strategy = passportJWT.Strategy;
-const param = {
+const params = {
     secretOrKey: config.jwtSecret,
-    jwtFromRequest: ExtractJwt.fromAuthHeader()
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
 }
 
+const mysql = require('mysql');
+const dbConfig = require('../config/db-config');
+
 module.exports = function() {
-    const strategy = new Strategy(params, (payload, done) => {
+    passport.use(new Strategy(params, (payload, done) => {
         //user에 id가 일치하는 데이터
         //id name email password
-        if(user) {
-            return done(null, {
-                id: user.id
-            });
-        } else {
-            return done(new Error('User not found!'), null);
-        }
-    });
-    passport.use(strategy);
-    return {
-        initialize: () => {
-            return passport.initialize();
-        },
-        authenticate: () => {
-            return passport.authenticate('jwt',config.jwtSession);
-        }
-    };
+        const conn = mysql.createConnection(dbConfig);
+        conn.query(`SELECT email FROM accounts WHERE email=${payload.id}`, (err, rows) => {
+            if (err)        return done(err, false);
+            if (rows[0])    return done(null, user);
+            else            return done(null, false);
+        });
+    }));
 };

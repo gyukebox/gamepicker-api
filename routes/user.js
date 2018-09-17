@@ -20,8 +20,8 @@ router.get('/profile', (req, res) => {
 });
 
 router.put('/',(req, res) => {
-    const { email, password } = req.body;
-    if(!(email && password)) {
+    const { name, email, password } = req.body;
+    if(!(name && email && password)) {
         res.sendStatus(400)
     } else {
         const now = new Date().toLocaleString();
@@ -32,6 +32,7 @@ router.put('/',(req, res) => {
             if(err)     console.log(err);
             else        res.sendStatus(201);
         });
+        conn.end();
     }
 })
 
