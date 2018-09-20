@@ -20,6 +20,6 @@ FAIL { "error": ERR_MESSAGE}</code></pre>
     "name": INPUT_NAME,
     "email": INPUT_EMAIL,
     "password": INPUT_PASSWORD
-}</code><pre>
+}</code></pre>
 * Response
 <pre><code>HTTP status codes</code></pre>
