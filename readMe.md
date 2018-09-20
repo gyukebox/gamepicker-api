@@ -1,5 +1,7 @@
 Gamepicker API 명세서
 =====================
 
-## /login
-## /users
+# 회원
+<pre><code>
+    POST /login
+</code></pre>
