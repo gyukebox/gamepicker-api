@@ -27,13 +27,51 @@ FAIL { "error": ERR_MESSAGE}</code></pre>
 <pre><code>DELETE /users</code></pre>
 
 ## 프로필 불러오기
-### 개임 프로필 불러오기
+### 개인 프로필 불러오기
 <pre><code>GET /users/profile/:name</code></pre>
+* Request
+<pre><code>{
+    "token": UNIQUE_TOKEN
+}</code></pre>
+* Response
+<pre><code>{
+    "name": USER_NAME,
+    "email": USER_EMAIL,
+    "gender": USER_GENDER,
+    "birthday": USER_BIRTHDAY,
+    "intoroduce": USER_INTRODUCE,
+    "potnt": USER_POINT
+}</code></pre>
 ### 유저 프로필 불러오기
 <pre><code>GET /users/profile</code></pre>
+* Request
+<pre><code>none</code></pre>
+* Response
+<pre><code>{
+    "name": USER_NAME,
+    "email": USER_EMAIL,
+    "gender": USER_GENDER,
+    "birthday": USER_BIRTHDAY,
+    "intoroduce": USER_INTRODUCE,
+    "potnt": USER_POINT
+}</code></pre>
 ## 유저 정보 수정
 <pre><code>POST /users/profile</code></pre>
-
+* Request
+<pre><code>{
+    "token": UNIQUE_TOKEN,
+    "name": USER_NAME,
+    "email": USER_EMAIL,
+    "password": USER_PASSWORD,
+    "gender": USER_GENDER,
+    "birthday": USER_BIRTHDAY,
+    "intoroduce": USER_INTRODUCE,
+}</code></pre>
+* Response
+<pre><code>
+    SUCCESS { "success": profile save }
+    FAIL    { "error": token invalid }
+</code></pre>
 # 커뮤니티
 ## 글 작성
 <pre><code>PUT /talk/write</code></pre>
