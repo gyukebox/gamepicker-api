@@ -1,7 +1,7 @@
 Gamepicker API 명세서
 =====================
 # 목차
-1. [회원]
+1. 회원
     - [로그인](#로그인)
     - [회원가입](#회원가입)
     - [회원탈퇴](#회원탈퇴)
@@ -122,6 +122,10 @@ FAIL    { "error": token invalid }</code></pre>
 <pre><code>POST /talk/:postID/recommend</code></pre>
 ## 글 비추천
 <pre><code>POST /talk/:postID/disrecommend</code></pre>
+## 댓글 달기
+## 댓글 가져오기
+## 댓글 수정
+## 댓글 삭제
 
 # 게임
 ## 게임 추가
@@ -136,6 +140,10 @@ FAIL    { "error": token invalid }</code></pre>
 <pre><code>POST /games/:gameID</code></pre>
 ## 게임 삭제
 <pre><code>DELETE /games/:gameID</code></pre>
+## 게임 댓글 달기
+## 게임 댓글 가져오기
+## 게임 댓글 수정
+## 게임 댓글 삭제
 
 # 태그
 ## 태그 가져오기
