@@ -1,5 +1,11 @@
 Gamepicker API 명세서
 =====================
+#목차
+1. 회원
+2. 커뮤니티
+3. 게임
+4. 태그
+5. 플랫폼
 
 # 회원
 ## 로그인
@@ -68,10 +74,8 @@ FAIL { "error": ERR_MESSAGE}</code></pre>
     "intoroduce": USER_INTRODUCE,
 }</code></pre>
 * Response
-<pre><code>
-    SUCCESS { "success": profile save }
-    FAIL    { "error": token invalid }
-</code></pre>
+<pre><code>SUCCESS { "success": profile save }
+FAIL    { "error": token invalid }</code></pre>
 # 커뮤니티
 ## 글 작성
 <pre><code>PUT /talk/write</code></pre>
