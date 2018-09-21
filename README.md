@@ -159,7 +159,7 @@ FAIL    { "error": token invalid }</code></pre>
 
 # 게임
 ## 게임 추가
-<pre><code>GET /games</code></pre>
+<pre><code>PUT /games</code></pre>
 * Request
 <pre><code></code></pre>
 * Response
@@ -171,7 +171,7 @@ FAIL    { "error": token invalid }</code></pre>
 * Response
 <pre><code></code></pre>
 ## ID로 게임 가져오기
-<pre><code>GET /games/:gameID</code></pre>
+<pre><code>GET /games/:id</code></pre>
 * Request
 <pre><code></code></pre>
 * Response
@@ -183,13 +183,13 @@ FAIL    { "error": token invalid }</code></pre>
 * Response
 <pre><code></code></pre>
 ## 게임 수정
-<pre><code>POST /games/:gameID</code></pre>
+<pre><code>POST /games/:id</code></pre>
 * Request
 <pre><code></code></pre>
 * Response
 <pre><code></code></pre>
 ## 게임 삭제
-<pre><code>DELETE /games/:gameID</code></pre>
+<pre><code>DELETE /games/:id</code></pre>
 * Request
 <pre><code></code></pre>
 * Response
