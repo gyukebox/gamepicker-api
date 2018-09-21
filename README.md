@@ -34,12 +34,13 @@ Gamepicker API 명세서
     - [게임 댓글 삭제](#게임-댓글-삭제)
 4. 태그
     - [태그 가져오기](#태그-가져오기)
+
 5. 플랫폼
     - [플랫폼 가져오기](#플랫폼-가져오기)
 
 # 회원
 ## 로그인
-<pre><code>POST /login</code></pre>
+<pre><code>POST /users/login</code></pre>
 * Request
 <pre><code>{
     "email": INPUT_EMAIL,
@@ -63,7 +64,7 @@ FAIL { "error": ERR_MESSAGE}</code></pre>
 <pre><code>DELETE /users</code></pre>
 
 ## 개인 프로필 가져오기
-<pre><code>GET /users/profile/:name</code></pre>
+<pre><code>GET /users/:name</code></pre>
 * Request
 <pre><code>{
     "token": UNIQUE_TOKEN
@@ -78,7 +79,7 @@ FAIL { "error": ERR_MESSAGE}</code></pre>
     "potnt": USER_POINT
 }</code></pre>
 ## 유저 프로필 가져오기
-<pre><code>GET /users/profile</code></pre>
+<pre><code>GET /users</code></pre>
 * Request
 <pre><code>none</code></pre>
 * Response
@@ -91,7 +92,7 @@ FAIL { "error": ERR_MESSAGE}</code></pre>
     "potnt": USER_POINT
 }</code></pre>
 ## 개인 프로필 수정
-<pre><code>POST /users/profile</code></pre>
+<pre><code>POST /users</code></pre>
 * Request
 <pre><code>{
     "token": UNIQUE_TOKEN,
@@ -108,20 +109,52 @@ FAIL    { "error": token invalid }</code></pre>
 # 커뮤니티
 ## 글 작성
 <pre><code>PUT /talk/write</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 인기 글 가져오기
 <pre><code>GET /talk/:postID</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 추천 글 가져오기
 <pre><code>GET /talk/:postID</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 최신 글 가져오기
 <pre><code>GET /talk/:postID</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 글 수정
 <pre><code>POST /talk/:postID</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 글 삭제
 <pre><code>DELETE /talk/:postID</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 글 추천
 <pre><code>POST /talk/:postID/recommend</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 글 비추천
 <pre><code>POST /talk/:postID/disrecommend</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 댓글 달기
 ## 댓글 가져오기
 ## 댓글 수정
@@ -130,16 +163,40 @@ FAIL    { "error": token invalid }</code></pre>
 # 게임
 ## 게임 추가
 <pre><code>GET /games</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 검색어로 게임 가져오기
-<pre><code>GET /games?query=':query'</code></pre>
+<pre><code>GET /games/search/:query</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## ID로 게임 가져오기
 <pre><code>GET /games/:gameID</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 추천 게임 가져오기
 <pre><code>GET /games/recommend</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 게임 수정
 <pre><code>POST /games/:gameID</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 게임 삭제
 <pre><code>DELETE /games/:gameID</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
 ## 게임 댓글 달기
 ## 게임 댓글 가져오기
 ## 게임 댓글 수정
@@ -148,9 +205,31 @@ FAIL    { "error": token invalid }</code></pre>
 # 태그
 ## 태그 가져오기
 <pre><code>GET /tags</code></pre>
+* Request
+<pre><code></code></pre>
+* Response
+<pre><code></code></pre>
+## 검색한 태그 가져오기
+<pro><code>GET /tags/search/:query</code></pre>
+* Request
+<pre><code>none</code></pre>
+* Response
+<pre><code>[
+    {"id":ID1, "value":VALUE1 },
+    {"id":ID2, "value":VALUE2 },
+    {"id":ID3, "value":VALUE3 },
+    ...
+]</code></pre>
 
 # 플랫폼
 ## 플랫폼 가져오기
 <pre><code>GET /platforms</code></pre>
-
-
+* Request
+<pre><code>none</code></pre>
+* Response
+<pre><code>[
+    {"id":ID1, "value":VALUE1 },
+    {"id":ID2, "value":VALUE2 },
+    {"id":ID3, "value":VALUE3 },
+    ...
+]</code></pre>
