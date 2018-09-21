@@ -1,8 +1,41 @@
 const express = require('express');
 const router = express.Router();
 
-const mysql = require('mysql');
-const dbConfig = require('../config/db-config');
+const Database = require('../model/Database');
+const database = new Database();
+
+router.get('/', (req, res) => {
+    const now = new Date().toLocaleString();
+    const json;
+    const { id, title, developer, publisher, age_rate, summary, img_link, video_link } = req.body;
+    const query = ` INSERT INTO games(title, developer, publisher, age_rate, summary, img_link, video_link, update_date, create_date)
+                    VALUES ('${title}', '${developer}', '${publisher}', '${age_rate}', '${summary}', '${img_link}', '${video_link}', '${now}',' ${now}')`
+    database.query(query)
+        .then(rows => {
+            json = rows[0];
+            return database.query(`SELECT tag_id FROM game_tags WHERE game_id=${id}`);
+        })
+        .then(rows => {
+            const tag_id_list = rows.map(data => {return data.tag_id});
+            return database.query(`SELECT value FROM tags WHERE IN ${tag_id_list}`);
+        })
+        .then(rows => {
+            json.tag_list = rows.map(data => {return data.value});
+        })
+        .then(() => {
+            return database.query(`SELECT platform_id FROM game_platform WHERE game_id=${id}`);
+        })
+        .then(rows => {
+            const platform_id_list = rows.map(data => {return data.platform_id});
+            return database.query(`SELECT value FROM platforms WHERE IN ${platform_id_list}`);
+        })
+        .then(rows => {
+            json.platform_list = rows.map(data => {return data.value});
+        })
+        .catch(err => {
+            res.status(400).json({error : err});
+        })
+})
 
 router.put('/',(req, res) => {
     const conn = mysql.createConnection(dbConfig);
@@ -16,7 +49,7 @@ router.put('/',(req, res) => {
     });
     conn.end();
 })
-
+//추천 게임 가져오기
 router.get('/recommend',(req, res) => {
     const conn = mysql.createConnection(dbConfig);
     const query = `SELECT id, title, img_link FROM games LIMIT 5`;
@@ -27,19 +60,6 @@ router.get('/recommend',(req, res) => {
     });
     conn.end();
 });
-
-router.get('/:id',(req, res) => {
-    //TODO: params => body, add tags & plaforms at response
-    const conn = mysql.createConnection(dbConfig);
-    const query =`  SELECT title, developer, publisher, age_rate, summary, img_link, video_link
-                    FROM games WHERE id=${req.params.id}`
-    conn.query('SET NAMES utf8');
-    conn.query(query,(err, rows) => {
-        if(err) res.json(400, err);
-        else    res.json(200, rows[0]);
-    });
-    conn.end();
-})
 
 router.post('/',(req, res) => {
     const conn = mysql.createConnection(dbConfig);

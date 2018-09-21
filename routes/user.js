@@ -23,7 +23,7 @@ checkDuplicateData = (field, value) => {
         });
     });
 }
-
+//login
 router.post('/login', (req, res) => {
     if(req.body.email && req.body.password) {
         const email = req.body.email;
@@ -52,7 +52,7 @@ router.post('/login', (req, res) => {
         res.json(400, { error: 'lack of input' });
     }
 })
-
+//get userName's profile
 router.get('/:userName' ,(req, res) => {
     const user_name = req.query.name;
     const conn = mysql.createConnection(dbConfig);
@@ -64,7 +64,7 @@ router.get('/:userName' ,(req, res) => {
         else        res.json(rows[0]);
     });
 })
-
+//profile modify
 router.post('/', (req, res) => {
     const token = req.body.token;
     const { name, password, birthday, gender, introduce } = req.body.data;
@@ -84,7 +84,7 @@ router.post('/', (req, res) => {
         res.json(400, { error: error});
     })
 });
-
+//get profile
 router.get('/', (req, res) => {
     const token = req.body.token;
     const id = jwt.decode(token, config.jwtSecret);
@@ -98,7 +98,7 @@ router.get('/', (req, res) => {
         else        res.json(rows[0]);
     });
 });
-
+//register
 router.put('/',(req, res) => {
     const { name, email, password } = req.body;
     if(!(name && email && password))    res.json(400, { error: 'lack of input'})
