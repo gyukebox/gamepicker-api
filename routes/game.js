@@ -29,6 +29,7 @@ router.get('/recommend',(req, res) => {
 });
 
 router.get('/:id',(req, res) => {
+    //TODO: params => body, add tags & plaforms at response
     const conn = mysql.createConnection(dbConfig);
     const query =`  SELECT title, developer, publisher, age_rate, summary, img_link, video_link
                     FROM games WHERE id=${req.params.id}`
