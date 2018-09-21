@@ -4,8 +4,11 @@ const router = express.Router();
 const jwt = require('jwt-simple');
 const config = require('../config/jwt-config');
 
-const mysql = require('mysql');
-const dbConfig = require('../config/db-config');
+const Database = require('../model/Database');
+const database = new Database();
+
+const passport = require('passport');
+const auth = require('./passport')
 
 tokenToId = (token) => {
     const user = jwt.decode(token, config.jwtSecret);
@@ -16,7 +19,7 @@ checkDuplicateData = (field, value) => {
     return new Promise((resolve, reject) => {
         const conn = mysql.createConnection(dbConfig);
         conn.query('SET NAMES utf8');
-        const query = `SELECT EXIST (SELECT id FROM accounts WHERE ${field}=${value}`;
+        const query = `SELECT EXIST (SELECT id FROM accounts WHERE ${field}=${value})`;
         conn.query(query, (err, rows) => {
             if(err)     reject(Error(`${value} at ${field} is duplicate`));
             else        resolve();
@@ -25,33 +28,30 @@ checkDuplicateData = (field, value) => {
 }
 //login
 router.post('/login', (req, res) => {
-    if(req.body.email && req.body.password) {
-        const email = req.body.email;
-        const password = req.body.password;
-        const conn = mysql.createConnection(dbConfig);
-        conn.query('SET NAMES utf8');
-        const query = `SELECT id, email, password FROM accounts WHERE email='${email}'`
-        conn.query(query, (err, rows) => {
-            if(err)         res.json(400, { error: 'DATABASE error' })
-            const user = rows[0];
-            if(user) {
-                if(user.password === password) {
-                    const payload = {
-                        id: user.id
-                    };
-                    const token = jwt.encode(payload, config.jwtSecret);
-                    res.json(200, { token: token });
-                } else {
-                    res.json(400, { error: 'wrong password' });
-                }
+    const { email, password } = req.body;
+    database.query(`SELECT id, email, password FROM accounts WHERE email='${email}'`)
+    .then(rows => {
+        const user = rows[0];
+        if(user) {
+            if(user.password === password) {
+                const payload = { id: user.id };
+                const token = jwt.encode(payload, config.jwtSecret);
+                res.status(200).json({token: token});
             } else {
-                res.json(400, { error: 'email not found' })
-            } 
-        });
-    } else {
-        res.json(400, { error: 'lack of input' });
-    }
+                res.status(400).json({error : 'invalid password'})
+            }
+        } else {
+            res.status(400).json({error : 'invalid email'})
+        }
+    }).catch(err => {
+        res.status(400).json(err);
+    })
 })
+/*
+router.get('/secret', passport.authenticate(), (req, res) => {
+    res.json(req.user);
+})
+*/
 //get userName's profile
 router.get('/:userName' ,(req, res) => {
     const user_name = req.query.name;
@@ -103,21 +103,15 @@ router.put('/',(req, res) => {
     const { name, email, password } = req.body;
     if(!(name && email && password))    res.json(400, { error: 'lack of input'})
     else {
-        const now = new Date().toLocaleString();
-        const conn = mysql.createConnection(dbConfig);
-        conn.query('SET NAMES utf8');
-        checkDuplicateData('email',email)
-        .then(() => {
-            checkDuplicateData('name',name)
-            .then(() => {
-                const query = `INSERT INTO accounts(email, password, point, login_date, create_date, update_date)
-                        VALUES ('${email}', '${password}', '0', '${now}', '${now}', '${now}')`;
-                conn.query(query, (err) => {
-                    if(err)     res.json(400, { error: 'DATABASE error' });
-                    else        res.json(201, { success: 'register complete'});
-                });
-            }, (error) => res.json(400, { error: error }));
-        }, (error) => res.json(400, { error: error }));
+        database.count('email',email).then(() => {
+            return database.count('name',name);
+        }).then(() => {
+            return database.query(`INSERT INTO accounts(name, email, password) VALUES ('${name}', '${email}', '${password}')`)
+        }).then(() => {
+            res.status(201).json({ success: 'register complete'});
+        }).catch(err => {
+            res.status(400).json(err);
+        })        
     }
 });
 
