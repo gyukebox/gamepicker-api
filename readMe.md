@@ -23,3 +23,18 @@ FAIL { "error": ERR_MESSAGE}</code></pre>
 }</code></pre>
 * Response
 <pre><code>HTTP status codes</code></pre>
+
+## 프로필
+<pre><code>PUT /users/profile/:userName</code></pre>
+* request
+<pre><code>{
+    
+}</code></pre>
+* Response
+<pre><code>{
+    blabla
+}</code></pre>
+
+#게임
+## 추천게임 불러오기
+<pre><code>GET /games/recommand</code><pre>

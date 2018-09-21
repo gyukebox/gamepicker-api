@@ -17,6 +17,6 @@ app.use('/login', require('./routes/login'));
 app.use('/users', require('./routes/user'));
 app.use('/games', require('./routes/game'));
 app.use('/tags', require('./routes/tags'));
-app,use('/platforms', require('./routes/platforms'));
+app.use('/platforms', require('./routes/platforms'));
 
 app.listen(port);
