@@ -5,11 +5,11 @@ const Database = require('../model/Database');
 const database = new Database();
 
 router.get('/', (req, res) => {
-    const now = new Date().toLocaleString();
     const json;
-    const { id, title, developer, publisher, age_rate, summary, img_link, video_link } = req.body;
-    const query = ` INSERT INTO games(title, developer, publisher, age_rate, summary, img_link, video_link, update_date, create_date)
-                    VALUES ('${title}', '${developer}', '${publisher}', '${age_rate}', '${summary}', '${img_link}', '${video_link}', '${now}',' ${now}')`
+    
+    const { id } = req.body;
+    const query = ` SELECT title, developer, publisher, age_rate, summary, img_link, video_link
+                    FROM games WHERE id=${id}`;
     database.query(query)
         .then(rows => {
             json = rows[0];
