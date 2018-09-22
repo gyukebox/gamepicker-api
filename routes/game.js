@@ -17,22 +17,26 @@ router.get('/', (req, res) => {
         })
         .then(rows => {
             const tag_id_list = rows.map(data => {return data.tag_id});
-            return database.query(`SELECT value FROM tags WHERE id IN (${tag_id_list.toString()})`);
+            if(tag_id_list.length > 0)
+                return database.query(`SELECT value FROM tags WHERE id IN (${tag_id_list.toString()})`);
+            else
+                return [];
         })
         .then(rows => {
-            json.tag_list = rows.map(data => {return data.value});
+            json.tags = rows.map(data => {return data.value});  ;
         })
         .then(() => {
             return database.query(`SELECT platform_id FROM game_platforms WHERE game_id=${id}`);
         })
         .then(rows => {
             const platform_id_list = rows.map(data => {return data.platform_id});
-            
-            return database.query(`SELECT value FROM platforms WHERE IN ${platform_id_list.toString()}`);
+            if (platform_id_list > 0)
+                return database.query(`SELECT value FROM platforms WHERE IN ${platform_id_list.toString()}`);
+            else
+                return [];
         })
         .then(rows => {
-            json.platform_list = rows.map(data => {return data.value});
-            
+            json.platforms = rows.map(data => {return data.value});
             res.status(201).json(json);
         })
         .catch(err => {
