@@ -19,5 +19,12 @@ app.use('/users', require('./routes/user'));
 app.use('/games', require('./routes/game'));
 app.use('/tags', require('./routes/tags'));
 app.use('/platforms', require('./routes/platforms'));
+app.use('/talks', require('./routes/talk'));
+
+//test code
+app.get('/', (req, res) => {
+    res.send(`You are connected to the gamepicker API. For more information, go to <a href='https://github.com/ansrl0107/GamePickerAPI'>Here!</a>`)
+});
+
 
 app.listen(port);

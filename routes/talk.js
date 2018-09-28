@@ -34,28 +34,61 @@ router.put('/', (req, res) => {
 
 router.get('/', (req, res) => {
     const { game_id, post_id } = req.query;
-    if (game_id && post_id ) {
-        const query = `SELECT id, title, content, recommend, disrecommend FROM posts WHERE game_id=${game_id} AND id=${post_id}`;
-        database.query(query)
-        .then(rows => res.status(200).json(rows))
-        .then(() => { return database.query(`UPDATE posts SET views = views + 1 WHERE game_id=${game_id} AND id=${post_id}`); })
-        .catch(err => res.status(400).json({ success: false, message: err }));
-    } else if (post_id) {   
-        const query = `SELECT id, title, content, recommend, disrecommend FROM posts WHERE id=${post_id}`;
-        database.query(query)
-        .then(rows => res.status(200).json(rows[0]))
-        .then(() => { return database.query(`UPDATE posts SET views = views + 1 WHERE id = ${post_id}`); })
-        .catch(err => res.status(400).json({ success: false, message: err }));
-    } else if (game_id) {
-        const query = `SELECT id, title, content, recommend, disrecommend FROM posts WHERE game_id=${game_id}`;
-        database.query(query)
-        .then(rows => res.status(200).json(rows))
-        .then(() => { return database.query(`UPDATE posts SET views = views + 1 WHERE game_id = ${game_id}`); })
-        .catch(err => res.status(400).json({ success: false, message: err }));
-    } else {
-        res.status(400).json({ success: false, message: 'url query not included' });
+    let query = `SELECT id, title, content, recommend, disrecommend FROM posts `;
+    if (game_id) {
+        query += `WHERE game_id=${game_id} `;
+        if (post_id)
+            query += `AND id=${post_id}`;
+    } else if(post_id) {
+        query += `WHERE post_id=${post_id} `;
     }
+    if (game_id && post_id) {
+        query  += `WHERE game_id=${game_id} AND id=${post_id}`;
+    } else if (game_id) {
+        query += `WHERE game_id=${game_id}`;
+    } else if( post_id ) {
+        query += `WHERE post_id=${post_id}`;
+    }
+    database.query(query)
+    .then(rows => {
+        res.status(200).json(rows);
+        return rows;
+    })
+    .then(rows => {
+        const id_list = [];
+        rows.forEach(row => id_list.push(row.id));
+        return database.query(`UPDATE posts SET views = views + 1 WHERE id IN (${id_list.toString()})`);
+    })
+    .catch(err => res.status(400).json({ success: false, message: err }));
 });
+
+router.get('/:sort', (req, res) => {
+    const sort_option = req.params.sort;
+    const count_per_page = req.query.posts || 10;
+    const page_number = req.query.pages || 1;
+    const game_id = req.query.game_id;
+    var query = `SELECT id, title, content, recommend, disrecommend FROM posts `;
+    if(game_id)
+        query += `WHERE game_id=${game_id} `;
+    switch (sort_option) {
+        case 'popular':
+            query += `ORDER BY views ASC `
+            break;
+        case 'recommend' :
+            query += `ORDER BY recommend ASC `;
+            break;
+        case 'recent' :
+            query += `ORDER BY update_date ASC `;
+            break;
+        default:
+            res.status(400).json({ success: false, message: 'check your sort option'})
+            break;
+    }
+    query += `LIMIT ${(page_number-1) * count_per_page},${count_per_page}`;
+    database.query(query)
+    .then(rows => res.status(200).json(rows))
+    .catch(err => res.status(400).json({ success: false, message: err }))
+})
 
 router.post('/', (req, res) => {
     const token = req.headers['x-access-token'];
@@ -75,12 +108,41 @@ router.delete('/', (req, res) => {
     if(!token)
         return res.status(401).json({ success: false, message: 'not logged in'});
     const { id } = req.body.id;
-    if(id != jwt.decode(token, config.jwtSession))
-        return res.status(401).json({ success: false, message: 'unauthenticated' })
-    const query = `DELETE FROM posts WHERE id = ${id}`;
+    const { user_id } = jwt.decode(token, config.jwtSession);
+    const query = `DELETE FROM posts WHERE id = ${id} AND user_id = ${user_id}`;
     database.query(query)
     .then(() => res.status(200).json({ success: true, message: 'post delete'}))
     .catch(err => res.status(400).json({ success: false, message: err }));
 })
+
+router.post('/recommend', (req, res) => {
+    const token = req.headers['x-access-token'];
+    if(!token)
+        return res.status(401).json({ success: false, message: 'not logged in'});
+    const user_id = jwt.decode(token, config.jwtSecret);
+    const { id } = req.body;
+
+    database.query(`SELECT EXISTS (SELECT * FROM recommends WHERE post_id = ${id} AND user_id = ${user_id}) as success`)
+    .then(rows => {
+        if ( rows.success == 1 )    res.status(406).json({ success: false, message: 'already recommend this post'})
+        else                        res.status(201).json({ success: true, message: 'recommend success'})
+    })
+    .catch(err => res.status(400).json({ success: false, message: err }))
+});
+
+router.post('/disrecommend', (req, res) => {
+    const token = req.headers['x-access-token'];
+    if(!token)
+        return res.status(401).json({ success: false, message: 'not logged in'});
+    const user_id = jwt.decode(token, config.jwtSecret);
+    const { id } = req.body;
+
+    database.query(`SELECT EXISTS (SELECT * FROM disrecommends WHERE post_id = ${id} AND user_id = ${user_id}) as success`)
+    .then(rows => {
+        if ( rows.success == 1 )    res.status(406).json({ success: false, message: 'already disrecommend this post'})
+        else                        res.status(201).json({ success: true, message: 'disrecommend success'})
+    })
+    .catch(err => res.status(400).json({ success: false, message: err }))
+});
 
 module.exports = router;

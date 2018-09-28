@@ -127,20 +127,21 @@ SUCCESS { success: true, message: 'post create'}
 FAIL    { success: false, message: ERR_MESSAGE }
 </code></pre>
 ## 글 가져오기
-<pre><code>GET /talk?post_id=ID (not tested)</code></pre>
+<pre><code>GET /talk</code></pre>
 * Request
 <pre><code>
 query {
-    post_id: POST_ID
+    post_id: index of posts         #optional, default = NaN -> search all posts
+    game_id: categories of posts    #optional, default = NaN -> search all posts
 }
 </code></pre>
 * Response
 <pre><code>
-SUCCESS { success: true, message: JSON }
+SUCCESS JSON
 FAIL    { success: false, message: ERR_MESSAGE }
 </code></pre>
 ## 카테고리 글 가져오기
-<pre><code>GET /talk?game_id=ID (not tested)</code></pre>
+<pre><code>GET /talk</code></pre>
 * Request
 <pre><code>
 query {
@@ -149,15 +150,24 @@ query {
 </code></pre>
 * Response
 <pre><code>
-SUCCESS { success: true, message: JSON }
+SUCCESS JSON
 FAIL    { success: false, message: ERR_MESSAGE }
 </code></pre>
 ## 인기 글 가져오기
 <pre><code>GET /talk/popular</code></pre>
 * Request
-<pre><code></code></pre>
+<pre><code>
+query {
+    posts: number of posts to show on one page  #optional, default = 10
+    pages: posts of the nth page                #optional, default = 1
+    game_id: categories of posts                #optional, default = NaN -> search all posts
+}
+</code></pre>
 * Response
-<pre><code></code></pre>
+<pre><code>
+SUCCESS JSON
+FAIL    { success: false, message: ERR_MESSAGE }
+</code></pre>
 ## 추천 글 가져오기
 <pre><code>GET /talk/recommend</code></pre>
 * Request
@@ -195,6 +205,9 @@ FAIL    { success: false, message: ERR_MESSAGE }
 header {
     x-access-token: USER_TOKEN
 }
+body {
+    id = POST_ID
+}
 </code></pre>
 * Response
 <pre><code>
@@ -202,17 +215,37 @@ SUCCESS { success: true, message: 'post delete'}
 FAIL    { success: false, message: ERR_MESSAGE }
 </code></pre>
 ## 글 추천
-<pre><code>POST /talk/:postID/recommend</code></pre>
+<pre><code>POST /talk/recommend (not tested)</code></pre>
 * Request
-<pre><code></code></pre>
+<pre><code>
+header {
+    x-access-token: USER_TOKEN
+}
+body {
+    id: POST_ID
+}
+</code></pre>
 * Response
-<pre><code></code></pre>
+<pre><code>
+SUCCESS { success: true, message: 'recommend success'}
+FAIL    { success: false, message: 'already recommend this post'}
+</code></pre>
 ## 글 비추천
-<pre><code>POST /talk/:postID/disrecommend</code></pre>
+<pre><code>POST /talk/disrecommend (not tested)</code></pre>
 * Request
-<pre><code></code></pre>
+<pre><code>
+header {
+    x-access-token: USER_TOKEN
+}
+body {
+    id: POST_ID
+}
+</code></pre>
 * Response
-<pre><code></code></pre>
+<pre><code>
+SUCCESS { success: true, message: 'disrecommend success'}
+FAIL    { success: false, message: 'already disrecommend this post'}
+</code></pre>
 
 # 게임
 ## 게임 추가
