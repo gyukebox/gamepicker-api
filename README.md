@@ -109,11 +109,49 @@ FAIL { "error": ERR_MESSAGE}</code></pre>
 FAIL    { "error": token invalid }</code></pre>
 # 커뮤니티
 ## 글 작성
-<pre><code>PUT /talk</code></pre>
+<pre><code>PUT /talk (not tested)</code></pre>
 * Request
-<pre><code></code></pre>
+<pre><code>
+header {
+    x-access-token: USER_TOKEN
+}
+body {
+    title: TITLE,
+    content: CONTENT,
+    game_id: GAME_ID(CATEGORY)
+}
+</code></pre>
 * Response
-<pre><code></code></pre>
+<pre><code>
+SUCCESS { success: true, message: 'post create'}
+FAIL    { success: false, message: ERR_MESSAGE }
+</code></pre>
+## 글 가져오기
+<pre><code>GET /talk?post_id=ID (not tested)</code></pre>
+* Request
+<pre><code>
+query {
+    post_id: POST_ID
+}
+</code></pre>
+* Response
+<pre><code>
+SUCCESS { success: true, message: JSON }
+FAIL    { success: false, message: ERR_MESSAGE }
+</code></pre>
+## 카테고리 글 가져오기
+<pre><code>GET /talk?game_id=ID (not tested)</code></pre>
+* Request
+<pre><code>
+query {
+    game_id: GAME_ID
+}
+</code></pre>
+* Response
+<pre><code>
+SUCCESS { success: true, message: JSON }
+FAIL    { success: false, message: ERR_MESSAGE }
+</code></pre>
 ## 인기 글 가져오기
 <pre><code>GET /talk/popular</code></pre>
 * Request
@@ -133,17 +171,36 @@ FAIL    { "error": token invalid }</code></pre>
 * Response
 <pre><code></code></pre>
 ## 글 수정
-<pre><code>POST /talk/:postID</code></pre>
+<pre><code>POST /talk (not tested)</code></pre>
 * Request
-<pre><code></code></pre>
+<pre><code>
+header {
+    x-access-token: USER_TOKEN
+}
+body {
+    id: POST_ID,
+    title: FIXED_TITLE,
+    content: FIXED_CONTENT
+}
+</code></pre>
 * Response
-<pre><code></code></pre>
+<pre><code>
+SUCCESS { success: true, message: 'post update'}
+FAIL    { success: false, message: ERR_MESSAGE }
+</code></pre>
 ## 글 삭제
-<pre><code>DELETE /talk/:postID</code></pre>
+<pre><code>DELETE /talk (not tested)</code></pre>
 * Request
-<pre><code></code></pre>
+<pre><code>
+header {
+    x-access-token: USER_TOKEN
+}
+</code></pre>
 * Response
-<pre><code></code></pre>
+<pre><code>
+SUCCESS { success: true, message: 'post delete'}
+FAIL    { success: false, message: ERR_MESSAGE }
+</code></pre>
 ## 글 추천
 <pre><code>POST /talk/:postID/recommend</code></pre>
 * Request
