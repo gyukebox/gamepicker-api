@@ -18,7 +18,7 @@ router.get('/', (req, res) => {
 router.put('/', (req, res) => {
     const { value } = req.body;
     if(!value)
-        return res.status(400).json({ success: false, message: 'not enough body '});
+        return res.status(400).json({ success: false, message: 'body.value is required'});
     database.query(`INSERT INTO platforms (value) VALUES (${value})`)
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: false }))
