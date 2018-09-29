@@ -7,7 +7,6 @@ const config = require('../config/jwt-config');
 const Database = require('../model/Database');
 const database = new Database();
 
-//login
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
     database.query(`SELECT id, email, password FROM accounts WHERE email='${email}'`)
