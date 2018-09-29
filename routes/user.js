@@ -48,21 +48,17 @@ router.post('/login', (req, res) => {
     })
 })
 
-//get userName's profile
-router.get('/:userName' ,(req, res) => {
-    const user_name = req.query.name;
-    const conn = mysql.createConnection(dbConfig);
-    const query =`  SELECT id, name, email, birthday, gender, introduce, point
-                    FROM accounts WHERE name=${user_name}`
-    conn.query('SET NAMES utf8');
-    conn.query(query, (err, rows) => {
-        if(err)     res.status(400).json({ success: false, message: err});
-        else        res.status(200).json({ success: true, profile: rows[0]});
-    });
-})
-
 router.get('/', (req, res) => {
-    
+    const { name, id } = req.query;
+    const token = req.headers['x-access-token'];
+    let query = `SELECT id, name, email, birthday, gender, introduce, point FROM accounts `;
+    if (token)      query += `WHERE id=${jwt.decode(token, config.jwtSecret)}`
+    else if (name && id) res.json(400).json({ success: false, message: 'too much query'});
+    else if (name)  query += `WHERE name=${name}`;
+    else if (id)    query += `WHERE id=${id}`;
+    database.query(query)
+    .then(rows => res.status(200).json({ success: true, profile: rows }))
+    .catch(err => res.status(400).json({ success: false, message: err }));
 })
 //profile modify
 router.post('/', (req, res) => {
@@ -84,20 +80,7 @@ router.post('/', (req, res) => {
         res.json(400, { error: error});
     })
 });
-//get profile
-router.get('/', (req, res) => {
-    const token = req.body.token;
-    const id = jwt.decode(token, config.jwtSecret);
-    const conn = mysql.createConnection(dbConfig);
-    conn.query('SET NAMES utf8');
-    const query = ` SELECT id, name, email, birthday, gender, introduce, point
-                    FROM accounts
-                    WHERE id=${id}`;
-    conn.query(query, (err, rows) => {
-        if(err)     res.json(400, { error: 'DATABASE error'});
-        else        res.json(rows[0]);
-    });
-});
+
 //register
 router.put('/',(req, res) => {
     const { name, email, password } = req.body;
