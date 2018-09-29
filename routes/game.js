@@ -9,6 +9,7 @@ const config = require('../config/jwt-config');
 
 router.get('/', (req, res) => {
     const { search, id } = req.query;
+
     let query = `SELECT title, developer, publisher, age_rate, summary, img_link, video_link FROM games `;
     if (search && id)   return res.status(400).json({ success:false, message: 'too many queries' });
     if (search) {
@@ -153,5 +154,19 @@ router.put('/rates', (req, res) => {
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
+
+router.get('/rates', (req, res) => {
+    const { game_id } = req.query;
+
+    database.query(`SELECT value FROM rates WHERE game_id=${game_id}`)
+    .then(rows => {
+        let sum = 0;
+        rows.foreach(row => sum += row.value);
+        const avg_rate = sum/rows.length;
+        res.status(200).json({ success: true, rate: avg_rate })
+    })
+    .catch(err => res.status(400).json({ success: false, message: err }))
+})
+
 
 module.exports = router;
