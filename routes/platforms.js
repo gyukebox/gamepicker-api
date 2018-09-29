@@ -6,21 +6,34 @@ const dbConfig = require('../config/db-config');
 const DATABASE = require('../model/Database');
 const database = DATABASE();
 
-router.get('/',(req, res) => {
-    const conn = mysql.createConnection(dbConfig);
-    const query = `SELECT id, value FROM platforms`;
-    conn.query('SET NAMES utf8');
-    conn.query(query, (err, rows) => {
-        if(err)     res.status(400).json({ error: 'DATABASE error '});
-        else        res.status(200).json(rows); 
-    });
-});
+router.get('/', (req, res) => {
+    const { id, value } = req.query;
+    let query = `SELECT id, value FROM platforms `;
+    if (id && value)    res.status(400).json({ success: false, message: 'too many query'});
+    else if (id)        query += `WHERE id=${id}`;
+    else if (value)     query += `WHERE value=${value}`;
+    database.query(query)
+    .then(rows => res.status(200).json({ success: true, platforms: rows }))
+    .catch(err => res.status(400).json({ success: false, message: err }))
+})
 
 router.put('/', (req, res) => {
     const { value } = req.body;
     database.query(`INSERT INTO platforms (value) VALUES (${value})`)
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: false }))
+})
+
+router.delete('/', (req, res) => {
+    const { id,value } = req.query;
+    let query = `DELETE FROM platforms `;
+    if (id && value)    res.status(400).json({ success: false, message: 'too many query'});
+    else if (id)        query += `WHERE id=${id}`;
+    else if (value)     query += `WHERE value=${value}`;
+    else                res.status(400).json({ success: false, message: 'not enough query'});
+    database.query(query)
+    .then(() => res.status(200).json({ success: true }))
+    .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
 module.exports = router;
