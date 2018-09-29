@@ -94,10 +94,17 @@ router.get('/recommend',(req, res) => {
 
 router.post('/',(req, res) => {
     const { id, title, developer, publisher, age_rate, summary, img_link, video_link } = req.body;
-    const query = ` UPDATE games
-                    SET title=${title}, developer=${developer}, publisher=${publisher}, age_rate=${age_rate}, summary=${summary} img_link=${img_link}, video_link=${video_link}
-                    WHERE id=${id}`;
-    database.query(query)
+    let set_query = `SET `;
+    if (!id)    return res.status(400).json({ success: false, message: `body.id is required`});
+    if (title) set_query += `title=${title},`
+    if (developer) set_query +=`developer=${developer},`
+    if (publisher) set_query +=`publisher=${publisher},`
+    if (age_rate) set_query +=`age_rate=${age_rate},`
+    if (summary) set_query +=`summary=${summary},`
+    if (img_link) set_query +=`img_link=${img_link},`
+    if (video_link) set_query +=`video_link=${video_link},`
+    set_query.slice(0,-1);
+    database.query(`UPDATE games ${set_query} WHERE id=${id}`)
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 });
