@@ -124,4 +124,12 @@ router.put('/comments', (req, res) => {
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
+router.get('/comments', (req, res) => {
+    const { game_id } = req.query;
+
+    database.query(`SELECT id, user_id, value, recommend, update_date FROM game_comments WHERE game_id=${game_id}`)
+    .then(rows => res.status(200).json({ success: true, comments: rows }))
+    .catch(err => res.status(400).json({ success: false, message: err }))
+})
+
 module.exports = router;
