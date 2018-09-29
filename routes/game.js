@@ -4,6 +4,9 @@ const router = express.Router();
 const Database = require('../model/Database');
 const database = new Database();
 
+const jwt = require('jwt-simple');
+const config = require('../config/jwt-config');
+
 router.get('/', (req, res) => {
     const { search, id } = req.query;
     let query = `SELECT title, developer, publisher, age_rate, summary, img_link, video_link FROM games `;
@@ -83,9 +86,11 @@ router.put('/',(req, res) => {
         res.status(400).json({ success: false, message: err });
     });
 });
-//추천 게임 가져오기
+
 router.get('/recommend',(req, res) => {
     const token = req.headers['x-access-token'];
+    //token 으로 개인에 알맞는 게임을 추천하는 알고리즘을 짜야함
+    //현재에는 상위 5개의 게임만 보여줌
     const query = `SELECT id, title, img_link FROM games LIMIT 5`;
     database.query(query)
         .then(rows => res.status(200).json(rows))
@@ -108,5 +113,15 @@ router.post('/',(req, res) => {
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 });
+
+router.put('/comments', (req, res) => {
+    const token = req.headers['x-access-token'];
+    const user_id = jwt.decode(token, config.jwtSecret);
+    const { game_id, value } = req.body;
+
+    database.query(`INSERT INTO game_comments(user_id, game_id, value) VALUES(${user_id}, ${game_id}, ${value})`)
+    .then(() => res.status(201).json({ success: true }))
+    .catch(err => res.status(400).json({ success: false, message: err }))
+})
 
 module.exports = router;
