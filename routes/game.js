@@ -22,10 +22,10 @@ router.get('/', (req, res) => {
         })
         .then(rows => {
             const tag_id_list = rows.map(data => {return data.tag_id});
+            let ret = [];
             if(tag_id_list.length > 0)
-                return database.query(`SELECT value FROM tags WHERE id IN (${tag_id_list.toString()})`);
-            else
-                return [];
+                ret =  database.query(`SELECT value FROM tags WHERE id IN (${tag_id_list.toString()})`);
+            return ret;
         })
         .then(rows => {
             json.tags = rows.map(data => {return data.value});  ;
@@ -35,10 +35,10 @@ router.get('/', (req, res) => {
         })
         .then(rows => {
             const platform_id_list = rows.map(data => {return data.platform_id});
+            let ret = [];
             if (platform_id_list > 0)
-                return database.query(`SELECT value FROM platforms WHERE IN ${platform_id_list.toString()}`);
-            else
-                return [];
+                ret =  database.query(`SELECT value FROM platforms WHERE IN ${platform_id_list.toString()}`);
+            return ret;
         })
         .then(rows => {
             json.platforms = rows.map(data => {return data.value});
