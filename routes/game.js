@@ -142,4 +142,16 @@ router.post('/comments', (req, res) => {
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
+router.put('/rates', (req, res) => {
+    const token = req.headers['x-access-token'];
+    const { game_id, value } = req.body;
+    const user_id = jwt.decode(token, config.jwtSecret);
+
+    database.count('user_id', user_id)
+    .then(() => {return database.count('game_id', game_id)})
+    .then(() => {return database.query(`INSERT INTO rates(user_id, game_id, value) VALUES(${user_id}, ${game_id}, ${value})`)})
+    .then(() => res.status(201).json({ success: true }))
+    .catch(err => res.status(400).json({ success: false, message: err }))
+})
+
 module.exports = router;
