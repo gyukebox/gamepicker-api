@@ -93,20 +93,13 @@ router.get('/recommend',(req, res) => {
 });
 
 router.post('/',(req, res) => {
-    const conn = mysql.createConnection(dbConfig);
-    conn.query('SET NAMES utf8');
-    if(!req.body)
-        res.status(412);
-    else{
-        const { id, title, developer, publisher, age_rate, summary, img_link, video_link } = req.body;
-        const query =`  UPDATE games
-                        SET title=${title}, developer=${developer}, publisher=${publisher}, age_rate=${age_rate}, summary=${summary} img_link=${img_link}, video_link=${video_link}
-                        WHERE id=${id}`;
-        conn.query(query, (err, rows) => {
-            if(err) res.status(400).json(err);
-            else    res.status(201);
-        });
-    }
+    const { id, title, developer, publisher, age_rate, summary, img_link, video_link } = req.body;
+    const query = ` UPDATE games
+                    SET title=${title}, developer=${developer}, publisher=${publisher}, age_rate=${age_rate}, summary=${summary} img_link=${img_link}, video_link=${video_link}
+                    WHERE id=${id}`;
+    database.query(query)
+    .then(() => res.status(201).json({ success: true }))
+    .catch(err => res.status(400).json({ success: false, message: err }))
 });
 
 module.exports = router;
