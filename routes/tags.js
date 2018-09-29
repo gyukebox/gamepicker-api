@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql');
-const dbConfig = require('../config/db-config');
+
+const DATABASE = require('../model/Database');
+const database = DATABASE();
 
 router.get('/',(req, res) => {
     const conn = mysql.createConnection(dbConfig);
@@ -27,5 +28,14 @@ router.get('/',(req, res) => {
         });
     }
 });
+
+router.put('/', (req, res) => {
+    const { value } = req.body;
+    if (!value)
+        return res.status(400).json({ success: false, message: 'body.value is required' })
+    database.query(`INSERT INTO tags (value) VALUES (${value})`)
+    .then(() => res.status(201).json({ success: true }))
+    .catch(err => res.status(400).json({ success: false, message: false }))
+})
 
 module.exports = router;
