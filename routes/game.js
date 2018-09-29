@@ -15,6 +15,7 @@ router.get('/', (req, res) => {
         return;
     }
     if (id) {
+        var json = [];
         database.query(query + `WHERE id=${id}`)
         .then(rows => {
             json = rows[0];            
@@ -42,10 +43,10 @@ router.get('/', (req, res) => {
         })
         .then(rows => {
             json.platforms = rows.map(data => {return data.value});
-            res.status(201).json(json);
+            res.status(201).json({ success: true, games: json });
         })
         .catch(err => {
-            res.status(400).json({error : err});
+            res.status(400).json({ success: false, message: err });
         })
         return;
     }
@@ -84,6 +85,7 @@ router.put('/',(req, res) => {
 });
 //추천 게임 가져오기
 router.get('/recommend',(req, res) => {
+    const token = req.headers['x-access-token'];
     const query = `SELECT id, title, img_link FROM games LIMIT 5`;
     database.query(query)
         .then(rows => res.status(200).json(rows))
