@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const DATABASE = require('../model/Database');
-const database = DATABASE();
+const database = new DATABASE();
 
 router.get('/', (req, res) => {
     const { id, value } = req.query;
