@@ -4,30 +4,16 @@ const router = express.Router();
 const DATABASE = require('../model/Database');
 const database = DATABASE();
 
-router.get('/',(req, res) => {
-    const conn = mysql.createConnection(dbConfig);
-    conn.query('SET NAMES utf8');
-    if(req.query.search) {
-        const query = `SELECT id, value FROM tags WHERE value LIKE '%${ req.query.search }%'`;
-        conn.query(query, (err, rows) => {
-            if(err)     res.status(400).json({ error: 'DATABASE error' });
-            else        res.status(200).json(rows); 
-        });
-    } /*else if (req.query.gameID) {
-        const query = `SELECT id, value FROM game_tags WHERE game_id=${ req.query.search }`;
-        conn.query(query, (err, rows) => {
-            return new promise((resolve. reject))
-            if(err)     res.status(400).json({ error: 'DATABASE error' });
-            else        res.status(200).json(rows); 
-        });
-    }*/ else {
-        const query = `SELECT id, value FROM tags`;
-        conn.query(query, (err, rows) => {
-            if(err)     res.status(400).json({ error: 'DATABASE error'});
-            else        res.status(200).json(rows); 
-        });
-    }
-});
+router.get('/', (req, res) => {
+    const { id, value } = req.query;
+    let query = `SELECT id, value FROM tags `;
+    if (id && value)    res.status(400).json({ success: false, message: 'too many query'});
+    else if (id)        query += `WHERE id=${id}`;
+    else if (value)     query += `WHERE value=${value}`;
+    database.query(query)
+    .then(rows => res.status(200).json({ success: true, platforms: rows }))
+    .catch(err => res.status(400).json({ success: false, message: err }))
+})
 
 router.put('/', (req, res) => {
     const { value } = req.body;
