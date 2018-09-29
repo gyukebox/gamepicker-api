@@ -84,16 +84,16 @@ router.post('/', (req, res) => {
 //register
 router.put('/',(req, res) => {
     const { name, email, password } = req.body;
-    if(!(name && email && password))    res.json(400, { error: 'lack of input'})
+    if(!(name && email && password))    res.status(400).json({ success: false, message: 'lack of input'})
     else {
         database.count('email',email).then(() => {
             return database.count('name',name);
         }).then(() => {
             return database.query(`INSERT INTO accounts(name, email, password) VALUES ('${name}', '${email}', '${password}')`)
         }).then(() => {
-            res.status(201).json({ success: 'register complete'});
+            res.status(201).json({ success: true });
         }).catch(err => {
-            res.status(400).json(err);
+            res.status(400).json({ success: false, message:err });
         })        
     }
 });
