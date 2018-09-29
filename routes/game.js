@@ -4,13 +4,18 @@ const router = express.Router();
 const Database = require('../model/Database');
 const database = new Database();
 
-//FIXME: 이거
 router.get('/', (req, res) => {
-    let json;
-    const id = req.query.id;
-    const query = ` SELECT title, developer, publisher, age_rate, summary, img_link, video_link
-                    FROM games WHERE id=${id}`;
-    database.query(query)
+    const { search, id } = req.query;
+    let query = `SELECT title, developer, publisher, age_rate, summary, img_link, video_link FROM games `;
+    if (search && id)   return res.status(400).json({ success:false, message: 'too many queries' });
+    if (search) {
+        database.query(query + `WHERE title LIKE '%${search}%'`)
+            .then(rows => res.status(200).json({ success:true, games: rows }))
+            .catch(err => res.status(400).json({ success: false, message: err }))
+        return;
+    }
+    if (id) {
+        database.query(query + `WHERE id=${id}`)
         .then(rows => {
             json = rows[0];            
             return database.query(`SELECT tag_id FROM game_tags WHERE game_id=${id}`);
@@ -42,6 +47,11 @@ router.get('/', (req, res) => {
         .catch(err => {
             res.status(400).json({error : err});
         })
+        return;
+    }
+    database.query(query)
+        .then(rows => res.status(200).json({ success:true, games: rows }))
+        .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
 router.put('/',(req, res) => {
@@ -67,9 +77,9 @@ router.put('/',(req, res) => {
         values = values.slice(0,-1);
         return database.query(`INSERT INTO game_platforms(game_id, platform_id) VALUES ${values}`)
     }).then(() => {
-        res.status(201).json({ success: 'game registration complete' });
+        res.status(201).json({ success: true });
     }).catch(err => {
-        res.status(400).json(err);
+        res.status(400).json({ success: false, message: err });
     });
 });
 //추천 게임 가져오기
@@ -96,11 +106,5 @@ router.post('/',(req, res) => {
         });
     }
 });
-
-router.get('/search/:query',(req,res) => {
-    database.query(`SELECT id, title, img_link FROM games WHERE title LIKE '%${req.params.query}%'`)
-        .then(rows => res.status(200).json(rows))
-        .catch(err => res.status(400).json(err))
-})
 
 module.exports = router;
