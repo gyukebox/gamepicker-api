@@ -36,22 +36,18 @@ router.post('/login', (req, res) => {
             if(user.password === password) {
                 const payload = { id: user.id };
                 const token = jwt.encode(payload, config.jwtSecret);
-                res.status(200).json({token: token});
+                res.status(200).json({ success: true, token: token});
             } else {
-                res.status(400).json({error : 'invalid password'})
+                res.status(400).json({ success: false, message : 'invalid password'})
             }
         } else {
-            res.status(400).json({error : 'invalid email'})
+            res.status(400).json({ success: false, message : 'invalid email'})
         }
     }).catch(err => {
         res.status(400).json(err);
     })
 })
-/*
-router.get('/secret', passport.authenticate(), (req, res) => {
-    res.json(req.user);
-})
-*/
+
 //get userName's profile
 router.get('/:userName' ,(req, res) => {
     const user_name = req.query.name;
@@ -60,9 +56,13 @@ router.get('/:userName' ,(req, res) => {
                     FROM accounts WHERE name=${user_name}`
     conn.query('SET NAMES utf8');
     conn.query(query, (err, rows) => {
-        if(err)     res.json(400, { error: 'DATABASE error'});
-        else        res.json(rows[0]);
+        if(err)     res.status(400).json({ success: false, message: err});
+        else        res.status(200).json({ success: true, profile: rows[0]});
     });
+})
+
+router.get('/', (req, res) => {
+    
 })
 //profile modify
 router.post('/', (req, res) => {
