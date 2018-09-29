@@ -132,4 +132,14 @@ router.get('/comments', (req, res) => {
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
+router.post('/comments', (req, res) => {
+    const token = req.headers['x-access-token'];
+    const { id } = req.body;
+    const user_id = jwt.decode(token, config.jwtSecret);
+
+    database.query(`DELETE FROM game_comments WHERE id=${id} AND user_id=${user_id}`)
+    .then(() => res.status(200).json({ success: true }))
+    .catch(err => res.status(400).json({ success: false, message: err }))
+})
+
 module.exports = router;
