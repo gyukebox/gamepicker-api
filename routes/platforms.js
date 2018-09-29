@@ -3,6 +3,9 @@ const router = express.Router();
 const mysql = require('mysql');
 const dbConfig = require('../config/db-config');
 
+const DATABASE = require('../model/Database');
+const database = DATABASE();
+
 router.get('/',(req, res) => {
     const conn = mysql.createConnection(dbConfig);
     const query = `SELECT id, value FROM platforms`;
@@ -12,28 +15,12 @@ router.get('/',(req, res) => {
         else        res.status(200).json(rows); 
     });
 });
-router.put('/:gameID', (req, res) => {
-    /*
-    const conn = mysql.createConnection(dbConfig);
-    
-    const query = `INSERT INTO game_platforms(game_id, value) 
-                    VALUES (${req.body.gameID}, req.body.game)`;
-    conn.query('SET NAMES utf8');
-    */
-   console.log(req.body.platform_list);
-   
-})
 
-/*
-router.get('/:gameid',(req, res) => {
-    const conn = mysql.createConnection(dbConfig);
-    const query = `SELECT id, value FROM tags`;
-    conn.query('SET NAMES utf8');
-    conn.query(query, (err, rows) => {
-        if(err)     console.log(err);
-        else        res.json(rows); 
-    });
-});
-*/
+router.put('/', (req, res) => {
+    const { value } = req.body;
+    database.query(`INSERT INTO platforms (value) VALUES (${value})`)
+    .then(() => res.status(201).json({ success: true }))
+    .catch(err => res.status(400).json({ success: false, message: false }))
+})
 
 module.exports = router;
