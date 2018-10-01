@@ -24,6 +24,15 @@ class Database {
             })
         })
     }
+    exist(field, data) {
+        return new Promise((resolve, reject) => {
+            this.connection.query(`SELECT count(*) as count FROM accounts WHERE ${field}='${data}'`, (err, rows) => {
+                if (err)    return reject(err);
+                else if (rows[0].count >= 1) return reject(`${data} exist at ${field}}`)
+                else    resolve();
+            })
+        })
+    }
     close() {
         return new Promise((resolve, reject) => {
             this.connection.end(err => {
