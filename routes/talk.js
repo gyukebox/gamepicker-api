@@ -62,7 +62,7 @@ router.get('/', (req, res) => {
     query += `LIMIT ${(page_number-1) * count_per_page},${count_per_page}`;
     database.query(query)
     .then(rows => {
-        res.status(200).json(rows);
+        res.status(200).json({ success: true, posts: rows});
         return rows;
     })
     .then(rows => {
@@ -82,7 +82,7 @@ router.post('/', (req, res) => {
         return res.status(401).json({ success: false, message: 'unauthenticated' })
     const query = `UPDATE posts SET title = ${title} content = ${content} WHERE id = ${id}`;
     database.query(query)
-    .then(() => res.status(201).json({ success: true, message: 'post update'}))
+    .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }));
 })
 
