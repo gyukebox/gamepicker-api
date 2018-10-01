@@ -139,8 +139,13 @@ router.post('/disrecommend', (req, res) => {
 
     database.query(`SELECT EXISTS (SELECT * FROM disrecommends WHERE post_id = ${id} AND user_id = ${user_id}) as success`)
     .then(rows => {
-        if ( rows.success == 1 )    res.status(406).json({ success: false, message: 'already disrecommend this post'})
-        else                        res.status(201).json({ success: true, message: 'disrecommend success'})
+        if (rows[0].success)
+            return database.query(`DELETE FROM disrecommends WHERE post_id = ${id} AND user_id = ${user_id}`);
+        else
+            return database.query(`INSERT INTO disrecommends (post_id, user_id) VALUES (${id}, ${user_id}) `);
+    })
+    .then(() => {
+        res.status(200).json({ success: true })
     })
     .catch(err => res.status(400).json({ success: false, message: err }))
 });

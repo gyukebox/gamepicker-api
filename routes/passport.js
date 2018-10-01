@@ -13,7 +13,6 @@ const database = new Database();
 
 module.exports = () => {
     var strategy = new Strategy(params, function (payload, done) {
-        // TODO write authentications to find users from a database
         database.query(`SELECT id, email, password FROM accounts WHERE email=${payload.id}`)
         .then((rows) => {
             const user = rows[0];
