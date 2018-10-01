@@ -47,9 +47,9 @@ router.post('/', (req, res) => {
     const id = jwt.decode(token, config.jwtSecret);
     const query = `UPDATE accounts SET (name, password, birthday, gender, introduce)
     = (${name}, ${password}, ${birthday}, ${gender}, ${introduce}) WHERE id=${id}`;
-    database.count('email', email)
+    database.unique('email', email)
     .then(() => {
-        return database.count('name', name)
+        return database.unique('name', name)
     }).then(() => {
         return database.query(query)
     }).then(() => {
@@ -64,8 +64,8 @@ router.put('/',(req, res) => {
     const { name, email, password } = req.body;
     if(!(name && email && password))    res.status(400).json({ success: false, message: 'lack of input'})
     else {
-        database.count('email',email).then(() => {
-            return database.count('name',name);
+        database.unique('email',email).then(() => {
+            return database.unique('name',name);
         }).then(() => {
             return database.query(`INSERT INTO accounts(name, email, password) VALUES ('${name}', '${email}', '${password}')`)
         }).then(() => {
