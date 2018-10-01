@@ -19,6 +19,16 @@ const config = require('../config/jwt-config');
 const Database = require('../model/Database');
 const database = new Database();
 
+const authToken = (token, id) => {
+    if (!token)
+        return { success: false, message: 'Token does not exist'}
+    if(!id)
+        return { success: true, id: jwt.decode(token, config.jwtSession)}
+    if(id === jwt.decode(token, config.jwtSession))
+        return { success: false, message: 'Authentication failed'}
+    return { success: true }
+}
+
 router.put('/', (req, res) => {
     const token = req.headers['x-access-token'];
     if(!token)
@@ -109,8 +119,13 @@ router.post('/recommend', (req, res) => {
 
     database.query(`SELECT EXISTS (SELECT * FROM recommends WHERE post_id = ${id} AND user_id = ${user_id}) as success`)
     .then(rows => {
-        if ( rows.success == 1 )    res.status(406).json({ success: false, message: 'already recommend this post'})
-        else                        res.status(201).json({ success: true, message: 'recommend success'})
+        if (rows[0].success)
+            return database.query(`DELETE FROM recommends WHERE post_id = ${id} AND user_id = ${user_id}`);
+        else
+            return database.query(`INSERT INTO recommends (post_id, user_id) VALUES (${id}, ${user_id}) `);
+    })
+    .then(() => {
+        res.status(200).json({ success: true })
     })
     .catch(err => res.status(400).json({ success: false, message: err }))
 });

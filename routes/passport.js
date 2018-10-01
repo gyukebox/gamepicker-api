@@ -25,11 +25,8 @@ module.exports = () => {
     });
     passport.use(strategy);
     return {
-        initialize: function () {
-            return passport.initialize();
-        },
-        authenticate: function () {
-            return passport.authenticate('jwt', cfg.jwtSession);
-        }
+        initialize: () => {return passport.initialize()},
+        authenticate: () => {return passport.authenticate('jwt', cfg.jwtSession)}
     };
 };
+

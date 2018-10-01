@@ -13,8 +13,6 @@ app.use(auth.initialize());
 
 const port = process.env.PORT || 3333;
 
-app.use(passport.initialize());
-
 app.use('/users', require('./routes/user'));
 app.use('/games', require('./routes/game'));
 app.use('/tags', require('./routes/tags'));
