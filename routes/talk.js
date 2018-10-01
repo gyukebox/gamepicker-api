@@ -24,24 +24,20 @@ router.put('/', (req, res) => {
     if(!token)
         return res.status(401).json({ success: false, message: 'not logged in'});
     const user_id = jwt.decode(token, config.jwtSecret);
-    const { title, content, game_id } = req.body;
+    const { title, content } = req.body;
+    const game_id = req.body.game_id || 0;
 
     const query = `INSERT INTO posts(user_id, title, content, game_id) VALUES ( ${user_id}, ${title}, ${content}, ${game_id} )`;
     database.query(query)
-    .then(() => res.status(201).json({ success: true, message: 'post create'}))
+    .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }));
 })
 
 router.get('/', (req, res) => {
-    const { game_id, post_id } = req.query;
+    const { game_id, post_id, sort } = req.query;
+    const count_per_page = req.query.posts || 10;
+    const page_number = req.query.pages || 1;
     let query = `SELECT id, title, content, recommend, disrecommend FROM posts `;
-    if (game_id) {
-        query += `WHERE game_id=${game_id} `;
-        if (post_id)
-            query += `AND id=${post_id}`;
-    } else if(post_id) {
-        query += `WHERE post_id=${post_id} `;
-    }
     if (game_id && post_id) {
         query  += `WHERE game_id=${game_id} AND id=${post_id}`;
     } else if (game_id) {
@@ -49,28 +45,7 @@ router.get('/', (req, res) => {
     } else if( post_id ) {
         query += `WHERE post_id=${post_id}`;
     }
-    database.query(query)
-    .then(rows => {
-        res.status(200).json(rows);
-        return rows;
-    })
-    .then(rows => {
-        const id_list = [];
-        rows.forEach(row => id_list.push(row.id));
-        return database.query(`UPDATE posts SET views = views + 1 WHERE id IN (${id_list.toString()})`);
-    })
-    .catch(err => res.status(400).json({ success: false, message: err }));
-});
-
-router.get('/:sort', (req, res) => {
-    const sort_option = req.params.sort;
-    const count_per_page = req.query.posts || 10;
-    const page_number = req.query.pages || 1;
-    const game_id = req.query.game_id;
-    var query = `SELECT id, title, content, recommend, disrecommend FROM posts `;
-    if(game_id)
-        query += `WHERE game_id=${game_id} `;
-    switch (sort_option) {
+    switch (sort) {
         case 'popular':
             query += `ORDER BY views ASC `
             break;
@@ -86,9 +61,17 @@ router.get('/:sort', (req, res) => {
     }
     query += `LIMIT ${(page_number-1) * count_per_page},${count_per_page}`;
     database.query(query)
-    .then(rows => res.status(200).json(rows))
-    .catch(err => res.status(400).json({ success: false, message: err }))
-})
+    .then(rows => {
+        res.status(200).json(rows);
+        return rows;
+    })
+    .then(rows => {
+        const id_list = [];
+        rows.forEach(row => id_list.push(row.id));
+        return database.query(`UPDATE posts SET views = views + 1 WHERE id IN (${id_list.toString()})`);
+    })
+    .catch(err => res.status(400).json({ success: false, message: err }));
+});
 
 router.post('/', (req, res) => {
     const token = req.headers['x-access-token'];
