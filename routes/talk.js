@@ -7,6 +7,17 @@ const config = require('../config/jwt-config');
 const Database = require('../model/Database');
 const database = new Database();
 
+return new Promise((resolve, reject) => {
+    this.connection.query(`SELECT EXISTS (SELECT id from ${table} WHERE ${field}='${data}') AS success`, (err, rows) => {
+        if (err)
+            return reject(err);
+        if (rows[0].success === 1)
+            return reject(`${data} exist at ${field}}`)
+        resolve();
+    })
+})
+
+
 const authToken = (token, id) => {
     if (!token)
         return { success: false, message: 'Token does not exist'}
@@ -15,6 +26,19 @@ const authToken = (token, id) => {
     if(id === jwt.decode(token, config.jwtSession))
         return { success: false, message: 'Authentication failed'}
     return { success: true }
+}
+
+const authToken = (token, id) => {
+    return new Promise((resolve, reject) => {
+        if (!token)
+            return reject('token not exist')
+        const _id = jwt.decode(token, config.jwtSecret)
+        if (!id)
+            return resolve(_id);
+        if (id !== _id)
+            return reject('Authentication failed');
+        resolve();
+    })
 }
 
 router.put('/', (req, res) => {
@@ -137,5 +161,66 @@ router.post('/disrecommend', (req, res) => {
     })
     .catch(err => res.status(400).json({ success: false, message: err }))
 });
+
+router.put('/comments', (req, res) => {
+    const token = req.headers['x-access-token'];
+    const { value, post_id } = req.body;
+    let user_id;
+    const retJSON = authToken(token).success;
+    if( !(user_id = retJSON.success) )
+        return res.status(400).json(retJSON);
+    if (!(value && post_id))
+        return res.status(400).json({ success: false, message: 'not enough query'});
+    database.query(`INSERT INTO post_comments (user_id, value, post_id) VALUES (${user_id}, ${value}, ${post_id})`)
+    .then(() => res.status(201).json({ success: true }))
+    .catch(err => res.status(400).json({ success:false, message: err }))
+})
+
+router.get('/comments', (req, res) => {
+    const { post_id } = req.query;
+    
+    database.query(`SELECT id, user_id, value, update_date FROM post_comments WHERE post_id=${post_id}`)
+    .then(rows => res.status(200).json({ success: true, comments: rows }))
+    .catch(err => res.status(400).json({ success: false, message: err }))
+})
+
+
+//FIXME: this is Experimental function
+router.post('/comments', (req, res) => {
+    const token = req.headers['x-access-token'];
+    //const user_id = 
+    const { id, value } = req.body;
+    const update_comment = (user_id) => {
+        return database.query(`UPDATE post_comments SET id=${id}, value=${value} WHERE user_id=${user_id}`)
+    }
+    const success = () => {
+        res.status(200).json({ success: true });
+    }
+    const error = (err) => {
+        res.status(400).json({ success: false, message: err });
+    }
+    authToken(token)
+    .then(update_comment)
+    .then(success)
+    .catch(error)
+})
+
+router.delete('/comments', (req, res) => {
+    const token = req.headers['x-access-token'];
+    const { id } = req.body;
+    const delete_comment = (user_id) => {
+        return database.query(`DELETE FROM post_comments WHERE id=${id} AND user_id=${user_id}`)
+    }
+    const success = () => {
+        res.status(200).json({ success: true });
+    }
+    const error = (err) => {
+        res.status(400).json({ success: false, message: err });
+    }
+    authToken(token)
+    .then(delete_comment)
+    .then(success)
+    .catch(error)
+})
 
 module.exports = router;
