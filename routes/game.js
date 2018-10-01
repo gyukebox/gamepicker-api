@@ -148,8 +148,8 @@ router.put('/rates', (req, res) => {
     const { game_id, value } = req.body;
     const user_id = jwt.decode(token, config.jwtSecret);
 
-    database.unique('user_id', user_id)
-    .then(() => {return database.unique('game_id', game_id)})
+    database.unique('accounts', 'user_id', user_id)
+    .then(() => {return database.unique('games', 'game_id', game_id)})
     .then(() => {return database.query(`INSERT INTO rates(user_id, game_id, value) VALUES(${user_id}, ${game_id}, ${value})`)})
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }))
