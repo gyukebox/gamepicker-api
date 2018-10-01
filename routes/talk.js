@@ -90,11 +90,13 @@ router.delete('/', (req, res) => {
     const token = req.headers['x-access-token'];
     if(!token)
         return res.status(401).json({ success: false, message: 'not logged in'});
-    const { id } = req.body.id;
-    const { user_id } = jwt.decode(token, config.jwtSession);
-    const query = `DELETE FROM posts WHERE id = ${id} AND user_id = ${user_id}`;
+    const id = req.body.id;
+    const user_id = jwt.decode(token, config.jwtSession);
+    if(id != user_id)
+        return res.status(401).json({ success: false, message: 'unauthenticated' })
+    const query = `DELETE FROM posts WHERE user_id = ${user_id} AND id = ${id}`;
     database.query(query)
-    .then(() => res.status(200).json({ success: true, message: 'post delete'}))
+    .then(() => res.status(200).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }));
 })
 
