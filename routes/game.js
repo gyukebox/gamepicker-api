@@ -59,6 +59,7 @@ router.get('/', (req, res) => {
         .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
+//tested
 router.put('/',(req, res) => {
     let id;
     const { title, developer, publisher, age_rate, summary, img_link, video_link, tag_list, platform_list } = req.body;
@@ -75,11 +76,13 @@ router.put('/',(req, res) => {
         values = values.slice(0,-1);
         return database.query(`INSERT INTO game_tags(game_id, tag_id) VALUES ${values}`)
     }).then(() => {
-        let values = '';
+        let values = '';        
         platform_list.map(data => {
             values+=`('${id}', '${data}'),`; 
         });
         values = values.slice(0,-1);
+        console.log(values);
+        console.log('aa');
         return database.query(`INSERT INTO game_platforms(game_id, platform_id) VALUES ${values}`)
     }).then(() => {
         res.status(201).json({ success: true });

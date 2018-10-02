@@ -7,27 +7,6 @@ const config = require('../config/jwt-config');
 const Database = require('../model/Database');
 const database = new Database();
 
-return new Promise((resolve, reject) => {
-    this.connection.query(`SELECT EXISTS (SELECT id from ${table} WHERE ${field}='${data}') AS success`, (err, rows) => {
-        if (err)
-            return reject(err);
-        if (rows[0].success === 1)
-            return reject(`${data} exist at ${field}}`)
-        resolve();
-    })
-})
-
-
-const authToken = (token, id) => {
-    if (!token)
-        return { success: false, message: 'Token does not exist'}
-    if(!id)
-        return { success: true, id: jwt.decode(token, config.jwtSession)}
-    if(id === jwt.decode(token, config.jwtSession))
-        return { success: false, message: 'Authentication failed'}
-    return { success: true }
-}
-
 const authToken = (token, id) => {
     return new Promise((resolve, reject) => {
         if (!token)

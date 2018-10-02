@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
     else if (id)        query += `WHERE id=${id}`;
     else if (value)     query += `WHERE value=${value}`;
     database.query(query)
-    .then(rows => res.status(200).json({ success: true, platforms: rows }))
+    .then(rows => res.status(200).json({ success: true, tags: rows }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
