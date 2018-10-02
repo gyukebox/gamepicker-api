@@ -81,8 +81,6 @@ router.put('/',(req, res) => {
             values+=`('${id}', '${data}'),`; 
         });
         values = values.slice(0,-1);
-        console.log(values);
-        console.log('aa');
         return database.query(`INSERT INTO game_platforms(game_id, platform_id) VALUES ${values}`)
     }).then(() => {
         res.status(201).json({ success: true });
