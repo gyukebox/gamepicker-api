@@ -78,7 +78,7 @@ router.get('/', (req, res) => {
             query += `ORDER BY update_date ASC `;
             break;
         default:
-            res.status(400).json({ success: false, message: 'check your sort option'})
+            query += `ORDER BY update_date ASC `
             break;
     }
     query += `LIMIT ${(page_number-1) * count_per_page},${count_per_page}`;

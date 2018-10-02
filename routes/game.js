@@ -8,40 +8,7 @@ const jwt = require('jwt-simple');
 const config = require('../config/jwt-config');
 
 router.get('/', (req, res) => {
-    /*
-    1. search 
-    2. all
-
-    1. query check
-    2. 
-    */
     const { search, id } = req.query;
-    const query_check = () => {
-        return new Promise((resolve, reject) => {
-            let query = `SELECT title, developer, publisher, age_rate, summary, img_link, video_link FROM games `;
-            if (search && id)
-                reject('too many queries');
-            else if (search)
-                query += `WHERE title LIKE '%${search}%'`;
-            else if (id)
-                query += `WHERE id=${id}`;
-            resolve(query);
-        })
-    }
-
-    const db = (query) => {
-        return database.query(query)
-    }
-
-    const success = (rows) => {
-        res.status(200).json({ success: true, games: rows });
-    }
-
-    const error = (err) => {
-        res.status(400).json({ success: false, message: err });
-    }
-
-
 
     let query = `SELECT title, developer, publisher, age_rate, summary, img_link, video_link FROM games `;
     if (search && id)   return res.status(400).json({ success:false, message: 'too many queries' });
