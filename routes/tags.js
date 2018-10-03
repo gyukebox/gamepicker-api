@@ -10,13 +10,17 @@ router.get('/', (req, res) => {
     if (id && value)    res.status(400).json({ success: false, message: 'too many query'});
     else if (id)        query += `WHERE id=${id}`;
     else if (value)     query += `WHERE value=${value}`;
+
     database.query(query)
     .then(rows => res.status(200).json({ success: true, tags: rows }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
 router.put('/', (req, res) => {
+    
     const { value } = req.body;
+    console.log(value);
+    
     if (!value)
         return res.status(400).json({ success: false, message: 'body.value is required' })
     database.query(`INSERT INTO tags (value) VALUES (${value})`)

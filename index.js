@@ -6,9 +6,9 @@ const cors = require('cors');
 const passport = require('passport');
 const auth = require('./routes/passport')();
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json())
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(auth.initialize());
 
 const port = process.env.PORT || 3333;
@@ -21,7 +21,7 @@ app.use('/talks', require('./routes/talk'));
 
 //test code
 app.get('/', (req, res) => {
-    res.send(`You are connected to the gamepicker API. For more information, go to <a href='https://github.com/ansrl0107/GamePickerAPI'>Here!</a>`)
+    res.sendFile('./index.html', {root: __dirname});
 });
 
 
