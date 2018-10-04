@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(auth.initialize());
 
-const port = process.env.PORT || 3333;
+const port = process.env.PORT || 8080;
 
 app.use('/users', require('./routes/user'));
 app.use('/games', require('./routes/game'));
