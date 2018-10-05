@@ -17,15 +17,12 @@ router.get('/', (req, res) => {
 })
 
 router.put('/', (req, res) => {
-    
     const { value } = req.body;
-    console.log(value);
-    
     if (!value)
         return res.status(400).json({ success: false, message: 'body.value is required' })
-    database.query(`INSERT INTO tags (value) VALUES (${value})`)
+    database.query(`INSERT INTO tags (value) VALUES ('${value}')`)
     .then(() => res.status(201).json({ success: true }))
-    .catch(err => res.status(400).json({ success: false, message: false }))
+    .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
 router.delete('/', (req, res) => {
