@@ -38,13 +38,14 @@ router.get('/', (req, res) => {
     const { game_id, post_id, sort } = req.query;
     const count_per_page = req.query.posts || 10;
     const page_number = req.query.pages || 1;
-    let query = `SELECT id, title, content, recommend, disrecommend FROM posts `;
+    let query = `SELECT id, title, content FROM posts `;
     if (game_id && post_id) {
         query  += `WHERE game_id='${game_id}' AND id='${post_id}'`;
     } else if (game_id) {
         query += `WHERE game_id='${game_id}'`;
     } else if( post_id ) {
-        query += `WHERE post_id='${post_id}'`;
+        query += `WHERE id='${post_id}'`;
+        database.query(`UPDATE posts SET views = views + 1 WHERE id='${post_id}'`);
     }
     switch (sort) {
         case 'popular':
@@ -65,11 +66,6 @@ router.get('/', (req, res) => {
     .then(rows => {
         res.status(200).json({ success: true, posts: rows});
         return rows;
-    })
-    .then(rows => {
-        const id_list = [];
-        rows.forEach(row => id_list.push(row.id));
-        return database.query(`UPDATE posts SET views = views + 1 WHERE id IN (${id_list.toString()})`);
     })
     .catch(err => res.status(400).json({ success: false, message: err }));
 });
