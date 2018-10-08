@@ -28,7 +28,7 @@ router.put('/', (req, res) => {
     const { title, content } = req.body;
     const game_id = req.body.game_id || 0;
 
-    const query = `INSERT INTO posts(user_id, title, content, game_id) VALUES ( ${user_id}, ${title}, ${content}, ${game_id} )`;
+    const query = `INSERT INTO posts(user_id, title, content, game_id) VALUES ( '${user_id}', '${title}', '${content}', '${game_id}' )`;
     database.query(query)
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }));
@@ -40,11 +40,11 @@ router.get('/', (req, res) => {
     const page_number = req.query.pages || 1;
     let query = `SELECT id, title, content, recommend, disrecommend FROM posts `;
     if (game_id && post_id) {
-        query  += `WHERE game_id=${game_id} AND id=${post_id}`;
+        query  += `WHERE game_id='${game_id}' AND id='${post_id}'`;
     } else if (game_id) {
-        query += `WHERE game_id=${game_id}`;
+        query += `WHERE game_id='${game_id}'`;
     } else if( post_id ) {
-        query += `WHERE post_id=${post_id}`;
+        query += `WHERE post_id='${post_id}'`;
     }
     switch (sort) {
         case 'popular':
@@ -81,7 +81,7 @@ router.post('/', (req, res) => {
     const { id, title, content } = req.body;
     if(id != jwt.decode(token, config.jwtSession))
         return res.status(401).json({ success: false, message: 'unauthenticated' })
-    const query = `UPDATE posts SET title = ${title} content = ${content} WHERE id = ${id}`;
+    const query = `UPDATE posts SET title = '${title}' content = '${content}' WHERE id = '${id}'`;
     database.query(query)
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }));
@@ -95,7 +95,7 @@ router.delete('/', (req, res) => {
     const user_id = jwt.decode(token, config.jwtSession);
     if(id != user_id)
         return res.status(401).json({ success: false, message: 'unauthenticated' })
-    const query = `DELETE FROM posts WHERE user_id = ${user_id} AND id = ${id}`;
+    const query = `DELETE FROM posts WHERE user_id = '${user_id}' AND id = '${id}'`;
     database.query(query)
     .then(() => res.status(200).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }));
@@ -108,12 +108,12 @@ router.post('/recommend', (req, res) => {
     const user_id = jwt.decode(token, config.jwtSecret);
     const { id } = req.body;
 
-    database.query(`SELECT EXISTS (SELECT * FROM recommends WHERE post_id = ${id} AND user_id = ${user_id}) as success`)
+    database.query(`SELECT EXISTS (SELECT * FROM recommends WHERE post_id = '${id}' AND user_id = '${user_id}') as success`)
     .then(rows => {
         if (rows[0].success)
-            return database.query(`DELETE FROM recommends WHERE post_id = ${id} AND user_id = ${user_id}`);
+            return database.query(`DELETE FROM recommends WHERE post_id = '${id}' AND user_id = '${user_id}'`);
         else
-            return database.query(`INSERT INTO recommends (post_id, user_id) VALUES (${id}, ${user_id}) `);
+            return database.query(`INSERT INTO recommends (post_id, user_id) VALUES ('${id}', '${user_id}') `);
     })
     .then(() => {
         res.status(200).json({ success: true })
@@ -128,12 +128,12 @@ router.post('/disrecommend', (req, res) => {
     const user_id = jwt.decode(token, config.jwtSecret);
     const { id } = req.body;
 
-    database.query(`SELECT EXISTS (SELECT * FROM disrecommends WHERE post_id = ${id} AND user_id = ${user_id}) as success`)
+    database.query(`SELECT EXISTS (SELECT * FROM disrecommends WHERE post_id = '${id}' AND user_id = '${user_id}') as success`)
     .then(rows => {
         if (rows[0].success)
-            return database.query(`DELETE FROM disrecommends WHERE post_id = ${id} AND user_id = ${user_id}`);
+            return database.query(`DELETE FROM disrecommends WHERE post_id = '${id}' AND user_id = '${user_id}'`);
         else
-            return database.query(`INSERT INTO disrecommends (post_id, user_id) VALUES (${id}, ${user_id}) `);
+            return database.query(`INSERT INTO disrecommends (post_id, user_id) VALUES ('${id}', '${user_id}') `);
     })
     .then(() => {
         res.status(200).json({ success: true })
@@ -150,7 +150,7 @@ router.put('/comments', (req, res) => {
         return res.status(400).json(retJSON);
     if (!(value && post_id))
         return res.status(400).json({ success: false, message: 'not enough query'});
-    database.query(`INSERT INTO post_comments (user_id, value, post_id) VALUES (${user_id}, ${value}, ${post_id})`)
+    database.query(`INSERT INTO post_comments (user_id, value, post_id) VALUES ('${user_id}', '${value}', '${post_id}')`)
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success:false, message: err }))
 })
@@ -158,7 +158,7 @@ router.put('/comments', (req, res) => {
 router.get('/comments', (req, res) => {
     const { post_id } = req.query;
     
-    database.query(`SELECT id, user_id, value, update_date FROM post_comments WHERE post_id=${post_id}`)
+    database.query(`SELECT id, user_id, value, update_date FROM post_comments WHERE post_id='${post_id}'`)
     .then(rows => res.status(200).json({ success: true, comments: rows }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
@@ -170,7 +170,7 @@ router.post('/comments', (req, res) => {
     //const user_id = 
     const { id, value } = req.body;
     const update_comment = (user_id) => {
-        return database.query(`UPDATE post_comments SET id=${id}, value=${value} WHERE user_id=${user_id}`)
+        return database.query(`UPDATE post_comments SET id='${id}', value='${value}' WHERE user_id='${user_id}'`)
     }
     const success = () => {
         res.status(200).json({ success: true });
@@ -188,7 +188,7 @@ router.delete('/comments', (req, res) => {
     const token = req.headers['x-access-token'];
     const { id } = req.body;
     const delete_comment = (user_id) => {
-        return database.query(`DELETE FROM post_comments WHERE id=${id} AND user_id=${user_id}`)
+        return database.query(`DELETE FROM post_comments WHERE id='${id}' AND user_id='${user_id}'`)
     }
     const success = () => {
         res.status(200).json({ success: true });

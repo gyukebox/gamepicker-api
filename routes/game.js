@@ -105,15 +105,15 @@ router.post('/',(req, res) => {
     const { id, title, developer, publisher, age_rate, summary, img_link, video_link } = req.body;
     let set_query = `SET `;
     if (!id)    return res.status(400).json({ success: false, message: `body.id is required`});
-    if (title) set_query += `title=${title},`
-    if (developer) set_query +=`developer=${developer},`
-    if (publisher) set_query +=`publisher=${publisher},`
-    if (age_rate) set_query +=`age_rate=${age_rate},`
-    if (summary) set_query +=`summary=${summary},`
-    if (img_link) set_query +=`img_link=${img_link},`
-    if (video_link) set_query +=`video_link=${video_link},`
+    if (title) set_query += `title='${title}',`
+    if (developer) set_query +=`developer='${developer}',`
+    if (publisher) set_query +=`publisher='${publisher}',`
+    if (age_rate) set_query +=`age_rate='${age_rate}',`
+    if (summary) set_query +=`summary='${summary}',`
+    if (img_link) set_query +=`img_link='${img_link}',`
+    if (video_link) set_query +=`video_link='${video_link}',`
     set_query.slice(0,-1);
-    database.query(`UPDATE games ${set_query} WHERE id=${id}`)
+    database.query(`UPDATE games ${set_query} WHERE id='${id}'`)
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 });
@@ -123,7 +123,7 @@ router.put('/comments', (req, res) => {
     const user_id = jwt.decode(token, config.jwtSecret);
     const { game_id, value } = req.body;
 
-    database.query(`INSERT INTO game_comments(user_id, game_id, value) VALUES(${user_id}, ${game_id}, ${value})`)
+    database.query(`INSERT INTO game_comments(user_id, game_id, value) VALUES('${user_id}', '${game_id}', '${value}')`)
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
@@ -141,7 +141,7 @@ router.post('/comments', (req, res) => {
     const { id } = req.body;
     const user_id = jwt.decode(token, config.jwtSecret);
 
-    database.query(`DELETE FROM game_comments WHERE id=${id} AND user_id=${user_id}`)
+    database.query(`DELETE FROM game_comments WHERE id='${id}' AND user_id='${user_id}'`)
     .then(() => res.status(200).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
@@ -153,7 +153,7 @@ router.put('/rates', (req, res) => {
 
     database.unique('accounts', 'user_id', user_id)
     .then(() => {return database.unique('games', 'game_id', game_id)})
-    .then(() => {return database.query(`INSERT INTO rates(user_id, game_id, value) VALUES(${user_id}, ${game_id}, ${value})`)})
+    .then(() => {return database.query(`INSERT INTO rates(user_id, game_id, value) VALUES('${user_id}', '${game_id}', '${value}')`)})
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
@@ -161,7 +161,7 @@ router.put('/rates', (req, res) => {
 router.get('/rates', (req, res) => {
     const { game_id } = req.query;
 
-    database.query(`SELECT value FROM rates WHERE game_id=${game_id}`)
+    database.query(`SELECT value FROM rates WHERE game_id='${game_id}'`)
     .then(rows => {
         let sum = 0;
         rows.foreach(row => sum += row.value);

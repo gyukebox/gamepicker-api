@@ -34,8 +34,8 @@ router.get('/', (req, res) => {
     let query = `SELECT id, name, email, birthday, gender, introduce, point FROM accounts `;
     if (token)      query += `WHERE id=${jwt.decode(token, config.jwtSecret)}`
     else if (name && id) res.json(400).json({ success: false, message: 'too much query'});
-    else if (name)  query += `WHERE name=${name}`;
-    else if (id)    query += `WHERE id=${id}`;
+    else if (name)  query += `WHERE name='${name}'`;
+    else if (id)    query += `WHERE id='${id}'`;
     database.query(query)
     .then(rows => res.status(200).json({ success: true, profile: rows }))
     .catch(err => res.status(400).json({ success: false, message: err }));
@@ -46,7 +46,7 @@ router.post('/', (req, res) => {
     const { name, password, birthday, gender, introduce } = req.body;
     const id = jwt.decode(token, config.jwtSecret);
     const query = `UPDATE accounts SET (name, password, birthday, gender, introduce)
-    = (${name}, ${password}, ${birthday}, ${gender}, ${introduce}) WHERE id=${id}`;
+    = ('${name}', '${password}', '${birthday}', '${gender}', '${introduce}') WHERE id='${id}'`;
     database.unique('accounts', 'email', email)
     .then(() => {
         return database.unique('accounts', 'name', name)
