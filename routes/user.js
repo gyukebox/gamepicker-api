@@ -34,9 +34,9 @@ router.post('/login', (req, res) => {
 
 router.get('/', (req, res) => {
     const { name, id } = req.query;
-    const token = req.headers['x-access-token'];
+    const token = req.headers['x-access-token'];    
     let query = `SELECT id, name, email, birthday, gender, introduce, point FROM accounts `;
-    if (token)      query += `WHERE id=${jwt.decode(token, config.jwtSecret)}`
+    if (token)      query += `WHERE id=${jwt.decode(token, config.jwtSecret).id}`
     else if (name && id) res.json(400).json({ success: false, message: 'too much query'});
     else if (name)  query += `WHERE name='${name}'`;
     else if (id)    query += `WHERE id='${id}'`;
