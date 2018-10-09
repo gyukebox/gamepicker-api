@@ -22,7 +22,7 @@ app.use('/tags', require('./routes/tags'));
 app.use('/platforms', require('./routes/platforms'));
 app.use('/talks', require('./routes/talk'));
 
-//time out 방지 코드
+//time out prevent code
 setInterval(() => {
   db.query('SELECT 1');
 }, 20000);
