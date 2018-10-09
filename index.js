@@ -6,8 +6,8 @@ const cors = require('cors');
 const passport = require('passport');
 const auth = require('./routes/passport')();
 
-const mysql = require('mysql');
-const db_config = require('./config/db-config');
+const Database = require('./model/Database');
+const database = new Database();
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,7 +24,7 @@ app.use('/talks', require('./routes/talk'));
 
 //time out prevent code
 setInterval(() => {
-  db.query('SELECT 1');
+  database.query('SELECT 1');
 }, 20000);
 
 //test code

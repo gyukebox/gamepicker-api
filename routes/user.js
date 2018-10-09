@@ -7,6 +7,10 @@ const config = require('../config/jwt-config');
 const Database = require('../model/Database');
 const database = new Database();
 
+const now = () => {
+    return new Date().toLocaleString();;
+}
+
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
     database.query(`SELECT id, email, password FROM accounts WHERE email='${email}'`)
@@ -61,13 +65,14 @@ router.post('/', (req, res) => {
 
 //register
 router.put('/',(req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password } = req.body;    
     if(!(name && email && password))    res.status(400).json({ success: false, message: 'lack of input'})
     else {
         database.unique('accounts', 'email', email).then(() => {
             return database.unique('accounts', 'name',name);
         }).then(() => {
-            return database.query(`INSERT INTO accounts(name, email, password) VALUES ('${name}', '${email}', '${password}')`)
+            return database.query(`INSERT INTO accounts(name, email, password, login_date, create_date, update_date)
+            VALUES ('${name}', '${email}', '${password}', '${now()}', '${now()}', '${now()}')`)
         }).then(() => {
             res.status(201).json({ success: true });
         }).catch(err => {
