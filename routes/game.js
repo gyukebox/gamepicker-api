@@ -14,7 +14,7 @@ const now = () => {
 router.get('/', (req, res) => {
     const { search, id } = req.query;
 
-    let query = `SELECT title, developer, publisher, age_rate, summary, img_link, video_link, update_date, create_date FROM games `;
+    let query = `SELECT id, title, developer, publisher, age_rate, summary, img_link, video_link, update_date, create_date FROM games `;
     if (search && id)   return res.status(400).json({ success:false, message: 'too many queries' });
     if (search) {
         database.query(query + `WHERE title LIKE '%${search}%'`)
@@ -120,18 +120,22 @@ router.post('/',(req, res) => {
 
 router.put('/comments', (req, res) => {
     const token = req.headers['x-access-token'];
-    const user_id = jwt.decode(token, config.jwtSecret);
+    const user_id = jwt.decode(token, config.jwtSecret).id;
     const { game_id, value } = req.body;
 
-    database.query(`INSERT INTO game_comments(user_id, game_id, value) VALUES('${user_id}', '${game_id}', '${value}')`)
+    database.query(`INSERT INTO game_comments(user_id, game_id, value, create_date, update_date) VALUES('${user_id}', '${game_id}', '${value}', '${now()}', '${now()}')`)
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
 router.get('/comments', (req, res) => {
     const { game_id } = req.query;
-
-    database.query(`SELECT id, user_id, value, recommend, update_date FROM game_comments WHERE game_id='${game_id}'`)
+    const query = `SELECT c.id, c.value, c.recommend, c.update_date, u.name
+    FROM game_comments AS c
+    JOIN accounts AS u
+    ON c.user_id = u.id
+    WHERE c.game_id='${game_id}'`
+    database.query(query)
     .then(rows => res.status(200).json({ success: true, comments: rows }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })

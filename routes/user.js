@@ -12,7 +12,7 @@ const now = () => {
 }
 
 router.post('/login', (req, res) => {
-    const { email, password } = req.body;
+    const { email, password } = req.body;    
     database.query(`SELECT id, email, password FROM accounts WHERE email='${email}'`)
     .then(rows => {
         const user = rows[0];
