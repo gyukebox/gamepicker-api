@@ -25,7 +25,9 @@ app.use('/talks', require('./routes/talk'));
 //time out prevent code
 setInterval(() => {
   database.query('SELECT 1');
-}, 20000);
+  console.log('tick');
+  
+}, 60000);
 
 //test code
 app.get('/', (req, res) => {
