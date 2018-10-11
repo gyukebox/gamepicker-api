@@ -73,14 +73,14 @@ router.put('/',(req, res) => {
         return database.query(`SELECT LAST_INSERT_ID() as last_id`)
     }).then(rows => {
         id = rows[0].last_id;
-        let values = '';    
-        tags.map(data =>  values+=`('${id}', '${data}'),`);
+        let values = '';        
+        tags.map(data =>  values+=`('${id}', '${data.id}'),`);
         values = values.slice(0,-1);
         if(tags.length !== 0)
             return database.query(`INSERT INTO game_tags(game_id, tag_id) VALUES ${values}`)
     }).then(() => {
         let values = '';
-        platforms.map(data => values+=`('${id}', '${data}'),`);
+        platforms.map(data => values+=`('${id}', '${data.id}'),`);
         values = values.slice(0,-1);
         if(platforms.length !== 0)
             return database.query(`INSERT INTO game_platforms(game_id, platform_id) VALUES ${values}`)
@@ -95,6 +95,9 @@ router.delete('/', (req, res) => {
     const { id } = req.body;
     const query = `DELETE FROM games WHERE id='${id}'`;
     database.query(query)
+    .then(() => {
+        return database.query(`DELETE FROM game_tags WHERE game_id='${id}'`)
+    })
     .then(rows => res.status(200).json({ success: true }))
     .catch(err => res.status(400).json({ success:false, message: err }))
 })
