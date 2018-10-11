@@ -27,7 +27,7 @@ setInterval(() => {
   database.query('SELECT 1');
   console.log('tick');
   
-}, 60000);
+}, 60000); //1분
 
 //test code
 app.get('/', (req, res) => {
