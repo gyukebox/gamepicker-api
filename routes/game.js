@@ -67,22 +67,22 @@ router.get('/', (req, res) => {
 //tested
 router.put('/',(req, res) => {
     let id;
-    const { title, developer, publisher, age_rate, summary, img_link, video_link, tag_list, platform_list } = req.body;
+    const { title, developer, publisher, age_rate, summary, img_link, video_link, tags, platforms } = req.body;
     const query = `INSERT INTO games(title, developer, publisher, age_rate, summary, img_link, video_link, update_date, create_date) VALUES('${title}', '${developer}', '${publisher}', '${age_rate}', '${summary}', '${img_link}', '${video_link}', '${now()}', '${now()}')`
     database.query(query).then(() => {        
         return database.query(`SELECT LAST_INSERT_ID() as last_id`)
     }).then(rows => {
         id = rows[0].last_id;
         let values = '';    
-        tag_list.map(data =>  values+=`('${id}', '${data}'),`);
+        tags.map(data =>  values+=`('${id}', '${data}'),`);
         values = values.slice(0,-1);
-        if(tag_list.length !== 0)
+        if(tags.length !== 0)
             return database.query(`INSERT INTO game_tags(game_id, tag_id) VALUES ${values}`)
     }).then(() => {
         let values = '';
-        platform_list.map(data => values+=`('${id}', '${data}'),`);
+        platforms.map(data => values+=`('${id}', '${data}'),`);
         values = values.slice(0,-1);
-        if(platform_list.length !== 0)
+        if(platforms.length !== 0)
             return database.query(`INSERT INTO game_platforms(game_id, platform_id) VALUES ${values}`)
     }).then(() => {
         res.status(201).json({ success: true });
@@ -90,6 +90,14 @@ router.put('/',(req, res) => {
         res.status(400).json({ success: false, message: err });
     });
 });
+
+router.delete('/', (req, res) => {
+    const { id } = req.body;
+    const query = `DELETE FROM games WHERE id='${id}'`;
+    database.query(query)
+    .then(rows => res.status(200).json({ success: true }))
+    .catch(err => res.status(400).json({ success:false, message: err }))
+})
 
 router.get('/recommend',(req, res) => {
     const token = req.headers['x-access-token'];
