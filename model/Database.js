@@ -5,25 +5,6 @@ class Database {
     constructor() {
         this.connection = mysql.createConnection(dbConfig);
         this.connection.query('SET NAMES utf8');
-        this.handleDisconnect();
-    }
-    handleDisconnect() {
-        const conn = mysql.createConnection(dbConfig);
-        conn.connect(err => {
-            if (err) {
-                console.log('error when connecting to db:', err);
-                setTimeout(this.handleDisconnect, 2000);
-            }
-        });
-
-        conn.on('error', (err) => {
-            console.log('db error', err);
-            if(err.code === 'PROTOCOL_CONNECTION_LOST') {
-                this.handleDisconnect();
-            } else {
-                throw err;
-            }
-        });
     }
     query(sql, args) {
         return new Promise((resolve, reject) => {
