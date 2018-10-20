@@ -11,8 +11,9 @@ const now = () => {
     return new Date().toLocaleString();;
 }
 
+/*
 router.get('/', (req, res) => {
-    const { search, id } = req.query;
+    const { search, id, title } = req.query;
 
     let query = `SELECT id, title, developer, publisher, age_rate, summary, img_link, video_link, update_date, create_date FROM games `;
     if (search && id)   return res.status(400).json({ success:false, message: 'too many queries' });
@@ -59,9 +60,84 @@ router.get('/', (req, res) => {
         })
         return;
     }
+    if (title) {
+        let query = `
+        SELECT 
+            games.id, 
+            title, 
+            developer,
+            publisher, 
+            age_rate, 
+            summary, 
+            img_link, 
+            video_link, 
+            games.update_date, 
+            games.create_date,
+            GROUP_CONCAT(DISTINCT(SELECT value FROM platforms WHERE id = game_platforms.id)) platforms,
+            GROUP_CONCAT(DISTINCT(SELECT value FROM tags WHERE id = game_tags.id)) tags
+        FROM games
+        LEFT JOIN game_platforms
+        ON game_platforms.game_id = games.id
+        LEFT JOIN game_tags
+        ON game_tags.game_id = games.id
+        GROUP BY games.id`
+    }
     database.query(query)
         .then(rows => res.status(200).json({ success:true, games: rows }))
         .catch(err => res.status(400).json({ success: false, message: err }))
+})
+*/
+
+router.get('/all', (req, res) => {
+    let query = `
+    SELECT
+        id,
+        title,
+        img_link
+    FROM games`
+    database.query(query)
+    .then(rows => res.status(200).json(rows))
+    .catch(err => res.status(400).json(err))
+})
+
+router.get('/',(req, res) => {
+    const { id, title } = req.query;
+    let query = `
+    SELECT 
+        games.id, 
+        title, 
+        developer,
+        publisher, 
+        age_rate, 
+        summary, 
+        img_link, 
+        video_link, 
+        games.update_date, 
+        games.create_date,
+        GROUP_CONCAT(DISTINCT(game_platforms.platform)) platforms,
+        GROUP_CONCAT(DISTINCT(game_tags.tag)) tags
+    FROM games
+    LEFT JOIN game_platforms
+    ON game_platforms.game_id = games.id
+    LEFT JOIN game_tags
+    ON game_tags.game_id = games.id `
+    if (id && title) {
+        return res.status(400).json({error: `Too many queries (id, title)`})
+    } else if (title) {
+        query += `WHERE title='${title}' GROUP BY games.id`
+    } else if (id) {
+        query += `WHERE games.id=${id} GROUP BY games.id`
+    } else {
+        return res.status(400).json({error: `query required (id or title)`})
+    }
+    database.query(query)
+    .then(rows => {
+        const game = rows[0];
+        game.tags = game.tags.split(',');
+        game.platforms = game.platforms.split(',');
+        res.status(200).json(game)
+    })
+    .catch(err => res.status(400).json(err))
 })
 
 //tested
@@ -74,16 +150,16 @@ router.put('/',(req, res) => {
     }).then(rows => {
         id = rows[0].last_id;
         let values = '';        
-        tags.map(data =>  values+=`('${id}', '${data.id}'),`);
+        tags.map(tag =>  values+=`('${id}', '${tag}'),`);
         values = values.slice(0,-1);
         if(tags.length !== 0)
-            return database.query(`INSERT INTO game_tags(game_id, tag_id) VALUES ${values}`)
+            return database.query(`INSERT INTO game_tags(game_id, tag) VALUES ${values}`)
     }).then(() => {
         let values = '';
-        platforms.map(data => values+=`('${id}', '${data.id}'),`);
+        platforms.map(platform => values+=`('${id}', '${platform}'),`);
         values = values.slice(0,-1);
         if(platforms.length !== 0)
-            return database.query(`INSERT INTO game_platforms(game_id, platform_id) VALUES ${values}`)
+            return database.query(`INSERT INTO game_platforms(game_id, platform) VALUES ${values}`)
     }).then(() => {
         res.status(201).json({ success: true });
     }).catch(err => {
@@ -132,22 +208,38 @@ router.post('/',(req, res) => {
 router.put('/comments', (req, res) => {
     const token = req.headers['x-access-token'];
     const user_id = jwt.decode(token, config.jwtSecret).id;
-    const { game_id, value } = req.body;
+    const { title, game_id, value } = req.body;
 
-    database.query(`INSERT INTO game_comments(user_id, game_id, value, create_date, update_date) VALUES('${user_id}', '${game_id}', '${value}', '${now()}', '${now()}')`)
+    database.query(`INSERT INTO game_comments(user_id, game_id, value, create_date, update_date) VALUES('${user_id}', (SELECT id FROM games WHERE title='${title}'), '${value}', '${now()}', '${now()}')`)
     .then(() => res.status(201).json({ success: true }))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
+router.get('/comments/count', (req, res) => {
+    const { title } = req.query;
+    const query = `
+    SELECT COUNT(*) count
+    FROM game_comments
+    WHERE game_id=(SELECT id FROM games WHERE title='${title}')`
+    database.query(query)
+    .then(rows => res.status(200).json(rows[0]))
+    .catch(err => res.status(400).json(err))
+})
+
 router.get('/comments', (req, res) => {
-    const { game_id } = req.query;
+    let { title, page, count } = req.query;
+    if (!page)  page = 1;
+    if (!count) count = 10;
     const query = `SELECT c.id, c.value, c.recommend, c.update_date, u.name
     FROM game_comments AS c
     JOIN accounts AS u
     ON c.user_id = u.id
-    WHERE c.game_id='${game_id}'`
+    WHERE c.game_id=(SELECT id FROM games WHERE title='${title}')
+    ORDER BY c.update_date DESC
+    LIMIT ${(page-1)*count}, ${count}`
+
     database.query(query)
-    .then(rows => res.status(200).json({ success: true, comments: rows }))
+    .then(rows => res.status(200).json(rows))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
 

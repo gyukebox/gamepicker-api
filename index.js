@@ -20,7 +20,7 @@ app.use('/users', require('./routes/user'));
 app.use('/games', require('./routes/game'));
 app.use('/tags', require('./routes/tags'));
 app.use('/platforms', require('./routes/platforms'));
-app.use('/talks', require('./routes/talk'));
+app.use('/posts', require('./routes/posts'));
 
 const conn = mysql.createConnection(dbConfig);
 setInterval(() => {
