@@ -40,20 +40,20 @@ router.put('/', (req, res) => {
 })
 
 router.get('/count', (req, res) => {
-    const { game, game_id } = req.query;
+    const { title, game_id } = req.query;
     let query = `
     SELECT COUNT(*) count
     FROM posts `
-    if(game && game_id) res.status(400).json({error: 'Too many queries'})
-    if(game) query += `WHERE game_id = (SELECT id FROM games WHERE title = '${game}')`
+    if(title && game_id) res.status(400).json({error: 'Too many queries'})
+    if(title && title !== '자유') query += `WHERE game_id = (SELECT id FROM games WHERE title = '${title}')`
     if(game_id) query += `WHERE game_id = '${game_id}')`
     database.query(query)
-    .then(rows => res.status(200).json(rows))
+    .then(rows => res.status(200).json(rows[0]))
     .catch(err => res.status(400).json(err))
 })
 
 router.get('/list', (req, res) => {
-    const { game, game_id, sort } = req.query;
+    const { title, game_id, sort } = req.query;
     const count_per_page = req.query.count || 10;
     const page_number = req.query.page || 1;
     let query =`
@@ -71,9 +71,8 @@ router.get('/list', (req, res) => {
     FROM posts
     LEFT JOIN accounts
     ON posts.user_id = accounts.id `
-    if (game) {
-        if(game !== '자유')
-            query += `WHERE posts.game_id = (SELECT id FROM games WHERE title = '${game}')`
+    if (title && title !== '자유') {
+        query += `WHERE posts.game_id = (SELECT id FROM games WHERE title = '${title}')`
     }
     if (game_id) {
         query += `WHERE posts.game_id='${game_id}' `;
@@ -95,7 +94,6 @@ router.get('/list', (req, res) => {
     database.query(query)
     .then(rows => {
         res.status(200).json(rows);
-        return rows;
     })
     .catch(err => res.status(400).json({ success: false, message: err }));
 })
