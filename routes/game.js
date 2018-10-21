@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const Database = require('../model/Database');
-const database = new Database();
+const database = require('../model/pool');
 
 const jwt = require('jwt-simple');
 const config = require('../config/jwt-config');
@@ -21,7 +20,7 @@ router.get('/', (req, res) => {
         database.query(query + `WHERE title LIKE '%${search}%'`)
             .then(rows => res.status(200).json({ success:true, games: rows }))
             .catch(err => res.status(400).json({ success: false, message: err }))
-        return;
+        return;`SELECT EXISTS (SELECT id from ${table} WHERE ${field}='${data}') AS success`
     }
     if (id) {
         var json = [];
@@ -87,6 +86,7 @@ router.get('/', (req, res) => {
         .catch(err => res.status(400).json({ success: false, message: err }))
 })
 */
+
 
 router.get('/all', (req, res) => {
     let query = `

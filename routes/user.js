@@ -4,8 +4,7 @@ const router = express.Router();
 const jwt = require('jwt-simple');
 const config = require('../config/jwt-config');
 
-const Database = require('../model/Database');
-const database = new Database();
+const database = require('../model/pool');
 
 const now = () => {
     return new Date().toLocaleString();;
