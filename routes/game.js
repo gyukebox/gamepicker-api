@@ -10,92 +10,22 @@ const now = () => {
     return new Date().toLocaleString();;
 }
 
-/*
-router.get('/', (req, res) => {
-    const { search, id, title } = req.query;
-
-    let query = `SELECT id, title, developer, publisher, age_rate, summary, img_link, video_link, update_date, create_date FROM games `;
-    if (search && id)   return res.status(400).json({ success:false, message: 'too many queries' });
-    if (search) {
-        database.query(query + `WHERE title LIKE '%${search}%'`)
-            .then(rows => res.status(200).json({ success:true, games: rows }))
-            .catch(err => res.status(400).json({ success: false, message: err }))
-        return;`SELECT EXISTS (SELECT id from ${table} WHERE ${field}='${data}') AS success`
-    }
-    if (id) {
-        var json = [];
-        database.query(query + `WHERE id='${id}'`)
-        .then(rows => {
-            json = rows[0];            
-            return database.query(`SELECT tag_id FROM game_tags WHERE game_id='${id}'`);
-        })
-        .then(rows => {
-            const tag_id_list = rows.map(data => {return data.tag_id});
-            let ret = [];                        
-            if(tag_id_list.length > 0)
-                ret =  database.query(`SELECT id, value FROM tags WHERE id IN (${tag_id_list.toString()})`);
-            return ret;
-
-        })
-        .then(rows => {
-            json.tags = rows;
-        })
-        .then(() => {
-            return database.query(`SELECT platform_id FROM game_platforms WHERE game_id='${id}'`);
-        })
-        .then(rows => {
-            const platform_id_list = rows.map(data => {return data.platform_id});
-            let ret = [];            
-            if (platform_id_list > 0)
-                ret =  database.query(`SELECT id, value FROM platforms WHERE id IN (${platform_id_list.toString()})`);
-            return ret;
-        })
-        .then(rows => {
-            json.platforms = rows;
-            res.status(201).json({ success: true, games: json });
-        })
-        .catch(err => {
-            res.status(400).json({ success: false, message: err });
-        })
-        return;
-    }
-    if (title) {
-        let query = `
-        SELECT 
-            games.id, 
-            title, 
-            developer,
-            publisher, 
-            age_rate, 
-            summary, 
-            img_link, 
-            video_link, 
-            games.update_date, 
-            games.create_date,
-            GROUP_CONCAT(DISTINCT(SELECT value FROM platforms WHERE id = game_platforms.id)) platforms,
-            GROUP_CONCAT(DISTINCT(SELECT value FROM tags WHERE id = game_tags.id)) tags
-        FROM games
-        LEFT JOIN game_platforms
-        ON game_platforms.game_id = games.id
-        LEFT JOIN game_tags
-        ON game_tags.game_id = games.id
-        GROUP BY games.id`
-    }
-    database.query(query)
-        .then(rows => res.status(200).json({ success:true, games: rows }))
-        .catch(err => res.status(400).json({ success: false, message: err }))
-})
-*/
-
-
 router.get('/all', (req, res) => {
-    let query = `
+    const { id, title } = req.query;
+    let sql = `
     SELECT
         id,
         title,
         img_link
-    FROM games`
-    database.query(query)
+    FROM games `
+    if (id && title) {
+        res.status(400).json({error: `Too many queries (id & title)`})
+    } else if (id) {
+        sql += `WHERE id = '${id}'`
+    } else if (title) {
+        sql += `WHERE title = '${title}'`
+    }
+    database.query(sql)
     .then(rows => res.status(200).json(rows))
     .catch(err => res.status(400).json(err))
 })
@@ -205,45 +135,50 @@ router.post('/',(req, res) => {
     .catch(err => res.status(400).json({ success: false, message: err }))
 });
 
-router.put('/comments', (req, res) => {
+router.post('/comments', (req, res) => {
     const token = req.headers['x-access-token'];
-    const user_id = jwt.decode(token, config.jwtSecret).id;
-    const { title, game_id, value } = req.body;
+    const { id, value } = req.body;
+    const user_id = jwt.decode(token, require('../config/jwt-config').jwtSecret).id;
 
-    database.query(`INSERT INTO game_comments(user_id, game_id, value, create_date, update_date) VALUES('${user_id}', (SELECT id FROM games WHERE title='${title}'), '${value}', '${now()}', '${now()}')`)
-    .then(() => res.status(201).json({ success: true }))
-    .catch(err => res.status(400).json({ success: false, message: err }))
+    const sql = `
+    INSERT INTO game_comments(user_id, game_id, value) 
+    VALUES('${user_id}', ${id}, '${value}')
+    `
+
+    database.query(sql)
+    .then(() => res.status(201))
+    .catch(err => res.status(400).json(err))
 })
 
 router.get('/comments/count', (req, res) => {
-    const { title } = req.query;
+    const { id } = req.query;
     const query = `
     SELECT COUNT(*) count
     FROM game_comments
-    WHERE game_id=(SELECT id FROM games WHERE title='${title}')`
+    WHERE game_id=(SELECT id FROM games WHERE id='${id}')`
     database.query(query)
     .then(rows => res.status(200).json(rows[0]))
     .catch(err => res.status(400).json(err))
 })
 
 router.get('/comments', (req, res) => {
-    let { title, page, count } = req.query;
-    if (!page)  page = 1;
-    if (!count) count = 10;
+    const { id, offset, limit } = req.query;
+    if(!offset) offset = 1;
+    if(!limit) length = 10;
     const query = `SELECT c.id, c.value, c.recommend, c.update_date, u.name
     FROM game_comments AS c
     JOIN accounts AS u
     ON c.user_id = u.id
-    WHERE c.game_id=(SELECT id FROM games WHERE title='${title}')
+    WHERE c.game_id='${id}'
     ORDER BY c.update_date DESC
-    LIMIT ${(page-1)*count}, ${count}`
+    LIMIT ${limit} OFFSET ${offset}`
 
     database.query(query)
     .then(rows => res.status(200).json(rows))
     .catch(err => res.status(400).json({ success: false, message: err }))
 })
 
-router.post('/comments', (req, res) => {
+router.delete('/comments', (req, res) => {
     const token = req.headers['x-access-token'];
     const { id } = req.body;
     const user_id = jwt.decode(token, config.jwtSecret);

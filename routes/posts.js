@@ -6,21 +6,16 @@ const config = require('../config/jwt-config');
 
 const database = require('../model/pool');
 
-const authToken = (token, id) => {
-    return new Promise((resolve, reject) => {
-        if (!token)
-            return reject('token not exist')
-        const _id = jwt.decode(token, config.jwtSecret)
-        if (!id)
-            return resolve(_id);
-        if (id !== _id)
-            return reject('Authentication failed');
-        resolve();
-    })
-}
-
 const now = () => {
     return new Date().toLocaleString();;
+}
+
+const authToken = (token) => {
+    return new Promise((resolve, reject) => {
+        if (!token)
+            reject({error: 'x-access-token required'})
+        resolve(jwt.decode(token,require('../config/jwt-config').jwtSecret).id);
+    })
 }
 
 router.put('/', (req, res) => {    
@@ -32,10 +27,10 @@ router.put('/', (req, res) => {
     const { title, content } = req.body;
     const game_id = req.body.game_id || 0;
 
-    const query = `INSERT INTO posts(user_id, title, content, game_id, create_date, update_date) VALUES ( '${user_id}', '${title}', '${content}', '${game_id}', '${now()}', '${now()}')`;
-    database.query(query)
-    .then(() => res.status(201).json({ success: true }))
-    .catch(err => res.status(403).json({ success: false, message: err }));
+    const sql = `INSERT INTO posts(user_id, title, content, game_id, create_date, update_date) VALUES ( '${user_id}', '${title}', '${content}', '${game_id}', '${now()}', '${now()}')`;
+    database.query(sql)
+    .then(() => res.status(201))
+    .catch(err => res.status(403).json(err));
 })
 
 router.get('/count', (req, res) => {
@@ -94,7 +89,7 @@ router.get('/list', (req, res) => {
     .then(rows => {
         res.status(200).json(rows);
     })
-    .catch(err => res.status(400).json({ success: false, message: err }));
+    .catch(err => res.status(400).json(err));
 })
 
 //id에 해당하는 post를 불러옴
@@ -131,8 +126,8 @@ router.post('/', (req, res) => {
         return res.status(401).json({ success: false, message: 'unauthenticated' })
     const query = `UPDATE posts SET title = '${title}' content = '${content}' WHERE id = '${id}'`;
     database.query(query)
-    .then(() => res.status(201).json({ success: true }))
-    .catch(err => res.status(400).json({ success: false, message: err }));
+    .then(() => res.status(201))
+    .catch(err => res.status(400).json(err));
 })
 
 router.delete('/', (req, res) => {
@@ -145,21 +140,19 @@ router.delete('/', (req, res) => {
         return res.status(401).json({ success: false, message: 'unauthenticated' })
     const query = `DELETE FROM posts WHERE user_id = '${user_id}' AND id = '${id}'`;
     database.query(query)
-    .then(() => res.status(200).json({ success: true }))
-    .catch(err => res.status(400).json({ success: false, message: err }));
+    .then(() => res.status(200))
+    .catch(err => res.status(400).json(err));
 })
 
-router.post('/recommend', (req, res) => {
-    console.log('aa');
-    
+router.post('/recommend', (req, res) => {    
     const token = req.headers['x-access-token'];
     if(!token)
-        return res.status(401).json({ success: false, message: 'not logged in'});
+        return res.status(401).json({ error: 'not logged in'});
     const user_id = jwt.decode(token, config.jwtSecret).id;
     const { id } = req.query;
     console.log(id);
     console.log(token);
-    
+    //FIXME: change to database.unique
     
     database.query(`SELECT EXISTS (SELECT * FROM recommends WHERE post_id = '${id}' AND user_id = '${user_id}') as success`)
     .then(rows => {
@@ -169,18 +162,19 @@ router.post('/recommend', (req, res) => {
             return database.query(`INSERT INTO recommends (post_id, user_id) VALUES ('${id}', '${user_id}') `);
     })
     .then(() => {
-        res.status(200).json({ success: true })
+        res.status(200);
     })
-    .catch(err => res.status(400).json({ success: false, message: err }))
+    .catch(err => res.status(400).json({ error: err }))
 });
 
 router.post('/disrecommend', (req, res) => {
     const token = req.headers['x-access-token'];
     if(!token)
-        return res.status(401).json({ success: false, message: 'not logged in'});
+        return res.status(401).json({ error: 'not logged in'});
     const user_id = jwt.decode(token, config.jwtSecret);
     const { id } = req.body;
 
+    //FIXME: change to database.unique
     database.query(`SELECT EXISTS (SELECT * FROM disrecommends WHERE post_id = '${id}' AND user_id = '${user_id}') as success`)
     .then(rows => {
         if (rows[0].success)
@@ -189,36 +183,58 @@ router.post('/disrecommend', (req, res) => {
             return database.query(`INSERT INTO disrecommends (post_id, user_id) VALUES ('${id}', '${user_id}') `);
     })
     .then(() => {
-        res.status(200).json({ success: true })
+        res.status(200);
     })
-    .catch(err => res.status(400).json({ success: false, message: err }))
+    .catch(err => res.status(400).json({ error: err }))
 });
 
-router.put('/comments', (req, res) => {
+router.post('/comments', (req, res) => {
     const token = req.headers['x-access-token'];
-    const { value, post_id } = req.body;
-    let user_id;
-    const retJSON = authToken(token).success;
-    if( !(user_id = retJSON.success) )
-        return res.status(400).json(retJSON);
-    if (!(value && post_id))
-        return res.status(400).json({ success: false, message: 'not enough query'});
-    database.query(`INSERT INTO post_comments (user_id, value, post_id) VALUES ('${user_id}', '${value}', '${post_id}')`)
-    .then(() => res.status(201).json({ success: true }))
-    .catch(err => res.status(400).json({ success:false, message: err }))
+        
+    const { value, id } = req.body;
+    
+    if (!id)
+        res.status(400).json({error: 'id required'})
+    authToken(token)
+    .then(user_id => {
+        const sql = `INSERT INTO post_comments (user_id, value, post_id) VALUES ('${user_id}', '${value}', '${id}')`;
+        return database.query(sql)
+    })
+    .then(() => res.status(201))
+    .catch(err => res.status(400).json(err))
+})
+
+router.get('/comments/count', (req, res) => {
+    const { id } = req.query;
+    let sql = `
+    SELECT COUNT(*) AS count
+    FROM post_comments `
+    if (id)    sql += `WHERE post_id='${id}'`;
+    database.query(sql)
+    .then(rows => res.status(200).json(rows[0]))
+    .catch(err => res.status(400).json(err))
 })
 
 router.get('/comments', (req, res) => {
-    const { post_id } = req.query;
-    
-    database.query(`SELECT id, user_id, value, update_date FROM post_comments WHERE post_id='${post_id}'`)
-    .then(rows => res.status(200).json({ success: true, comments: rows }))
-    .catch(err => res.status(400).json({ success: false, message: err }))
+    const { id, offset, limit } = req.query;
+    if(!offset) offset = 1;
+    if(!limit) length = 10;
+    const sql = `
+    SELECT comment.id, user.name, comment.value, comment.update_date
+    FROM post_comments AS comment
+    LEFT JOIN accounts AS user
+    ON comment.user_id = user.id
+    WHERE comment.post_id = '${id}'
+    ORDER BY comment.update_date DESC
+    LIMIT ${limit} OFFSET ${offset}`
+    database.query(sql)
+    .then(rows => res.status(200).json(rows))
+    .catch(err => res.status(400).json(err))
 })
 
 
 //FIXME: this is Experimental function
-router.post('/comments', (req, res) => {
+router.put('/comments', (req, res) => {
     const token = req.headers['x-access-token'];
     //const user_id = 
     const { id, value } = req.body;
