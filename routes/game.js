@@ -63,15 +63,17 @@ router.get('/',(req, res) => {
     database.query(query)
     .then(rows => {
         const game = rows[0];
-        game.tags = game.tags.split(',');
-        game.platforms = game.platforms.split(',');
+        
+        game.tags = game.tags?game.tags.split(','):[];
+        game.platforms = game.platforms?game.platforms.split(','):[];
+        
         res.status(200).json(game)
     })
     .catch(err => res.status(400).json(err))
 })
 
 //tested
-router.put('/',(req, res) => {
+router.post('/',(req, res) => {
     let id;
     const { title, developer, publisher, age_rate, summary, img_link, video_link, tags, platforms } = req.body;
     const query = `INSERT INTO games(title, developer, publisher, age_rate, summary, img_link, video_link, update_date, create_date) VALUES('${title}', '${developer}', '${publisher}', '${age_rate}', '${summary}', '${img_link}', '${video_link}', '${now()}', '${now()}')`
@@ -91,9 +93,9 @@ router.put('/',(req, res) => {
         if(platforms.length !== 0)
             return database.query(`INSERT INTO game_platforms(game_id, platform) VALUES ${values}`)
     }).then(() => {
-        res.status(201).json({ success: true });
+        res.status(201);
     }).catch(err => {
-        res.status(400).json({ success: false, message: err });
+        res.status(400).json(err);
     });
 });
 
@@ -104,8 +106,8 @@ router.delete('/', (req, res) => {
     .then(() => {
         return database.query(`DELETE FROM game_tags WHERE game_id='${id}'`)
     })
-    .then(rows => res.status(200).json({ success: true }))
-    .catch(err => res.status(400).json({ success:false, message: err }))
+    .then(rows => res.status(200))
+    .catch(err => res.status(400).json(err))
 })
 
 router.get('/recommend',(req, res) => {
@@ -118,10 +120,11 @@ router.get('/recommend',(req, res) => {
         .catch(err => res.status(400).json(err))
 });
 
-router.post('/',(req, res) => {
-    const { id, title, developer, publisher, age_rate, summary, img_link, video_link } = req.body;
+router.put('/',(req, res) => {
+    const { id } = req.query;
+    const { title, developer, publisher, age_rate, summary, img_link, video_link } = req.body;
     let set_query = `SET `;
-    if (!id)    return res.status(400).json({ success: false, message: `body.id is required`});
+    if (!id)    return res.status(400).json({ error: `body.id is required`});
     if (title) set_query += `title='${title}',`
     if (developer) set_query +=`developer='${developer}',`
     if (publisher) set_query +=`publisher='${publisher}',`
@@ -129,10 +132,10 @@ router.post('/',(req, res) => {
     if (summary) set_query +=`summary='${summary}',`
     if (img_link) set_query +=`img_link='${img_link}',`
     if (video_link) set_query +=`video_link='${video_link}',`
-    set_query.slice(0,-1);
+    set_query = set_query.slice(0,-1);    
     database.query(`UPDATE games ${set_query} WHERE id='${id}'`)
-    .then(() => res.status(201).json({ success: true }))
-    .catch(err => res.status(400).json({ success: false, message: err }))
+    .then(() => res.status(201))
+    .catch(err => res.status(400).json(err))
 });
 
 router.post('/comments', (req, res) => {
