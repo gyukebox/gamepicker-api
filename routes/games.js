@@ -71,7 +71,7 @@ router.get('/:id', (req, res) => {
 })
 
 router.post('/' , (req, res) => {
-    const { validate, success, error } = require('../model/common')(res);
+    const { authentication ,validate, success, error } = require('../model/common')(res);
     const { title, developer, publisher, age_rate, summary, img_link, video_link, tags, platforms } = req.body;    
     const payload = {
         body: ['title', 'developer', 'publisher', 'age_rate', 'summary', 'img_link', 'video_link', 'tags', 'platforms']
@@ -87,25 +87,29 @@ router.post('/' , (req, res) => {
                 
                 const tagArr = [];
                 tags.map(tag => tagArr.push(`('${id}','${tag}')`));
-                database.query(`INSERT INTO game_tags(game_id, tag) VALUES ${tagArr.toString()}`)
+                if (tags.length !== 0)
+                    database.query(`INSERT INTO game_tags(game_id, tag) VALUES ${tagArr.toString()}`)
 
                 const platformArr = [];
                 platforms.map(platform => platformArr.push(`('${id}','${platform}')`));
-                database.query(`INSERT INTO game_platforms(title, platform) VALUES ${platformArr.toString()}`)
+                if (platforms.length !== 0)
+                    database.query(`INSERT INTO game_platforms(title, platform) VALUES ${platformArr.toString()}`)
             }).then(resolve).catch(reject)
         })
     }
-    validate(req, payload).then(query).then(success).catch(error);
+    const v = () => {
+        return validate(req, payload);
+    }
+    authentication(req, null, null, true).then(v).then(query).then(success).catch(error);
 })
 
 router.put('/:id', (req, res) => {
     const { authentication, success, error } = require('../model/common')(res);
     const query = () => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {            
             const { id } = req.params;
             const { title, developer, publisher, age_rate, summary, img_link, video_link, tags, platforms } = req.body;
             let set_query = `SET `;
-            if (!id)    return res.status(400).json({ error: `body.id is required`});
             if (title) set_query += `title='${title}',`
             if (developer) set_query +=`developer='${developer}',`
             if (publisher) set_query +=`publisher='${publisher}',`
@@ -120,13 +124,15 @@ router.put('/:id', (req, res) => {
             }).then(() => {
                 const tagArr = [];
                 tags.map(tag => tagArr.push(`('${id}','${tag}')`));
-                return database.query(`INSERT INTO game_tags(game_id, tag) VALUES ${tagArr.toString()}`)
+                if (tags.length !== 0)
+                    database.query(`INSERT INTO game_tags(game_id, tag) VALUES ${tagArr.toString()}`)
             }).then(() => {
                 return database.query(`DELETE FROM game_platforms WHERE game_id=${id}`)
             }).then(() => {
                 const platformArr = [];
                 platforms.map(platform => platformArr.push(`('${id}','${platform}')`));
-                database.query(`INSERT INTO game_platforms(game_id, platform) VALUES ${platformArr.toString()}`)
+                if (platforms.length !== 0)
+                    database.query(`INSERT INTO game_platforms(game_id, platform) VALUES ${platformArr.toString()}`)
             }).then(resolve).catch(reject);
         })
 
@@ -188,11 +194,9 @@ router.get('/:id/comments', (req, res) => {
 
 router.post('/:id/comments', (req, res) => {
     const {  decodeToken, success, error } = require('../model/common')(res);
-    const token = req.headers['x-access-token'];
-    const query = () => {
+    const query = (user_id) => {
         const game_id = req.params.id;
         const { value } = req.body;
-        const user_id = jwt.decode(token, config.jwtSecret).id;
         const sql = `
         INSERT INTO game_comments(user_id, game_id, value) 
         VALUES('${user_id}', ${game_id}, '${value}')`

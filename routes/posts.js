@@ -63,11 +63,12 @@ router.get('/:id', (req, res) => {
         posts.content, 
         posts.views, 
         posts.update_date,
-        (SELECT COUNT(*) FROM recommends WHERE post_id = posts.id) recommend
+        (SELECT COUNT(*) FROM recommends WHERE post_id = posts.id) recommend,
+        (SELECT COUNT(*) FROM disrecommends WHERE post_id = posts.id) disrecommend
     FROM posts
     JOIN accounts AS users
     ON posts.user_id = users.id
-    WHERE id='${id}'`
+    WHERE posts.id='${id}'`
     const singulation = (rows) => {
         return rows[0];
     }
@@ -125,9 +126,9 @@ router.post('/:id/recommend', (req, res) => {
             database.query(`SELECT COUNT(*) AS count FROM recommends WHERE post_id = '${id}' AND user_id = '${user_id}'`)
             .then(rows => {
                 if (rows[0].count === 0) {
-                    database.query(`INSERT INTO recommends(post_id, user_id) VALUES ('${id}','${user_id}')`).then(() => resolve()).catch(reject)
+                    database.query(`INSERT INTO recommends(post_id, user_id) VALUES ('${id}','${user_id}')`).then(() => resolve('recommend')).catch(reject)
                 } else {
-                    database.query(`DELETE FROM recommends WHERE post_id = '${id}' AND user_id = '${user_id}'`).then(() => resolve()).catch(reject)
+                    database.query(`DELETE FROM recommends WHERE post_id = '${id}' AND user_id = '${user_id}'`).then(() => resolve('cancel')).catch(reject)
                 }
             })
         })
@@ -143,9 +144,9 @@ router.post('/:id/disrecommend', (req, res) => {
             database.query(`SELECT COUNT(*) AS count FROM disrecommends WHERE post_id = '${id}' AND user_id = '${user_id}'`)
             .then(rows => {
                 if (rows[0].count === 0) {
-                    database.query(`INSERT INTO disrecommends(post_id, user_id) VALUES ('${id}','${user_id}')`).then(() => resolve()).catch(reject)
+                    database.query(`INSERT INTO disrecommends (post_id, user_id) VALUES ('${id}','${user_id}')`).then(() => resolve('disrecommend')).catch(reject)
                 } else {
-                    database.query(`DELETE FROM disrecommends WHERE post_id = '${id}' AND user_id = '${user_id}'`).then(() => resolve()).catch(reject)
+                    database.query(`DELETE FROM disrecommends WHERE post_id = '${id}' AND user_id = '${user_id}'`).then(() => resolve('cancel')).catch(reject)
                 }
             }).catch(reject);
         })
@@ -161,9 +162,9 @@ router.get('/:id/recommend', (req, res) => {
             database.query(`SELECT COUNT(*) AS count FROM recommends WHERE post_id = '${id}' AND user_id = '${user_id}'`)
             .then(rows => {
                 if (rows[0].count === 0) {
-                   resolve(true);
+                   resolve(false);
                 } else {
-                    resolve(false);
+                    resolve(true);
                 }
             }).catch(reject);
         })
@@ -179,9 +180,9 @@ router.get('/:id/disrecommend', (req, res) => {
             database.query(`SELECT COUNT(*) AS count FROM disrecommends WHERE post_id = '${id}' AND user_id = '${user_id}'`)
             .then(rows => {
                 if (rows[0].count === 0) {
-                   resolve(true);
+                   resolve(false);
                 } else {
-                    resolve(false);
+                    resolve(true);
                 }
             }).catch(reject);
         })
@@ -190,33 +191,48 @@ router.get('/:id/disrecommend', (req, res) => {
 })
 
 router.get('/:id/comments', (req, res) => {
-    const { post_id } = req.params;
     const { success, error } = require('../model/common')(res);
     const { limit, offset } = req.query;
+    const post_id = req.params.id;
     let sql = `
-    SELECT comment.id, user.name, comment.value, comment.update_date
-    FROM post_comments AS comment
-    LEFT JOIN accounts AS user
-    ON comment.user_id = user.id
-    WHERE comment.post_id = '${post_id}'
-    ORDER BY comment.update_date DESC `
+    SELECT 
+        comments.id,
+        comments.value,
+        comments.update_date,
+        users.name
+    FROM post_comments AS comments
+    JOIN accounts AS users
+    ON comments.user_id = users.id
+    WHERE comments.post_id = ${post_id}
+    ORDER BY comments.update_date DESC `;
     if (limit) {
-        sql += `LIMIT ${limit} `
+        sql += `LIMIT ${limit} `;
         if (offset)
-            sql += `OFFSET ${offset}`
+            sql += `OFFSET ${offset}`;
     }
-    database.query(sql).then(success).catch(error);
+    const count = (rows) => {
+        return new Promise((resolve, reject) => {
+            const json = {
+                comments: rows
+            }
+            database.query(`SELECT COUNT(*) AS count FROM post_comments WHERE post_id = '${post_id}'`)
+            .then(rows => {
+                json.count = rows[0].count;
+                resolve(json);
+            }).catch(reject);
+        })
+    }
+    database.query(sql).then(count).then(success).catch(error);
 })
 
 router.post('/:id/comments', (req, res) => {
-    const { post_id } = req.params;        
-    const { decodeToken, success, error } = require('../model/common')(res);
-    const query = (user_id) => {        
+    const {  decodeToken, success, error } = require('../model/common')(res);
+    const query = (user_id) => {
+        const post_id = req.params.id;
         const { value } = req.body;
-        if (!value) throw 'body.value is required'
         const sql = `
-        INSERT INTO post_comments(user_id, post_id, value)
-        VALUES('${user_id}','${post_id}','${value}')`
+        INSERT INTO post_comments(user_id, post_id, value) 
+        VALUES('${user_id}', ${post_id}, '${value}')`
         return database.query(sql);
     }
     decodeToken(req).then(query).then(success).catch(error);

@@ -4,7 +4,7 @@ const database = require('./pool');
 
 const common = (res) => {    
     return {
-        success: (rows) => {   
+        success: (rows) => {            
             res.status(200).json({
                 status: 'success',
                 data: rows
@@ -36,11 +36,9 @@ const common = (res) => {
                     reject(`headers['x-access-token'] is required`);
                     return;
                 }                
-                try {
-                    const value = jwt.decode(token, config.jwtSecret);
-                } catch (error) {
-                    reject(`headers['x-access-token'] is invalid`) 
-                }
+                const value = jwt.decode(token, config.jwtSecret);
+                if (!value.id)
+                reject(`headers['x-access-token'] is invalid`) 
                 if (table === 'users') {
                     if (value.id === id)
                         resolve();
@@ -50,12 +48,14 @@ const common = (res) => {
                         if (rows[0].id === id)
                             resolve();
                     }).catch(reject);
-                } else if (admin === true) {
+                } else if (admin === true) {                    
                     database.query(`SELECT COUNT(*) AS count FROM admin WHERE user_id='${value.id}'`)
-                    .then(rows => {
+                    .then(rows => {                        
                         if (rows[0].count > 0)
                             resolve();
-                    })
+                        else
+                            throw 'admin permission required'                        
+                    }).catch(reject)
                 } else {
                     reject('authentication failed')
                 }
