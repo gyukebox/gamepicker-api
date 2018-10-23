@@ -13,19 +13,19 @@ const common = (res) => {
         error: (error) => {
             res.status(400).json({
                 status: 'error',
-                message: error
+                data: error
             })
         },
         validate: (req, payload) => {
             return new Promise((resolve, reject) => {
                 if (payload.body) {
-                    payload.body.map(v => {                        
-                        if (!req.body[v]) {
+                    payload.body.map(v => {                                                
+                        if (req.body[v] === undefined) {
                             reject(`body.${v} is required`)
-                            return;
                         }
                     })
                 }
+                resolve();
             })
         },
         authentication: (req, id, admin) => {
@@ -57,16 +57,17 @@ const common = (res) => {
         },
         decodeToken: (req) => {
             return new Promise((resolve, reject) => {
-                const token = req.headers['x-access-token'];
+                const token = req.headers['x-access-token'];                
                 if (!token) {
                     reject(`headers['x-access-token'] is required`);
-                }                
-                try {
+                } else {
                     const value = jwt.decode(token, config.jwtSecret);
-                } catch (error) {
-                    reject(`headers['x-access-token'] is invalid`) 
+                    if (!value.id) {
+                        reject(`headers['x-access-token'] is invalid`) 
+                    } else {
+                        resolve(value.id);
+                    }
                 }
-                resolve(value.id);
             })
         }
     }

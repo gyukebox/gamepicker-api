@@ -8,36 +8,22 @@ const pool = mysql.createPool({
     password: config.password,
     database: config.database,
     connectionLimit: 20,
-    waitForConnections: true
+    waitForConnections: true,
+    multipleStatements: true
 });
 
 const database = {
-    query: (sql) => {
+    query: (sql, opt) => {
         return new Promise((resolve, reject) => {
             pool.getConnection((err, conn) => {
-                conn.query(sql, (err, rows) => {
+                conn.query(sql, opt, (err, rows) => {
                     if (err) {
-                        conn.release();
                         reject(err);
-                    }
-                    conn.release();
-                    resolve(rows);     
-                    
-                })
-            })
-        })
-    },
-    unique: (table, field, data) => {
-        return new Promise((resolve, reject) => {
-            pool.getConnection((err, conn) => {
-                conn.query(`SELECT EXISTS (SELECT id from ${table} WHERE ${field}='${data}') AS success`, (err, rows) => {
-                    if (err) {
                         conn.release();
-                        reject(err);
+                    } else {
+                        resolve(rows);     
+                        conn.release();
                     }
-                    if (rows[0].success === 1)
-                        return reject(`${data} exist at ${field}`)
-                    resolve();
                 })
             })
         })

@@ -8,7 +8,7 @@ router.get('/', (req, res) => {
     const { search, limit, offset } = req.query;
     const { success, error } = require('../../model/common')(res);
     let sql = `
-    SELECT title, img_link
+    SELECT id, title, img_link
     FROM games `;
     if (search) 
         sql += `WHERE title LIKE '${search}' `
@@ -36,7 +36,7 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
     const { id } = req.params;
     const { success, error } = require('../../model/common')(res);
-    const sql = `
+    let sql = `
     SELECT 
         games.id, 
         title, 
@@ -54,39 +54,45 @@ router.get('/:id', (req, res) => {
     LEFT JOIN game_platforms
     ON game_platforms.game_id = games.id
     LEFT JOIN game_tags
-    ON game_tags.game_id = games.id
-    WHERE id = '${id}'`
-    database.query(sql).then(success).catch(error);
+    ON game_tags.game_id = games.id `    
+    const regNumber = /^[0-9]*$/;
+    if (regNumber.test(id)) {
+        sql += `WHERE games.id = '${id}' GROUP BY games.id`;
+    } else {
+        sql += `WHERE games.title = '${id}' GROUP BY games.id`;
+    }
+    const processing = (rows) => {
+        const game = rows[0];
+        game.tags = game.tags===null?[]:game.tags.split(',');
+        game.platforms = game.platforms===null?[]:game.platforms.split(',');
+        return game;
+    }
+    database.query(sql).then(processing).then(success).catch(error);
 })
 
 router.post('/' , (req, res) => {
     const { validate, success, error } = require('../../model/common')(res);
-    const { title, developer, publisher, age_rate, summary, img_link, video_link, tags, platforms } = req.body;
+    const { title, developer, publisher, age_rate, summary, img_link, video_link, tags, platforms } = req.body;    
     const payload = {
         body: ['title', 'developer', 'publisher', 'age_rate', 'summary', 'img_link', 'video_link', 'tags', 'platforms']
     }
     const query = () => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {            
             const sql = `
             INSERT INTO games(title, developer, publisher, age_rate, summary, img_link, video_link)
-            VALUES('${title}', '${developer}', '${publisher}', '${age_rate}', '${summary}', '${img_link}', '${video_link}');
-            SELECT LAST_INSERT_ID() as id`
+            VALUES ('${title}', '${developer}', '${publisher}', '${age_rate}', '${summary}', '${img_link}', '${video_link}')`
             database.query(sql)
             .then(rows => {
-                const id = rows[0].id;
+                const id = rows.insertId;
+                
                 const tagArr = [];
+                tags.map(tag => tagArr.push(`('${id}','${tag}')`));
+                database.query(`INSERT INTO game_tags(game_id, tag) VALUES ${tagArr.toString()}`)
+
                 const platformArr = [];
-                tags.map(tag => tagArr.push(`(${id},${tag})`));
-                platforms.map(platform => platformArr.push(`(${id},${platform})`));
-                const sql = `
-                INSERT INTO game_tags(title, tag) VALUES ${tagArr.toString()};
-                INSERT INTO game_platforms(title, platform) VALUES ${platformArr.toString()}`
-                return database.query(sql)
-            }).then(() => {
-                resolve();
-            }).catch(err => {
-                reject(err);
-            })
+                platforms.map(platform => platformArr.push(`('${id}','${platform}')`));
+                database.query(`INSERT INTO game_platforms(title, platform) VALUES ${platformArr.toString()}`)
+            }).then(resolve).catch(reject)
         })
     }
     validate(req, payload).then(query).then(success).catch(error);
@@ -95,31 +101,55 @@ router.post('/' , (req, res) => {
 router.put('/:id', (req, res) => {
     const { authentication, success, error } = require('../../model/common')(res);
     const query = () => {
-        const { id } = req.params;
-        const { title, developer, publisher, age_rate, summary, img_link, video_link } = req.body;
-        let set_query = `SET `;
-        if (!id)    return res.status(400).json({ error: `body.id is required`});
-        if (title) set_query += `title='${title}',`
-        if (developer) set_query +=`developer='${developer}',`
-        if (publisher) set_query +=`publisher='${publisher}',`
-        if (age_rate) set_query +=`age_rate='${age_rate}',`
-        if (summary) set_query +=`summary='${summary}',`
-        if (img_link) set_query +=`img_link='${img_link}',`
-        if (video_link) set_query +=`video_link='${video_link}',`
-        set_query = set_query.slice(0,-1);    
-        return database.query(`UPDATE games ${set_query} WHERE id = '${id}'`)
+        return new Promise((resolve, reject) => {
+            const { id } = req.params;
+            const { title, developer, publisher, age_rate, summary, img_link, video_link, tags, platforms } = req.body;
+            let set_query = `SET `;
+            if (!id)    return res.status(400).json({ error: `body.id is required`});
+            if (title) set_query += `title='${title}',`
+            if (developer) set_query +=`developer='${developer}',`
+            if (publisher) set_query +=`publisher='${publisher}',`
+            if (age_rate) set_query +=`age_rate='${age_rate}',`
+            if (summary) set_query +=`summary='${summary}',`
+            if (img_link) set_query +=`img_link='${img_link}',`
+            if (video_link) set_query +=`video_link='${video_link}',`
+            set_query = set_query.slice(0,-1);    
+            database.query(`UPDATE games ${set_query} WHERE id = '${id}'`)
+            .then(() => {
+                return database.query(`DELETE FROM game_tags WHERE game_id=${id}`)
+            }).then(() => {
+                const tagArr = [];
+                tags.map(tag => tagArr.push(`('${id}','${tag}')`));
+                return database.query(`INSERT INTO game_tags(game_id, tag) VALUES ${tagArr.toString()}`)
+            }).then(() => {
+                return database.query(`DELETE FROM game_platforms WHERE game_id=${id}`)
+            }).then(() => {
+                const platformArr = [];
+                platforms.map(platform => platformArr.push(`('${id}','${platform}')`));
+                database.query(`INSERT INTO game_platforms(game_id, platform) VALUES ${platformArr.toString()}`)
+            }).then(resolve).catch(reject);
+        })
+
     }
-    authentication(req, false, true).then(query).then(success).catch(error);
+    //authentication(req, false, true).then(query).then(success).catch(error);
+    query().then(success).catch(error);
 });
 
 router.delete('/:id', (req, res) => {
     const { authentication, success, error } = require('../../model/common')(res);
     const id = req.params.id;
     const query = () => {
-        const sql = `DELETE FROM games WHERE id='${id}'`;
-        return database.query(sql)
+        return new Promise((resolve, reject) => {
+            database.query(`DELETE FROM games WHERE id='${id}'`)
+            .then(() => {
+                return database.query(`DELETE FROM game_tags WHERE game_id=${id}`)
+            }).then(() => {
+                return database.query(`DELETE FROM game_platforms WHERE game_id=${id}`)
+            }).then(resolve).catch(reject);
+        })
     }
-    authentication(req, false, true).then(query).then(success).catch(error);
+    //authentication(req, false, true).then(query).then(success).catch(error);
+    query().then(success).catch(error);
 })
 
 
@@ -159,12 +189,8 @@ router.get('/:id/comments', (req, res) => {
 })
 
 router.post('/:id/comments', (req, res) => {
-    const { validate, success, error } = require('../../model/common')(res);
+    const {  decodeToken, success, error } = require('../../model/common')(res);
     const token = req.headers['x-access-token'];
-    const payload = {
-        headers: ['x-access-token'],
-        body: ['value']
-    }
     const query = () => {
         const game_id = req.params.id;
         const { value } = req.body;
@@ -174,7 +200,7 @@ router.post('/:id/comments', (req, res) => {
         VALUES('${user_id}', ${game_id}, '${value}')`
         return database.query(sql);
     }
-    validate(req, payload).then(query).then(success).catch(error);
+    decodeToken(req).then(query).then(success).catch(error);
 })
 
 /*

@@ -5,9 +5,9 @@ const jwt = require('jwt-simple');
 const config = require('../../config/jwt-config');
 
 router.get('/', (req, res) => {
-    const { gameID, limit, offset } = req.query;
+    const { game, gameID, limit, offset } = req.query;
     const { success, error } = require('../../model/common')(res);
-    const sql = `
+    let sql = `
     SELECT
         posts.id,
         posts.game_id,
@@ -25,6 +25,9 @@ router.get('/', (req, res) => {
     if (gameID) {
         sql += `WHERE game_id = '${gameID}'`
     }
+    if (game && game !== '자유') {
+        sql += `WHERE game_id = (SELECT id FROM games WHERE title = '${game}')`
+    }
     if (limit) {
         sql += `LIMIT ${limit} `
         if (offset)
@@ -32,7 +35,13 @@ router.get('/', (req, res) => {
     }
     const count = (rows) => {
         return new Promise((resolve, reject) => {
-            const sql = `SELECT COUNT(*) AS count FROM posts`;
+            let sql = `SELECT COUNT(*) AS count FROM posts `;            
+            if (gameID) {
+                sql += `WHERE game_id = '${gameID}'`
+            }
+            if (game && game !== '자유') {
+                sql += `WHERE game_id = (SELECT id FROM games WHERE title = '${game}')`
+            }
             const json = {
                 posts: rows,
                 count: 0
@@ -99,19 +108,20 @@ router.delete('/:id', (req, res) => {
 
 router.post('/:id/comments', (req, res) => {
     const { id } = req.params;
-    const user_id = decodeToken(req);
+    console.log(user_id);
+        
     const { decodeToken, validate, success, error } = require('../../model/common')(res);
     const payload = {
         body: ['value']
     }
-    const query = () => {
+    const query = (user_id) => {        
         const { value } = req.body;
         const sql = `
         INSERT INTO post_comments(user_id, post_id, value)
         VALUES('${user_id}','${post_id}','${value}')`
         return database.query(sql);
     }
-    validate(req, payload).then(query).then(success).catch(error);
+    decodeToken(req).then(query).then(success).catch(error);
 })
 
 router.put('/:id/comments/:commentID', (req, res) => {
