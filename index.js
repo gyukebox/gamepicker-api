@@ -9,18 +9,13 @@ app.use(bodyParser.json());
 
 const port = process.env.PORT || 3333;
 
-app.use('/v2', require('./routes/v2/index'));
-app.use('/v2/posts', require('./routes/v2/posts'));
-app.use('/v2/tags', require('./routes/v2/tags'));
-app.use('/v2/platforms', require('./routes/v2/platforms'));
-app.use('/v2/users', require('./routes/v2/users'));
-app.use('/v2/games', require('./routes/v2/games'));
-
-app.use('/users', require('./routes/user'));
-app.use('/games', require('./routes/game'));
+app.use('/', require('./routes/index'));
+app.use('/posts', require('./routes/posts'));
 app.use('/tags', require('./routes/tags'));
 app.use('/platforms', require('./routes/platforms'));
-app.use('/posts', require('./routes/posts'));
+app.use('/users', require('./routes/users'));
+app.use('/games', require('./routes/games'));
+
 
 process.on('uncaughtException', function (err) {
     console.log(`!!! error !!!`)

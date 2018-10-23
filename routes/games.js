@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jwt-simple');
-const config = require('../../config/jwt-config');
-const database = require('../../model/pool');
+const config = require('../config/jwt-config');
+const database = require('../model/pool');
 
 router.get('/', (req, res) => {
     const { search, limit, offset } = req.query;
-    const { success, error } = require('../../model/common')(res);
+    const { success, error } = require('../model/common')(res);
     let sql = `
     SELECT id, title, img_link
     FROM games `;
@@ -35,7 +35,7 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     const { id } = req.params;
-    const { success, error } = require('../../model/common')(res);
+    const { success, error } = require('../model/common')(res);
     let sql = `
     SELECT 
         games.id, 
@@ -71,7 +71,7 @@ router.get('/:id', (req, res) => {
 })
 
 router.post('/' , (req, res) => {
-    const { validate, success, error } = require('../../model/common')(res);
+    const { validate, success, error } = require('../model/common')(res);
     const { title, developer, publisher, age_rate, summary, img_link, video_link, tags, platforms } = req.body;    
     const payload = {
         body: ['title', 'developer', 'publisher', 'age_rate', 'summary', 'img_link', 'video_link', 'tags', 'platforms']
@@ -99,7 +99,7 @@ router.post('/' , (req, res) => {
 })
 
 router.put('/:id', (req, res) => {
-    const { authentication, success, error } = require('../../model/common')(res);
+    const { authentication, success, error } = require('../model/common')(res);
     const query = () => {
         return new Promise((resolve, reject) => {
             const { id } = req.params;
@@ -131,12 +131,11 @@ router.put('/:id', (req, res) => {
         })
 
     }
-    //authentication(req, false, true).then(query).then(success).catch(error);
-    query().then(success).catch(error);
+    authentication(req, null, null, true).then(query).then(success).catch(error);
 });
 
 router.delete('/:id', (req, res) => {
-    const { authentication, success, error } = require('../../model/common')(res);
+    const { authentication, success, error } = require('../model/common')(res);
     const id = req.params.id;
     const query = () => {
         return new Promise((resolve, reject) => {
@@ -148,13 +147,12 @@ router.delete('/:id', (req, res) => {
             }).then(resolve).catch(reject);
         })
     }
-    //authentication(req, false, true).then(query).then(success).catch(error);
-    query().then(success).catch(error);
+    authentication(req, null, null, true).then(query).then(success).catch(error);
 })
 
 
 router.get('/:id/comments', (req, res) => {
-    const { success, error } = require('../../model/common')(res);
+    const { success, error } = require('../model/common')(res);
     const { limit, offset } = req.query;
     const game_id = req.params.id;
     let sql = `
@@ -189,7 +187,7 @@ router.get('/:id/comments', (req, res) => {
 })
 
 router.post('/:id/comments', (req, res) => {
-    const {  decodeToken, success, error } = require('../../model/common')(res);
+    const {  decodeToken, success, error } = require('../model/common')(res);
     const token = req.headers['x-access-token'];
     const query = () => {
         const game_id = req.params.id;
@@ -203,21 +201,42 @@ router.post('/:id/comments', (req, res) => {
     decodeToken(req).then(query).then(success).catch(error);
 })
 
-/*
+
 router.put('/:id/comments/:commentID', (req, res) => {
-    const { authentication, success, error } = require('../../model/common')(res);
+    const { id, commentID } = req.params;
+    const { authentication, success, error } = require('../model/common')(res);
+    const { value } = req.body;
+    const query = () => {
+        if (!value)
+            throw 'body.value is required'
+        const sql = `
+        UPDATE game_comments
+        SET
+            value = '${value}'
+        WHERE game_id = '${id}' AND id = '${commentID}'`;
+        return database.query(sql);
+    }
+    authentication(req, 'game_comments', commentID, false).then(query).then(success).catch(error);
 
 })
 
 router.delete('/:id/comments/:commentID', (req, res) => {
-
+    const { id, commentID } = req.params;
+    const { authentication, success, error } = require('../model/common')(res);
+    const query = () => {
+        const sql = `
+        DELETE FROM game_comments
+        WHERE game_id = '${id}' AND id = '${commentID}'`
+        return database.query(sql);
+    }
+    authentication(req, 'game_comments', commentID, true).then(query).then(success).catch(error);
 })
-*/
+
 
 router.get('/:gameID/rates/:userID', (req, res) => {
     const game_id = req.params.gameID;
     const user_id = req.params.userID;
-    const { authentication, success, error } = require('../../model/common')(res);
+    const { authentication, success, error } = require('../model/common')(res);
     const query = () => {
         const sql = `
         SELECT value 
@@ -225,11 +244,11 @@ router.get('/:gameID/rates/:userID', (req, res) => {
         WHERE game_id='${game_id}' AND user_id='${user_id}'`;
         return database.query(sql);
     }
-    authentication(req, user_id).then(query).then(success).then(error);
+    authentication(req, 'users', user_id).then(query).then(success).then(error);
 })
 
 router.post('/:id/rates', (req, res) => {
-    const { validate, success, error } = require('../../model/common')(res);
+    const { validate, success, error } = require('../model/common')(res);
     const token = req.headers['x-access-token'];
     const game_id = req.params.id;
     const { value } = req.body;

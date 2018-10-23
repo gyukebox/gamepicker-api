@@ -28,8 +28,9 @@ const common = (res) => {
                 resolve();
             })
         },
-        authentication: (req, id, admin) => {
+        authentication: (req, table, id, admin) => {
             return new Promise((resolve, reject) => {
+                const permit_table = ['posts','post_comments','game_comments'];
                 const token = req.headers['x-access-token'];
                 if (!token) {
                     reject(`headers['x-access-token'] is required`);
@@ -40,15 +41,20 @@ const common = (res) => {
                 } catch (error) {
                     reject(`headers['x-access-token'] is invalid`) 
                 }
-                if (value.id === id) {
-                    resolve();
+                if (table === 'users') {
+                    if (value.id === id)
+                        resolve();
+                } else if (permit_table.includes(table)) {
+                    database.query(`SELECT id FROM ${table} WHERE user_id = '${value.id}'`)
+                    .then(rows => {
+                        if (rows[0].id === id)
+                            resolve();
+                    }).catch(reject);
                 } else if (admin === true) {
                     database.query(`SELECT COUNT(*) AS count FROM admin WHERE user_id='${value.id}'`)
                     .then(rows => {
                         if (rows[0].count > 0)
                             resolve();
-                        else
-                            reject('authentication(admin) failed');
                     })
                 } else {
                     reject('authentication failed')

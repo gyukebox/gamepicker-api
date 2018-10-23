@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../../model/pool');
-const config = require('../../config/jwt-config');
+const database = require('../model/pool');
+const config = require('../config/jwt-config');
 const jwt = require('jwt-simple');
 
 router.get('/', (req, res) => {
-    const { success, error } = require('../../model/common')(res);
+    const { success, error } = require('../model/common')(res);
     const { limit, offset } = req.query;
     let sql = `
     SELECT id, name, birthday, gender, introduce, point, login_date, update_date, create_date
@@ -31,7 +31,7 @@ router.get('/', (req, res) => {
 })
 
 router.get('/:id', (req, res) => {
-    const { error } = require('../../model/common')(res);
+    const { error } = require('../model/common')(res);
     const { id } = req.params;
     const sql = `
     SELECT name, birthday, gender, introduce, point, login_date, update_date, create_date
@@ -47,7 +47,7 @@ router.get('/:id', (req, res) => {
 })
 
 router.post('/', (req, res) => {
-    const { success, error } = require('../../model/common')(res);
+    const { success, error } = require('../model/common')(res);
     const { name, email, password } = req.body;
     const sql = `
     INSERT INTO accounts(name, email, password)
@@ -62,18 +62,19 @@ router.post('/', (req, res) => {
     database.query(sql).then(generateToken).then(success).catch(error);
 })
 
+//FIXME: 미완
 router.put('/:id', (req, res) => {
-    const { authentication, success, error } = require('../../model/common')(res);
+    const { authentication, success, error } = require('../model/common')(res);
     const id = req.params.id;
     const query = () => {
         const sql = ``;
         return database.query(sql)
     }
-    authentication(req, id).then(query).then(success).catch(error);
+    authentication(req, 'users', id, false).then(query).then(success).catch(error);
 });
 
 router.delete('/:id', (req, res) => {
-    const { authentication, success, error } = require('../../model/common')(res);
+    const { authentication, success, error } = require('../model/common')(res);
     const id = req.params.id;
     const query = () => {
         const sql = `
@@ -81,7 +82,7 @@ router.delete('/:id', (req, res) => {
         WHERE id = ${id}`;
         return database.query(sql)
     }
-    authentication(req, id, true).then(query).then(success).catch(error);
+    authentication(req, 'users', id, true).then(query).then(success).catch(error);
 })
 
 module.exports = router;

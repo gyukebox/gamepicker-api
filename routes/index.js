@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../../model/pool');
-const config = require('../../config/jwt-config');
+const database = require('../model/pool');
+const config = require('../config/jwt-config');
 const jwt = require('jwt-simple');
 
 router.post('/login', (req, res) => {
-    const { success, error } = require('../../model/common')(res);
+    const { success, error } = require('../model/common')(res);
     const { email, password } = req.body;
-    const processing = (rows) => {
+    const check = (rows) => {
         if (rows.length === 0) {
             throw 'email is invalid';
         } else if (rows[0].password !== password) {
@@ -19,13 +19,13 @@ router.post('/login', (req, res) => {
         }
     }
     database.query(`SELECT id, password FROM accounts WHERE email='${email}'`)
-    .then(processing)
+    .then(check)
     .then(success)
     .catch(error);
 })
 
 router.get('/me', (req, res) => {
-    const { decodeToken, success, error } = require('../../model/common')(res);
+    const { decodeToken, success, error } = require('../model/common')(res);
     const query = (user_id) => {
         const sql = `
         SELECT name, email, password, birthday, gender, introduce, point
