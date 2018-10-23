@@ -117,6 +117,78 @@ router.delete('/:id', (req, res) => {
     authentication(req, 'posts', id, true).then(query).then(success).catch(error);
 })
 
+router.post('/:id/recommend', (req, res) => {
+    const { id } = req.params;
+    const { decodeToken, success, error } = require('../model/common')(res);
+    const query = (user_id) => {
+        return new Promise((resolve, reject) => {
+            database.query(`SELECT COUNT(*) AS count FROM recommends WHERE post_id = '${id}' AND user_id = '${user_id}'`)
+            .then(rows => {
+                if (rows[0].count === 0) {
+                    database.query(`INSERT INTO recommends(post_id, user_id) VALUES ('${id}','${user_id}')`).then(() => resolve()).catch(reject)
+                } else {
+                    database.query(`DELETE FROM recommends WHERE post_id = '${id}' AND user_id = '${user_id}'`).then(() => resolve()).catch(reject)
+                }
+            })
+        })
+    }
+    decodeToken(req).then(query).then(success).catch(error);
+})
+
+router.post('/:id/disrecommend', (req, res) => {
+    const { id } = req.params;
+    const { decodeToken, success, error } = require('../model/common')(res);
+    const query = (user_id) => {
+        return new Promise((resolve, reject) => {
+            database.query(`SELECT COUNT(*) AS count FROM disrecommends WHERE post_id = '${id}' AND user_id = '${user_id}'`)
+            .then(rows => {
+                if (rows[0].count === 0) {
+                    database.query(`INSERT INTO disrecommends(post_id, user_id) VALUES ('${id}','${user_id}')`).then(() => resolve()).catch(reject)
+                } else {
+                    database.query(`DELETE FROM disrecommends WHERE post_id = '${id}' AND user_id = '${user_id}'`).then(() => resolve()).catch(reject)
+                }
+            }).catch(reject);
+        })
+    }
+    decodeToken(req).then(query).then(success).catch(error);
+})
+
+router.get('/:id/recommend', (req, res) => {
+    const { id } = req.params;
+    const { decodeToken, success, error } = require('../model/common')(res);
+    const query = (user_id) => {
+        return new Promise((resolve, reject) => {
+            database.query(`SELECT COUNT(*) AS count FROM recommends WHERE post_id = '${id}' AND user_id = '${user_id}'`)
+            .then(rows => {
+                if (rows[0].count === 0) {
+                   resolve(true);
+                } else {
+                    resolve(false);
+                }
+            }).catch(reject);
+        })
+    }
+    decodeToken(req).then(query).then(success).catch(error);
+})
+
+router.get('/:id/disrecommend', (req, res) => {
+    const { id } = req.params;
+    const { decodeToken, success, error } = require('../model/common')(res);
+    const query = (user_id) => {
+        return new Promise((resolve, reject) => {
+            database.query(`SELECT COUNT(*) AS count FROM disrecommends WHERE post_id = '${id}' AND user_id = '${user_id}'`)
+            .then(rows => {
+                if (rows[0].count === 0) {
+                   resolve(true);
+                } else {
+                    resolve(false);
+                }
+            }).catch(reject);
+        })
+    }
+    decodeToken(req).then(query).then(success).catch(error);
+})
+
 router.get('/:id/comments', (req, res) => {
     const { post_id } = req.params;
     const { success, error } = require('../model/common')(res);

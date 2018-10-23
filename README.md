@@ -14,6 +14,10 @@
 | GET    | /posts/:id                     | [게시물 조회](https://github.com/ansrl0107/GamePickerAPI/wiki/게시물-조회)           |
 | PUT    | /posts/:id                     | [게시물 수정](https://github.com/ansrl0107/GamePickerAPI/wiki/게시물-수정)           |
 | DELETE | /posts/:id                     | [게시물 삭제](https://github.com/ansrl0107/GamePickerAPI/wiki/게시물-삭제)           |
+| GET    | /posts/:id/recommend           | [게시물 추천 확인](https://github.com/ansrl0107/GamePickerAPI/wiki/게시물-추천-확인)     |
+| POST   | /posts/:id/recommend           | [게시물 추천](https://github.com/ansrl0107/GamePickerAPI/wiki/게시물-추천)           |
+| GET    | /posts/:id/disrecommend        | [게시물 비추천 확인](https://github.com/ansrl0107/GamePickerAPI/wiki/게시물-비추천-확인)   |
+| POST   | /posts/:id/disrecommend        | [게시물 비추천](https://github.com/ansrl0107/GamePickerAPI/wiki/게시물-비추천)         |
 | GET    | /posts/:id/comments            | [게시물 댓글 조회](https://github.com/ansrl0107/GamePickerAPI/wiki/게시물-댓글-조회)     |
 | POST   | /posts/:id/comments            | [게시물 댓글 작성](https://github.com/ansrl0107/GamePickerAPI/wiki/게시물-댓글-작성)     |
 | PUT    | /posts/:id/comments/:commentID | [게시물 댓글 수정](https://github.com/ansrl0107/GamePickerAPI/wiki/게시물-댓글-수정)     |
