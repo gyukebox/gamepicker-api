@@ -49,10 +49,6 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
     const { success, error } = require('../model/common')(res);
     const { name, email, password } = req.body;
-    console.log('aa');
-    
-    console.log(req.body);
-    
     const sql = `
     INSERT INTO accounts(name, email, password)
     VALUES ('${name}', '${email}', '${password}')`
