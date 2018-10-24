@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
         accounts.name,
         posts.content,
         posts.views,
-        posts.update_date AS date,
+        posts.update_date,
         IFNULL((SELECT title FROM games WHERE id = posts.game_id),"자유") category,
         (SELECT COUNT(*) FROM recommends WHERE post_id = posts.id) recommends,
         (SELECT COUNT(*) FROM post_comments WHERE post_id = posts.id) comment_count

@@ -49,12 +49,15 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
     const { success, error } = require('../model/common')(res);
     const { name, email, password } = req.body;
+    console.log('aa');
+    
+    console.log(req.body);
+    
     const sql = `
     INSERT INTO accounts(name, email, password)
-    VALUES ('${name}', '${email}', '${password}');
-    SELECT LAST_INSERT_ID() as id`
+    VALUES ('${name}', '${email}', '${password}')`
     const generateToken = (rows) => {
-        const id = rows[0].id;
+        const id = rows.insertId;
         const payload = { id: id };
         const token = jwt.encode(payload, config.jwtSecret);
         return { token: token }

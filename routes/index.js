@@ -28,12 +28,24 @@ router.get('/me', (req, res) => {
     const { decodeToken, success, error } = require('../model/common')(res);
     const query = (user_id) => {
         const sql = `
-        SELECT name, email, password, birthday, gender, introduce, point
+        SELECT 
+            name,
+            email, 
+            password, 
+            birthday, 
+            gender, 
+            introduce, 
+            point, 
+            (SELECT EXISTS(SELECT * FROM admin WHERE user_id = '${user_id}')) AS admin
         FROM accounts
         WHERE id = '${user_id}'`
         return database.query(sql);
     }
     const singulation = (rows) => {
+        database.query(`SELECT COUNT(*) AS count FROM admin WHERE user_id = '${rows[0].id}'`)
+        .then(rows => {
+            rows
+        })
         return rows[0]
     }
     decodeToken(req).then(query).then(singulation).then(success).catch(error);
