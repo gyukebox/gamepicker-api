@@ -7,15 +7,21 @@ const database = require('../model/pool');
 router.get('/', (req, res) => {
     const { search, limit, offset } = req.query;
     const { success, error } = require('../model/common')(res);
+    const option = [];
     let sql = `
     SELECT id, title, img_link
     FROM games `;
-    if (search) 
-        sql += `WHERE title LIKE '${search}' `
+    if (search) {
+        sql += `WHERE title LIKE ? `
+        option.push('%'+search+'%');
+    }
     if (limit) {
-        sql += `LIMIT ${limit} `
-        if (offset)
-            sql += `OFFSET ${offset}`
+        sql += `LIMIT ? `
+        option.push(Number(limit));
+        if (offset) {
+            sql += `OFFSET ?`
+            option.push(Number(offset));
+        }
     }
     const count = (rows) => {
         return new Promise((resolve, reject) => {
@@ -30,7 +36,7 @@ router.get('/', (req, res) => {
             }).catch(reject)
         })
     }
-    database.query(sql).then(count).then(success).catch(error);
+    database.query(sql,option).then(count).then(success).catch(error);
 });
 
 router.get('/:id', (req, res) => {
@@ -48,8 +54,8 @@ router.get('/:id', (req, res) => {
         video_link, 
         games.update_date, 
         games.create_date,
-        GROUP_CONCAT(DISTINCT(game_platforms.platform)) platforms,
-        GROUP_CONCAT(DISTINCT(game_tags.tag)) tags
+        GROUP_CONCAT(DISTINCT(game_platforms.platform)) AS platforms,
+        GROUP_CONCAT(DISTINCT(game_tags.tag)) AS tags
     FROM games
     LEFT JOIN game_platforms
     ON game_platforms.game_id = games.id
@@ -57,9 +63,9 @@ router.get('/:id', (req, res) => {
     ON game_tags.game_id = games.id `    
     const regNumber = /^[0-9]*$/;
     if (regNumber.test(id)) {
-        sql += `WHERE games.id = '${id}' GROUP BY games.id`;
+        sql += `WHERE games.id = ? GROUP BY games.id`;
     } else {
-        sql += `WHERE games.title = '${id}' GROUP BY games.id`;
+        sql += `WHERE games.title = ? GROUP BY games.id`;
     }
     const processing = (rows) => {
         const game = rows[0];
@@ -67,7 +73,7 @@ router.get('/:id', (req, res) => {
         game.platforms = game.platforms===null?[]:game.platforms.split(',');
         return game;
     }
-    database.query(sql).then(processing).then(success).catch(error);
+    database.query(sql,[id]).then(processing).then(success).catch(error);
 })
 
 router.post('/' , (req, res) => {
@@ -80,20 +86,19 @@ router.post('/' , (req, res) => {
         return new Promise((resolve, reject) => {            
             const sql = `
             INSERT INTO games(title, developer, publisher, age_rate, summary, img_link, video_link)
-            VALUES ('${title}', '${developer}', '${publisher}', '${age_rate}', '${summary}', '${img_link}', '${video_link}')`
-            database.query(sql)
+            VALUES (?)`
+            database.query(sql,[[title, developer, publisher, age_rate, summary, img_link, video_link]])
             .then(rows => {
                 const id = rows.insertId;
                 
                 const tagArr = [];
                 tags.map(tag => tagArr.push(`('${id}','${tag}')`));
                 if (tags.length !== 0)
-                    database.query(`INSERT INTO game_tags(game_id, tag) VALUES ${tagArr.toString()}`)
-
+                    database.query(`INSERT INTO game_tags(game_id, tag) VALUES ?`, tagArr)
                 const platformArr = [];
                 platforms.map(platform => platformArr.push(`('${id}','${platform}')`));
                 if (platforms.length !== 0)
-                    database.query(`INSERT INTO game_platforms(title, platform) VALUES ${platformArr.toString()}`)
+                    database.query(`INSERT INTO game_platforms(title, platform) VALUES ?`,platformArr)
             }).then(resolve).catch(reject)
         })
     }
@@ -108,31 +113,33 @@ router.put('/:id', (req, res) => {
     const query = () => {
         return new Promise((resolve, reject) => {            
             const { id } = req.params;
-            const { title, developer, publisher, age_rate, summary, img_link, video_link, tags, platforms } = req.body;
+            const { tags, platforms } = req.body;
+            const names = ['title', 'developer', 'publisher', 'age_rate', 'summary', 'img_link', 'video_link'];
+            const value = [];
             let set_query = `SET `;
-            if (title) set_query += `title='${title}',`
-            if (developer) set_query +=`developer='${developer}',`
-            if (publisher) set_query +=`publisher='${publisher}',`
-            if (age_rate) set_query +=`age_rate='${age_rate}',`
-            if (summary) set_query +=`summary='${summary}',`
-            if (img_link) set_query +=`img_link='${img_link}',`
-            if (video_link) set_query +=`video_link='${video_link}',`
-            set_query = set_query.slice(0,-1);    
-            database.query(`UPDATE games ${set_query} WHERE id = '${id}'`)
+            names.map(name => {
+                if (req.body[name]) {
+                    set_query += `${name}=?,`
+                    option.push(req.body[name]);
+                }
+            })
+            set_query = set_query.slice(0,-1);
+            value.push(id);
+            database.query(`UPDATE games ${set_query} WHERE id = ?`,value)
             .then(() => {
-                return database.query(`DELETE FROM game_tags WHERE game_id=${id}`)
+                return database.query(`DELETE FROM game_tags WHERE game_id=?`,[id])
             }).then(() => {
                 const tagArr = [];
                 tags.map(tag => tagArr.push(`('${id}','${tag}')`));
                 if (tags.length !== 0)
-                    database.query(`INSERT INTO game_tags(game_id, tag) VALUES ${tagArr.toString()}`)
+                    database.query(`INSERT INTO game_tags(game_id, tag) VALUES ?`,tagArr)
             }).then(() => {
-                return database.query(`DELETE FROM game_platforms WHERE game_id=${id}`)
+                return database.query(`DELETE FROM game_platforms WHERE game_id=?`,[id])
             }).then(() => {
                 const platformArr = [];
                 platforms.map(platform => platformArr.push(`('${id}','${platform}')`));
                 if (platforms.length !== 0)
-                    database.query(`INSERT INTO game_platforms(game_id, platform) VALUES ${platformArr.toString()}`)
+                    database.query(`INSERT INTO game_platforms(game_id, platform) VALUES ?`,platformArr)
             }).then(resolve).catch(reject);
         })
 
@@ -145,11 +152,11 @@ router.delete('/:id', (req, res) => {
     const id = req.params.id;
     const query = () => {
         return new Promise((resolve, reject) => {
-            database.query(`DELETE FROM games WHERE id='${id}'`)
+            database.query(`DELETE FROM games WHERE id=?`,[id])
             .then(() => {
-                return database.query(`DELETE FROM game_tags WHERE game_id=${id}`)
+                return database.query(`DELETE FROM game_tags WHERE game_id=?`,[id])
             }).then(() => {
-                return database.query(`DELETE FROM game_platforms WHERE game_id=${id}`)
+                return database.query(`DELETE FROM game_platforms WHERE game_id=?`,[id])
             }).then(resolve).catch(reject);
         })
     }
@@ -161,6 +168,7 @@ router.get('/:id/comments', (req, res) => {
     const { success, error } = require('../model/common')(res);
     const { limit, offset } = req.query;
     const game_id = req.params.id;
+    const option = [game_id]
     let sql = `
     SELECT 
         comments.id,
@@ -170,12 +178,15 @@ router.get('/:id/comments', (req, res) => {
     FROM game_comments AS comments
     JOIN accounts AS users
     ON comments.user_id = users.id
-    WHERE comments.game_id = ${game_id}
+    WHERE comments.game_id = ?
     ORDER BY comments.update_date DESC `;
     if (limit) {
-        sql += `LIMIT ${limit} `;
-        if (offset)
-            sql += `OFFSET ${offset}`;
+        sql += `LIMIT ? `;
+        option.push(Number(limit))
+        if (offset) {
+            sql += `OFFSET ?`;
+            option.push(Number(offset))
+        }
     }
     const count = (rows) => {
         return new Promise((resolve, reject) => {
@@ -189,7 +200,7 @@ router.get('/:id/comments', (req, res) => {
             }).catch(reject);
         })
     }
-    database.query(sql).then(count).then(success).catch(error);
+    database.query(sql,option).then(count).then(success).catch(error);
 })
 
 router.post('/:id/comments', (req, res) => {
@@ -199,10 +210,10 @@ router.post('/:id/comments', (req, res) => {
         const { value } = req.body;
         const sql = `
         INSERT INTO game_comments(user_id, game_id, value) 
-        VALUES('${user_id}', ${game_id}, '${value}')`
-        return database.query(sql);
+        VALUES (?,?,?)`
+        return database.query(sql,[user_id,game_id,value]);
     }
-    decodeToken(req).then(query).then(success).catch(error);
+    decodeToken(req,).then(query).then(success).catch(error);
 })
 
 
@@ -215,10 +226,9 @@ router.put('/:id/comments/:commentID', (req, res) => {
             throw 'body.value is required'
         const sql = `
         UPDATE game_comments
-        SET
-            value = '${value}'
-        WHERE game_id = '${id}' AND id = '${commentID}'`;
-        return database.query(sql);
+        SET value = ?
+        WHERE game_id = ? AND id = ?`;
+        return database.query(sql,[value,id,commentID]);
     }
     authentication(req, 'game_comments', commentID, false).then(query).then(success).catch(error);
 
@@ -230,8 +240,8 @@ router.delete('/:id/comments/:commentID', (req, res) => {
     const query = () => {
         const sql = `
         DELETE FROM game_comments
-        WHERE game_id = '${id}' AND id = '${commentID}'`
-        return database.query(sql);
+        WHERE game_id = ? AND id = ?`
+        return database.query(sql,[id,commentID]);
     }
     authentication(req, 'game_comments', commentID, true).then(query).then(success).catch(error);
 })
@@ -245,8 +255,8 @@ router.get('/:gameID/rates/:userID', (req, res) => {
         const sql = `
         SELECT value 
         FROM rates 
-        WHERE game_id='${game_id}' AND user_id='${user_id}'`;
-        return database.query(sql);
+        WHERE game_id=? AND user_id=?`;
+        return database.query(sql,[game_id,user_id]);
     }
     authentication(req, 'users', user_id).then(query).then(success).then(error);
 })
@@ -266,25 +276,31 @@ router.post('/:id/rates', (req, res) => {
             const sql = `
             SELECT COUNT(*) AS count
             FROM rates
-            WHERE user_id='${user_id}' AND game_id='${game_id}'`
-            database.query(sql)
+            WHERE user_id=? AND game_id=?`
+            database.query(sql,[user_id,game_id])
             .then(rows => {
                 if (rows[0].count > 0) {
                     const sql = `
                     UPDATE rates
-                    SET value='${value}'
-                    WHERE user_id='${user_id}' AND game_id='${game_id}'`
-                    database.query(sql).then(resolve).catch(reject);
+                    SET value=?
+                    WHERE user_id=? AND game_id=?`
+                    database.query(sql,[value,user_id,game_id]).then(resolve).catch(reject);
                 } else {
                     const sql = `
                     INSERT INTO rates(user_id, game_id, value)
-                    VALUES('${user_id}', '${game_id}', '${value}')`
-                    database.query(sql).then(resolve).catch(reject);
+                    VALUES(?, ?, ?)`
+                    database.query(sql,[user_id,game_id,value]).then(resolve).catch(reject);
                 }
             })
         })
     }
     validate(req, payload).then(query).then(success).catch(error);
+})
+
+router.get('/:id/rates', (req, res) => {
+    const { id } = req.params;
+    const { success, error } = require('../model/common')(res);
+    database.query(`SELECT IFNULL(AVG(value), 0) AS value FROM rates WHERE game_id = ?`,[id]).then(success).catch(error);
 })
 
 module.exports = router;
