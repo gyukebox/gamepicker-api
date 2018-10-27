@@ -18,7 +18,7 @@ router.post('/login', (req, res) => {
             return token;
         }
     }
-    database.query(`SELECT id, password FROM accounts WHERE email='${email}'`)
+    database.query(`SELECT id, password FROM accounts WHERE email=?`,[email])
     .then(check)
     .then(success)
     .catch(error);
@@ -29,23 +29,21 @@ router.get('/me', (req, res) => {
     const query = (user_id) => {
         const sql = `
         SELECT 
+            id,
             name,
             email, 
             password, 
             birthday, 
             gender, 
-            introduce, 
+            IFNULL(introduce, "") AS introduce, 
             point, 
-            (SELECT EXISTS(SELECT * FROM admin WHERE user_id = '${user_id}')) AS admin
+            (SELECT EXISTS(SELECT * FROM admin WHERE user_id = ?)) AS admin,
+            (SELECT EXISTS(SELECT * FROM premium_accounts WHERE user_id = ?)) AS premium
         FROM accounts
-        WHERE id = '${user_id}'`
-        return database.query(sql);
+        WHERE id = ?`
+        return database.query(sql,[user_id, user_id, user_id]);
     }
     const singulation = (rows) => {
-        database.query(`SELECT COUNT(*) AS count FROM admin WHERE user_id = '${rows[0].id}'`)
-        .then(rows => {
-            rows
-        })
         return rows[0]
     }
     decodeToken(req).then(query).then(singulation).then(success).catch(error);

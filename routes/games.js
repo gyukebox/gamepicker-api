@@ -5,12 +5,29 @@ const config = require('../config/jwt-config');
 const database = require('../model/pool');
 
 router.get('/', (req, res) => {
-    const { search, limit, offset } = req.query;
+    const { search, limit, offset, sort } = req.query;
     const { success, error } = require('../model/common')(res);
     const option = [];
     let sql = `
-    SELECT id, title, img_link
+    SELECT id, title, img_link,
+        (SELECT COUNT(*) FROM rates WHERE game_id = games.id) AS count,
+        IFNULL((SELECT AVG(value) FROM rates WHERE game_id = games.id), 0) AS rate
     FROM games `;
+    // FIXME: sort 옵션 
+    switch (sort) {
+        case 'rate':
+            sql += `ORDER BY IFNULL((SELECT AVG(value) FROM rates WHERE game_id = games.id), 0) `;
+            break;
+        case 'popular':
+            sql += `ORDER BY (SELECT COUNT(*) FROM rates WHERE game_id = games.id) `; 
+            break;
+        case 'random':
+            sql += `ORDER BY rand() `; 
+            break;
+        default:
+            sql += `ORDER BY update_date DESC `
+            break;
+    }
     if (search) {
         sql += `WHERE title LIKE ? `
         option.push('%'+search+'%');
@@ -90,15 +107,25 @@ router.post('/' , (req, res) => {
             database.query(sql,[[title, developer, publisher, age_rate, summary, img_link, video_link]])
             .then(rows => {
                 const id = rows.insertId;
-                
                 const tagArr = [];
-                tags.map(tag => tagArr.push(`('${id}','${tag}')`));
+                let sql = `INSERT INTO game_tags(game_id, tag) VALUES `
+                tags.map(tag => {
+                    sql += `(?),`
+                    tagArr.push([id,tag])
+                });
+                sql = sql.slice(0,-1);                
                 if (tags.length !== 0)
-                    database.query(`INSERT INTO game_tags(game_id, tag) VALUES ?`, tagArr)
+                    database.query(sql,tagArr)
+
                 const platformArr = [];
-                platforms.map(platform => platformArr.push(`('${id}','${platform}')`));
+                sql = `INSERT INTO game_platforms(game_id, platform) VALUES `
+                platforms.map(platform => {
+                    sql += `(?),`
+                    platformArr.push([id,platform])
+                });
+                sql = sql.slice(0,-1);          
                 if (platforms.length !== 0)
-                    database.query(`INSERT INTO game_platforms(title, platform) VALUES ?`,platformArr)
+                    database.query(sql,platformArr)
             }).then(resolve).catch(reject)
         })
     }
@@ -116,30 +143,42 @@ router.put('/:id', (req, res) => {
             const { tags, platforms } = req.body;
             const names = ['title', 'developer', 'publisher', 'age_rate', 'summary', 'img_link', 'video_link'];
             const value = [];
-            let set_query = `SET `;
+            let set_query = `SET `;            
             names.map(name => {
-                if (req.body[name]) {
+                console.log(req.body[name], name);
+                
+                if (req.body[name] !== '') {
                     set_query += `${name}=?,`
-                    option.push(req.body[name]);
+                    value.push(req.body[name]);
                 }
             })
             set_query = set_query.slice(0,-1);
-            value.push(id);
+            value.push(id);            
             database.query(`UPDATE games ${set_query} WHERE id = ?`,value)
             .then(() => {
                 return database.query(`DELETE FROM game_tags WHERE game_id=?`,[id])
             }).then(() => {
                 const tagArr = [];
-                tags.map(tag => tagArr.push(`('${id}','${tag}')`));
+                let sql = `INSERT INTO game_tags(game_id, tag) VALUES `
+                tags.map(tag => {
+                    sql += `(?),`
+                    tagArr.push([id,tag])
+                });
+                sql = sql.slice(0,-1);                
                 if (tags.length !== 0)
-                    database.query(`INSERT INTO game_tags(game_id, tag) VALUES ?`,tagArr)
+                    database.query(sql,tagArr)
             }).then(() => {
                 return database.query(`DELETE FROM game_platforms WHERE game_id=?`,[id])
             }).then(() => {
                 const platformArr = [];
-                platforms.map(platform => platformArr.push(`('${id}','${platform}')`));
+                let sql = `INSERT INTO game_platforms(game_id, platform) VALUES `
+                platforms.map(platform => {
+                    sql += `(?),`
+                    platformArr.push([id,platform])
+                });
+                sql = sql.slice(0,-1);          
                 if (platforms.length !== 0)
-                    database.query(`INSERT INTO game_platforms(game_id, platform) VALUES ?`,platformArr)
+                    database.query(sql,platformArr)
             }).then(resolve).catch(reject);
         })
 

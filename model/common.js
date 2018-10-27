@@ -38,11 +38,13 @@ const common = (res) => {
                 }                
                 const value = jwt.decode(token, config.jwtSecret);
                 if (!value.id)
-                reject(`headers['x-access-token'] is invalid`) 
-                if (table === 'users') {
-                    if (value.id === id)
+                    reject(`headers['x-access-token'] is invalid`)
+                if (table === 'users') {                                                        
+                    if (value.id === Number(id))
                         resolve();
                 } else if (permit_table.includes(table)) {
+                    console.log('a');
+                    
                     database.query(`SELECT id FROM ${table} WHERE user_id = '${value.id}'`)
                     .then(rows => {
                         if (rows[0].id === id)
@@ -56,7 +58,7 @@ const common = (res) => {
                         else
                             throw 'admin permission required'                        
                     }).catch(reject)
-                } else {
+                } else {                    
                     reject('authentication failed')
                 }
             })
