@@ -9,10 +9,14 @@ router.get('/', (req, res) => {
     const { success, error } = require('../model/common')(res);
     const option = [];
     let sql = `
-    SELECT id, title, img_link,
-        (SELECT COUNT(*) FROM rates WHERE game_id = games.id) AS count,
+    SELECT games.id, title, img_link,
+        GROUP_CONCAT(DISTINCT(game_platforms.platform)) AS platforms,
+        (SELECT COUNT(*) FROM rates WHERE game_id = games.id) AS rate_count,
         IFNULL((SELECT AVG(value) FROM rates WHERE game_id = games.id), 0) AS rate
-    FROM games `;
+    FROM games
+    LEFT JOIN game_platforms
+    ON game_platforms.game_id = games.id
+    GROUP BY games.id `;
     // FIXME: sort 옵션 
     switch (sort) {
         case 'rate':
@@ -36,7 +40,7 @@ router.get('/', (req, res) => {
         sql += `LIMIT ? `
         option.push(Number(limit));
         if (offset) {
-            sql += `OFFSET ?`
+            sql += `OFFSET ? `
             option.push(Number(offset));
         }
     }

@@ -22,20 +22,20 @@ router.get('/', (req, res) => {
     LEFT JOIN accounts
     ON posts.user_id = accounts.id `;
     if (gameID) {
-        sql += `WHERE game_id = ?`
+        sql += `WHERE game_id = ? `
         option.push(gameID)
     }
     if (game && game !== '자유') {
-        sql += `WHERE game_id = (SELECT id FROM games WHERE title = ?)`
+        sql += `WHERE game_id = (SELECT id FROM games WHERE title = ?) `
         option.push(game)
     }
     sql += `ORDER BY update_date DESC `
     if (limit) {
         sql += `LIMIT ? `
-        option.push(limit)
+        option.push(Number(limit))
         if (offset) {
-            sql += `OFFSET ?`
-            option.push(offset)
+            sql += `OFFSET ? `
+            option.push(Number(offset))
         }
     }
     const count = (rows) => {
@@ -218,10 +218,10 @@ router.get('/:id/comments', (req, res) => {
     ORDER BY comments.update_date DESC `;
     if (limit) {
         sql += `LIMIT ? `;
-        option.push(limit)
+        option.push(Number(limit))
         if (offset) {
             sql += `OFFSET ?`;
-            option.push(offset)
+            option.push(Number(offset))
         }
     }
     const count = (rows) => {
@@ -236,7 +236,7 @@ router.get('/:id/comments', (req, res) => {
             }).catch(reject);
         })
     }
-    database.query(sql).then(count).then(success).catch(error);
+    database.query(sql, option).then(count).then(success).catch(error);
 })
 
 router.post('/:id/comments', (req, res) => {

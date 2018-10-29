@@ -13,10 +13,10 @@ router.get('/', (req, res) => {
     FROM accounts `;
     if (limit) {
         sql += `LIMIT ? `;
-        option.push(limit)
+        option.push(Number(limit))
         if (offset) {
             sql += `OFFSET ?`;
-            option.push(offset)
+            option.push(Number(offset))
         }
     }
     const count = (rows) => {
