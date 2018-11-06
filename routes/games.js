@@ -60,6 +60,35 @@ router.get('/', (req, res) => {
     database.query(sql,option).then(count).then(success).catch(error);
 });
 
+router.get('/recommend', (req, res) => {
+    /*
+    게임 추천 알고리즘
+    1. (평점 - 평점 평균)으로 게임들을 소팅 
+        —> 상위 10개의 게임에서 중복되는 태그의 개수로 선호하는 태그를 소팅 
+        —> 상위의 n개의 태그들을 포함하는 게임들을 소팅 (n을 1씩 줄여가며 게임들을 뽑는다)
+    2. 찜한 게임들의 중복되는 태그의 개수로 소팅 
+        -> 상위의 n개의 태그들을 포함하는 게임들을 소팅 (n을 1씩 줄여가며 게임들을 뽑는다)
+    3. 같은 성별, 나이의 오차값이 적은 (0, +-1, +-2 순서) 순서대로 좋아하는 게임을 소팅, 동차 일경우 중복되는 태그가 많은 게임이 우선순위
+    4. 
+    */
+    const { decodeToken, success, error } = require('../model/common')(res);
+    const query = (user_id) => {
+        const rates_games = [];
+        const rates_sql = `
+        SELECT id 
+        FROM games 
+        ORDER BY 
+            (SELECT AVG(value) 
+            FROM rates 
+            WHERE game_id=games.id AND user_id=?)`
+        const favor_games = [];
+        const similar_games = [];
+
+    }
+    decodeToken(req).then(query).then(success).catch(error);
+
+})
+
 router.get('/:id', (req, res) => {
     const { id } = req.params;
     const { success, error } = require('../model/common')(res);
