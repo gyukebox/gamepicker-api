@@ -42,14 +42,6 @@ const common = (res) => {
                 if (table === 'users') {                                                        
                     if (value.id === Number(id))
                         resolve();
-                } else if (admin === true) {                    
-                    database.query(`SELECT COUNT(*) AS count FROM admin WHERE user_id='${value.id}'`)
-                    .then(rows => {                        
-                        if (rows[0].count > 0)
-                            resolve();
-                        else
-                            reject('admin permission required')                    
-                    }).catch(reject)
                 } else if (permit_table.includes(table)) {                    
                     database.query(`SELECT id FROM ${table} WHERE user_id = ?`,[value.id])
                     .then(rows => {
@@ -58,7 +50,17 @@ const common = (res) => {
                             if (row.id === id)
                              resolve();
                         })
-                        reject('permission denied');
+                        if (admin === true) {
+                            database.query(`SELECT COUNT(*) AS count FROM admin WHERE user_id='${value.id}'`)
+                            .then(rows => {                        
+                                if (rows[0].count > 0)
+                                    resolve();
+                                else
+                                    reject('permission denied')                    
+                            }).catch(reject)
+                        } else {
+                            reject('permission denied')
+                        }
                     }).catch(reject);
                 } else {                    
                     reject('authentication failed')
