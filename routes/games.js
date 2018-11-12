@@ -265,7 +265,7 @@ router.get('/:id/comments', (req, res) => {
             const json = {
                 comments: rows
             }
-            database.query(`SELECT COUNT(*) AS count FROM game_comments`)
+            database.query(`SELECT COUNT(*) AS count FROM game_comments WHERE game_id=?`,[game_id])
             .then(rows => {
                 json.count = rows[0].count;
                 resolve(json);
