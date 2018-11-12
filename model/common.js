@@ -45,9 +45,8 @@ const common = (res) => {
                 } else if (permit_table.includes(table)) {                    
                     database.query(`SELECT id FROM ${table} WHERE user_id = ?`,[value.id])
                     .then(rows => {
-                        console.log(id);
                         rows.map(row => {
-                            if (row.id === id)
+                            if (row.id === Number(id))
                              resolve();
                         })
                         if (admin === true) {
