@@ -42,22 +42,24 @@ const common = (res) => {
                 if (table === 'users') {                                                        
                     if (value.id === Number(id))
                         resolve();
-                } else if (permit_table.includes(table)) {
-                    console.log('a');
-                    
-                    database.query(`SELECT id FROM ${table} WHERE user_id = '${value.id}'`)
-                    .then(rows => {
-                        if (rows[0].id === id)
-                            resolve();
-                    }).catch(reject);
                 } else if (admin === true) {                    
                     database.query(`SELECT COUNT(*) AS count FROM admin WHERE user_id='${value.id}'`)
                     .then(rows => {                        
                         if (rows[0].count > 0)
                             resolve();
                         else
-                            throw 'admin permission required'                        
+                            reject('admin permission required')                    
                     }).catch(reject)
+                } else if (permit_table.includes(table)) {                    
+                    database.query(`SELECT id FROM ${table} WHERE user_id = ?`,[value.id])
+                    .then(rows => {
+                        console.log(id);
+                        rows.map(row => {
+                            if (row.id === id)
+                             resolve();
+                        })
+                        reject('permission denied');
+                    }).catch(reject);
                 } else {                    
                     reject('authentication failed')
                 }

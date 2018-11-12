@@ -310,10 +310,19 @@ router.delete('/:id/comments/:commentID', (req, res) => {
     const { id, commentID } = req.params;
     const { authentication, success, error } = require('../model/common')(res);
     const query = () => {
-        const sql = `
-        DELETE FROM game_comments
-        WHERE game_id = ? AND id = ?`
-        return database.query(sql,[id,commentID]);
+        return new Promise((resolve, reject) => {
+            const sql = `
+            DELETE FROM game_comments
+            WHERE game_id = ? AND id = ?`;
+            database.query(sql,[id,commentID])
+            .then(rows => {
+                if (rows.affectedRows === 0) {
+                    resolve('deleted nothing')
+                } else {
+                    resolve('deleted')
+                }
+            }).catch(reject)
+        })
     }
     authentication(req, 'game_comments', commentID, true).then(query).then(success).catch(error);
 })
