@@ -335,6 +335,91 @@ router.delete('/:id/comments/:commentID', (req, res) => {
     authentication(req, 'game_comments', commentID, true).then(query).then(success).catch(error);
 })
 
+router.post('/:id/comments/:commentID/recommend', (req, res) => {
+    const { id, commentID } = req.params;
+    const { decodeToken, success, error } = require('../model/common')(res);
+    const query = (id) => {
+        return new Promise((resolve, reject) => {
+            database.query(`SELECT COUNT(*) AS count FROM game_comment_recommend WHERE user_id=?`,[id])
+            .then(rows => {
+                if (rows[0].count === 0) {
+                    resolve('already recommend')
+                } else {
+                    const sql = `
+                    INSERT INTO game_comment_recommend(user_id, comment_id)
+                    VALUES (?,?)`
+                    database.query(sql,[id, commentID])
+                    .then(() => resolve())
+                    .catch(reject);
+                }
+            })
+        })
+    }
+    decodeToken(req).then(query).then(success).catch(error);
+})
+
+router.post('/:id/comments/:commentID/disrecommend', (req, res) => {
+    const { id, commentID } = req.params;
+    const { decodeToken, success, error } = require('../model/common')(res);
+    const query = (id) => {
+        return new Promise((resolve, reject) => {
+            database.query(`SELECT COUNT(*) AS count FROM game_comment_disrecommend WHERE user_id=?`,[id])
+            .then(rows => {
+                if (rows[0].count === 0) {
+                    resolve('already recommend')
+                } else {
+                    const sql = `
+                    INSERT INTO game_comment_disrecommend(user_id, comment_id)
+                    VALUES (?,?)`
+                    database.query(sql,[id, commentID])
+                    .then(() => resolve())
+                    .catch(reject);
+                }
+            }).catch(reject)
+        })
+    }
+    decodeToken(req).then(query).then(success).catch(error);
+})
+
+router.get('/:id/comments/:commentID/recommend', (req, res) => {
+    const { id, commentID } = req.params;
+    const { decodeToken, success, error } = require('../model/common')(res);
+    const query = (id) => {
+        return new Promise((resolve, reject) => {
+            const sql = `
+            SELECT COUNT(*) AS count FROM game_comment_recommend WHERE user_id=? AND comment_id=?`
+            database.query(sql,[id, commentID])
+            .then(rows => {
+                if (rows[0].count === 0) {
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            }).catch(reject)
+        })
+    }
+    decodeToken(req).then(query).then(success).catch(error);
+})
+
+router.get('/:id/comments/:commentID/disrecommend', (req, res) => {
+    const { id, commentID } = req.params;
+    const { decodeToken, success, error } = require('../model/common')(res);
+    const query = (id) => {
+        return new Promise((resolve, reject) => {
+            const sql = `
+            SELECT COUNT(*) AS count FROM game_comment_disrecommend WHERE user_id=? AND comment_id=?`
+            database.query(sql,[id, commentID])
+            .then(rows => {
+                if (rows[0].count === 0) {
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            }).catch(reject)
+        })
+    }
+    decodeToken(req).then(query).then(success).catch(error);
+})
 
 router.get('/:gameID/rates/:userID', (req, res) => {
     const game_id = req.params.gameID;
