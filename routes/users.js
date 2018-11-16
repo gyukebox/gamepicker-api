@@ -84,6 +84,16 @@ router.get('/:id/rates', (req, res) => {
     database.query(sql, [id]).then(success).catch(error);
 })
 
+router.get('/:id/favor', (req, res) => {
+    const { id } = req.params;
+    const { success, error } = require('../model/common')(res);
+    const sql = `
+    SELECT (SELECT id, title, img_link FROM games WHERE id = favor.game_id)
+    FROM favor
+    WHERE user_id = ?`;
+    database.query(sql, [id]).then(success).catch(error);
+})
+
 router.get('/:id', (req, res) => {
     const { error } = require('../model/common')(res);
     const { id } = req.params;
