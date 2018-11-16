@@ -143,24 +143,25 @@ router.put('/:id', (req, res) => {
                     reject(`${name} is exist`)
                 } else {
                     const param = [];
-                    const sql = `
+                    let sql = `
                     UPDATE accounts
-                    SET 
-                        name = ?,
-                        birthday = ?,
-                        gender = ?,
-                        introduce = ?
-                    WHERE id = ?`;
-                    /*
-                    const tmp = [name, birthday, gender, introduce]
-
-                    if (name) {
-                        sql += 'name=?'
-                        param.push(name)
-                    }
-                    */
+                    SET `;
                     
-                    database.query(sql,[name, birthday, gender, introduce, id])
+                    const tmp = [
+                        {label: 'name', value: name},
+                        {label: 'birthday', value: birthday},
+                        {label: 'gender', value: gender},
+                        {label: 'introduce', value: introduce}
+                    ]
+                    tmp.forEach(item => {
+                        if (item.value) {
+                            sql += `${label}=? `;
+                            param.push(item.value);
+                        }
+                    })
+                    sql += 'WHERE id=?'
+                    param.push(id);
+                    database.query(sql,param)
                     .then(resolve).catch(reject)
                 }
             }).catch(reject);
