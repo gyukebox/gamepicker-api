@@ -61,7 +61,15 @@ const common = (res) => {
                             }).catch(reject)
                         }
                     }).catch(reject);
-                }  else {                    
+                } else if (admin === true) {
+                    database.query(`SELECT COUNT(*) AS count FROM admin WHERE user_id='${value.id}'`)
+                    .then(rows => {                        
+                        if (rows[0].count > 0)
+                            resolve();
+                        else
+                            reject('permission denied')                    
+                    }).catch(reject)
+                } else {                    
                     reject('authentication failed')
                 }
             })

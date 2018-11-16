@@ -142,6 +142,7 @@ router.put('/:id', (req, res) => {
                 if (rows[0].exist) {
                     reject(`${name} is exist`)
                 } else {
+                    const param = [];
                     const sql = `
                     UPDATE accounts
                     SET 
@@ -150,6 +151,15 @@ router.put('/:id', (req, res) => {
                         gender = ?,
                         introduce = ?
                     WHERE id = ?`;
+                    /*
+                    const tmp = [name, birthday, gender, introduce]
+
+                    if (name) {
+                        sql += 'name=?'
+                        param.push(name)
+                    }
+                    */
+                    
                     database.query(sql,[name, birthday, gender, introduce, id])
                     .then(resolve).catch(reject)
                 }
