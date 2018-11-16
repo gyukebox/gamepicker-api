@@ -121,6 +121,7 @@ router.get('/:id', (req, res) => {
     }
     const processing = (rows) => {
         const game = rows[0];
+        game.age_rate = game.age_rate===null?[]:game.age_rate.split(',');
         game.tags = game.tags===null?[]:game.tags.split(',');
         game.platforms = game.platforms===null?[]:game.platforms.split(',');
         return game;
