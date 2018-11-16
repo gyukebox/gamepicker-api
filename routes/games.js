@@ -184,8 +184,12 @@ router.put('/:id', (req, res) => {
                 console.log(req.body[name], name);
                 
                 if (req.body[name] !== '') {
-                    set_query += `${name}=?,`
-                    value.push(req.body[name]);
+                    set_query += `${name}=?,`;
+                    if (name === 'age_rate') {
+                        value.push(req.body[name].toString());
+                    } else {
+                        value.push(req.body[name]);
+                    }
                 }
             })
             set_query = set_query.slice(0,-1);
