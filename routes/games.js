@@ -340,7 +340,7 @@ router.post('/:id/comments/:commentID/recommend', (req, res) => {
     const { decodeToken, success, error } = require('../model/common')(res);
     const query = (id) => {
         return new Promise((resolve, reject) => {
-            database.query(`SELECT COUNT(*) AS count FROM game_comment_recommend WHERE user_id=?`,[id])
+            database.query(`SELECT COUNT(*) AS count FROM game_comment_recommend WHERE user_id=? AND comment_id=?`,[id, commentID])
             .then(rows => {
                 if (rows[0].count === 0) {
                     resolve('already recommend')
@@ -363,10 +363,10 @@ router.post('/:id/comments/:commentID/disrecommend', (req, res) => {
     const { decodeToken, success, error } = require('../model/common')(res);
     const query = (id) => {
         return new Promise((resolve, reject) => {
-            database.query(`SELECT COUNT(*) AS count FROM game_comment_disrecommend WHERE user_id=?`,[id])
+            database.query(`SELECT COUNT(*) AS count FROM game_comment_disrecommend WHERE user_id=? AND comment_id=?`,[id, commentID])
             .then(rows => {
                 if (rows[0].count === 0) {
-                    resolve('already recommend')
+                    resolve('already disrecommend')
                 } else {
                     const sql = `
                     INSERT INTO game_comment_disrecommend(user_id, comment_id)
