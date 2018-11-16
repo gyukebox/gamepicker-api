@@ -346,7 +346,13 @@ router.get('/:gameID/rates/:userID', (req, res) => {
         WHERE game_id=? AND user_id=?`;
         return database.query(sql,[game_id,user_id]);
     }
-    authentication(req, 'users', user_id).then(query).then(success).then(error);
+    const processing = (rows) => {
+        if (rows[0].value)
+            return rows[0].value;
+        else
+            return 0;
+    }
+    authentication(req, 'users', user_id, false).then(query).then(processing).then(success).then(error);
 })
 
 router.post('/:id/rates', (req, res) => {
