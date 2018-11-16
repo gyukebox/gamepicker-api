@@ -352,7 +352,7 @@ router.get('/:gameID/rates/:userID', (req, res) => {
         else
             return 0;
     }
-    authentication(req, 'users', user_id, false).then(query).then(processing).then(success).then(error);
+    authentication(req, 'users', user_id, false).then(query).then(processing).then(success).catch(error);
 })
 
 router.post('/:id/rates', (req, res) => {
