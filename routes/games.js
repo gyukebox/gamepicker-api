@@ -105,7 +105,9 @@ router.get('/:id', (req, res) => {
         games.update_date, 
         games.create_date,
         GROUP_CONCAT(DISTINCT(game_platforms.platform)) AS platforms,
-        GROUP_CONCAT(DISTINCT(game_tags.tag)) AS tags
+        GROUP_CONCAT(DISTINCT(game_tags.tag)) AS tags,
+        (SELECT COUNT(*) FROM rates WHERE game_id = ${id}) AS rate_count,
+        IFNULL((SELECT AVG(value) FROM rates WHERE game_id = ${id}), 0) AS rate
     FROM games
     LEFT JOIN game_platforms
     ON game_platforms.game_id = games.id
@@ -137,7 +139,7 @@ router.post('/' , (req, res) => {
             const sql = `
             INSERT INTO games(title, developer, publisher, age_rate, summary, img_link, video_link)
             VALUES (?)`
-            database.query(sql,[[title, developer, publisher, age_rate, summary, img_link, video_link]])
+            database.query(sql,[[title, developer, publisher, age_rate.toString(), summary, img_link, video_link]])
             .then(rows => {
                 const id = rows.insertId;
                 const tagArr = [];
