@@ -133,7 +133,6 @@ router.put('/:id', (req, res) => {
     const { authentication, success, error } = require('../model/common')(res);
     const { id } = req.params;
     const { name, birthday, gender, introduce } = req.body;  
-    console.log(req.body);
       
     const query = () => {
         return new Promise((resolve, reject) => {            
@@ -154,13 +153,13 @@ router.put('/:id', (req, res) => {
                         {label: 'introduce', value: introduce}
                     ]
                     tmp.forEach(item => {
-                        if (item.value) {
-                            sql += `${label}=? `;
-                            param.push(item.value);
+                        if (item.value) {       
+                            sql += `${item.label}=? `;
+                            param.push(item.value);           
                         }
-                    })
+                    })                    
                     sql += 'WHERE id=?'
-                    param.push(id);
+                    param.push(id);                    
                     database.query(sql,param)
                     .then(resolve).catch(reject)
                 }
