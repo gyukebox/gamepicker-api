@@ -30,6 +30,8 @@ const common = (res) => {
         },
         authentication: (req, table, id, admin) => {
             return new Promise((resolve, reject) => {
+                console.log('aa');
+                
                 const permit_table = ['posts','post_comments','game_comments'];
                 const token = req.headers['x-access-token'];
                 if (!token) {
@@ -49,16 +51,17 @@ const common = (res) => {
                             if (row.id === Number(id))
                              resolve();
                         })
+                        if (admin === true) {
+                            database.query(`SELECT COUNT(*) AS count FROM admin WHERE user_id='${value.id}'`)
+                            .then(rows => {                        
+                                if (rows[0].count > 0)
+                                    resolve();
+                                else
+                                    reject('permission denied')                    
+                            }).catch(reject)
+                        }
                     }).catch(reject);
-                } else if (admin === true) {
-                    database.query(`SELECT COUNT(*) AS count FROM admin WHERE user_id='${value.id}'`)
-                    .then(rows => {                        
-                        if (rows[0].count > 0)
-                            resolve();
-                        else
-                            reject('permission denied')                    
-                    }).catch(reject)
-                } else {                    
+                }  else {                    
                     reject('authentication failed')
                 }
             })
