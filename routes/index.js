@@ -51,7 +51,8 @@ router.get('/me', (req, res) => {
 
 router.get('/tmp/games', (req, res) => {
     const { success, error } = require('../model/common')(res);
-    const sql = `
+    const { limit, offset } = req.query;
+    let sql = `
     SELECT 
         title, 
         (
@@ -61,8 +62,12 @@ router.get('/tmp/games', (req, res) => {
             ON tags.value = game_tags.tag
             WHERE game_id = games.id
         ) AS tag_id_list
-    FROM games
-    LIMIT 5`
+    FROM games `
+    if (limit) {
+        sql += `LIMIT ${limit} `;
+        if (offset)
+            sql += `OFFSET ${offset}`
+    }
 
     database.query(sql)
     .then(success).catch(error);
