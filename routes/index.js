@@ -61,7 +61,8 @@ router.get('/tmp/games', (req, res) => {
             ON tags.value = game_tags.tag
             WHERE game_id = games.id
         ) AS tag_id_list
-    FROM games`
+    FROM games
+    LIMIT 5`
 
     database.query(sql)
     .then(success).catch(error);
