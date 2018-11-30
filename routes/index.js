@@ -49,4 +49,22 @@ router.get('/me', (req, res) => {
     decodeToken(req).then(query).then(singulation).then(success).catch(error);
 })
 
+router.get('/tmp/games', (req, res) => {
+    const { success, error } = require('../model/common')(res);
+    const sql = `
+    SELECT 
+        id, 
+        (
+            SELECT GROUP_CONCAT(tags.id)
+            FROM game_tags
+            LEFT JOIN tags
+            ON tags.value = game_tags.tag
+            WHERE game_id = games.id
+        ) AS tag_id_list
+    FROM games`
+
+    database.query(sql)
+    .then(success).catch(error);
+})
+
 module.exports = router;
