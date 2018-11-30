@@ -53,7 +53,7 @@ router.get('/tmp/games', (req, res) => {
     const { success, error } = require('../model/common')(res);
     const sql = `
     SELECT 
-        name, 
+        title, 
         (
             SELECT GROUP_CONCAT(tags.id)
             FROM game_tags
