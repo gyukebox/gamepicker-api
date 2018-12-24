@@ -92,32 +92,36 @@ router.get('/:user_id/posts/comments', (req, res) => {
     getUserComments().then(success).catch(fail);
 })
 
-router.get('/:name/games/comments', (req, res) => {
-    const { name } = req.params;
+//FIXME: To be fixed when Database structure change
+router.get('/:user_id/reviews', (req, res) => {
+    const { user_id } = req.params;
     const { limit, offset } = req.query;
-    const option = [name];
-    let sql = 'SELECT id, title FROM game_comments WHERE user_id = (SELECT id FROM users WHERE name = ?)';
+    const { success, fail } = require('./common')(res);
+    const option = [user_id];
+    let sql = 'SELECT id, value FROM game_comments WHERE user_id = ?';
 
-    if (!isNaN(limit)) {
+    if (limit) {
         sql += ' LIMIT ?'
-        option.push(limit);
-        if (!isNaN(offset)) {
+        option.push(Number(limit));
+        if (offset) {
             sql += ' OFFSET ?';
-            option.push(offset);
+            option.push(Number(offset));
         }
     }
-    db.query(sql,option)
-    .then(rows => {
-        res.status(200).json({
-            success: true,
-            data: rows
-        })
-    }).catch(err => {
-        res.status(500).json({
-            success: false,
-            data: err
-        })
+
+    const getUserReviews = () => new Promise((resolve, reject) => {
+        db.query(sql,option)
+        .then(rows => {
+            resolve({
+                code: 200,
+                data: {
+                    reviews: rows
+                }
+            })
+        }).catch(reject)
     })
+
+    getUserReviews().then(success).catch(fail);
 })
 
 module.exports = router;
