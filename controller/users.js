@@ -2,27 +2,32 @@ const express = require('express');
 const router = express.Router();
 const db = require('../model/database');
 
-router.get('/:name', (req, res) => {
-    const { name } = req.params;
-    db.query(`SELECT name, email, birthday, gender, points FROM users WHERE name = ?`,[name])
-    .then(rows => {
-        const obj = {
-            success: true,
-            data: rows[0]
-        }
-        let statusCode = 200;
-        if (rows.length === 0) {
-            obj.success = false;
-            obj.data = 'user not found';
-            statusCode = 404;
-        }
-        res.status(statusCode).json(obj);
-    }).catch(err => {
-        res.status(500).json({
-            success: false,
-            data: err
-        })
-    });
+router.get('/:user_id', (req, res) => {
+    const { user_id } = req.params;
+    const { success, fail } = require('./common')(res);
+
+    const getUser = () => new Promise((resolve, reject) => {
+        db.query(`SELECT name, email, birthday, gender, points FROM users WHERE id = ?`,[user_id])
+        .then(rows => {
+            if (rows.length === 0) {
+                reject({
+                    code: 404,
+                    data: {
+                        message: 'User not found'
+                    }
+                })
+            } else {
+                resolve({
+                    code: 200,
+                    data: {
+                        user: rows[0]
+                    }
+                })
+            }
+        }).catch(reject)
+    })
+
+    getUser().then(success).catch(fail);
 });
 
 router.get('/:name/posts', (req, res) => {
