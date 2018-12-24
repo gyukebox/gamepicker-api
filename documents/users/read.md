@@ -8,7 +8,7 @@
 
 ## Success Response
 
-**Code** : `204`
+**Code** : `200`
 
 **Content example**
 ```
