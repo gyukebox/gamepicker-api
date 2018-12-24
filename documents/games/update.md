@@ -7,8 +7,13 @@
 **Auth required** : `True`
 
 **Data constraints** 
+
 ```
-{
+Headers {
+    x-access-token : token from '/auth/login'
+}
+
+Body {
     id: 1,
     title: "Call of Duty®: WWII",
     developer: " Sledgehammer Games, Raven Software",

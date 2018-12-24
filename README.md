@@ -1,23 +1,17 @@
 # gamepicker API
 
-## Open Endpoints
+## Account related
 
 * [Login](documents/auth/login.md) : `POST /auth/login`
 * [Register](documents/auth/register.md) : `POST /auth/register`
 
-## Curent User related
-
-* [View info](documents/auth/ShowInfo.md) : `GET /auth/me`
-* [Update info](documents/auth/UpdateInfo.md) : `PUT /auth/me`
-  
 ## User related
 
-* [View User info](documents/users/read) : `GET /users/:user_id`
-* [View user-created posts](documents/users/posts) : `GET /users/:user_id/posts`
-* [View user-created comments](documents/users/comments) : `GET /users/:user_id/posts`
-* [View user-created reviews](documents/users/reviews) : `GET /users/:user_id/reviews`
-
-## Account related
+* [View info](documents/users/read) : `GET /users/:user_id`
+* [Update info](documents/users/update) : `PUT /users/:user_id`
+* [View created posts](documents/users/posts) : `GET /users/:user_id/posts`
+* [View created comments](documents/users/comments) : `GET /users/:user_id/posts`
+* [View created reviews](documents/users/reviews) : `GET /users/:user_id/reviews`
 
 ## Game related
 

@@ -1,10 +1,15 @@
-# Login
+# View info
 
 **Method** : `GET`
 
 **URL** : `/users/:user_id`
 
 **Auth required** : `False`
+
+**Data constraints** 
+```
+NULL
+```
 
 ## Success Response
 
@@ -13,17 +18,19 @@
 **Content example**
 ```
 {
-    name : "smk0107",
-    email : "ansrl0107@gmail.com",
-    birthday : "1998-01-07",
-    gender : "M",
-    points : 57321
+    user : {
+        name : "smk0107",
+        email : "ansrl0107@gmail.com",
+        birthday : "1998-01-07",
+        gender : "M",
+        points : 57321
+    }
 }
 ```
 
 ## Error Response
 
-**Condition** : Email or name duplicates
+**Condition** : There is no matching user with 'user_id'
 
 **Code** : `404 Not Found`
 

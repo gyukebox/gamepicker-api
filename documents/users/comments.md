@@ -1,4 +1,4 @@
-# Login
+# View created comments
 
 **Method** : `GET`
 
@@ -20,17 +20,19 @@ Query {
 
 **Content example**
 ```
-[
-    {
-        id : 1,
-        value : "You have to be diligent"
-    },
-    {
-        id : 2,
-        title : "Buy Bitcoin"
-    },
-    ...
-]
+{
+    comments: [
+        {
+            id : 1,
+            value : "You have to be diligent"
+        },
+        {
+            id : 2,
+            title : "Buy Bitcoin"
+        },
+        ...
+    ]
+}
 ```
 
 ## Error Response

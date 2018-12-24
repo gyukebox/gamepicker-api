@@ -1,4 +1,4 @@
-# Login
+# View created reviews
 
 **Method** : `GET`
 
@@ -20,19 +20,21 @@ Query {
 
 **Content example**
 ```
-[
-    {
-        id : 1,
-        value : "This is the best game I've ever played.",
-        grade : 5.0
-    },
-    {
-        id : 2,
-        title : "This game is the worst.",
-        grade : 0.5
-    },
-    ...
-]
+{
+    reviews : [
+        {
+            id : 1,
+            value : "This is the best game I've ever played.",
+            grade : 5.0
+        },
+        {
+            id : 2,
+            title : "This game is the worst.",
+            grade : 0.5
+        },
+        ...
+    ]
+}
 ```
 
 ## Error Response

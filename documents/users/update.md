@@ -1,15 +1,20 @@
-# Update game (Not implements)
+# Update info
 
-**Method** : `DELETE`
+**Method** : `PUT`
 
-**URL** : `/games/:game_id`
+**URL** : `/users/:user_id`
 
 **Auth required** : `True`
 
 **Data constraints** 
+
 ```
 Headers {
     x-access-token : token from '/auth/login'
+}
+
+Body {
+    introduce : introduce text
 }
 ```
 
@@ -24,7 +29,7 @@ NULL
 
 ## Error Response
 
-**Condition** : There is no matching game with 'user_id'
+**Condition** : There is no matching user with 'user_id'
 
 **Code** : `404 Not Found`
 
@@ -32,6 +37,6 @@ NULL
 
 ```
 {
-    message: "game not found"
+    message: "User not found"
 }
 ```

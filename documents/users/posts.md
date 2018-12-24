@@ -1,4 +1,4 @@
-# Login
+# View created posts
 
 **Method** : `GET`
 
@@ -20,17 +20,19 @@ Query {
 
 **Content example**
 ```
-[
-    {
-        id : 1,
-        title : "How to be a great developer"
-    },
-    {
-        id : 2,
-        title : "Way to be rich"
-    },
-    ...
-]
+{
+    posts : [
+        {
+            id : 1,
+            title : "How to be a great developer"
+        },
+        {
+            id : 2,
+            title : "Way to be rich"
+        },
+        ...
+    ]
+}
 ```
 
 ## Error Response

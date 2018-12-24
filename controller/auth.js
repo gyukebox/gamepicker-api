@@ -63,20 +63,26 @@ router.post('/manage/login', (req, res) => {
 
 router.post('/register', (req, res) => {
     const { name, email, password } = req.body;
-    db.query('INSERT INTO users(name, email, password) VALUES (?, ?, ?)', [name, email, password])
-    .then(rows => {
-        //send email verification
-        
+    const { success, fail } = require('./common')(res);
+
+    const createUser = () => new Promise((resolve, reject) => {
+        db.query('INSERT INTO users(name, email, password) VALUES (?, ?, ?)', [name, email, password])
+        .then(rows => {
+            const token = jwt.encode({
+                email: email,
+                password: password
+            })
+            resolve(token);
+        }).catch(reject);
+    })
+
+    const sendMail = (token) => new Promise((resolve, reject) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: mail_config.user,
                 pass: mail_config.pass
             }
-        })
-        const token = jwt.encode({
-            email: email,
-            password: password
         })
         const mailOptions = {
             from: mail_config.user,
@@ -86,17 +92,22 @@ router.post('/register', (req, res) => {
         }
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
-                console.log(err);
+                reject({
+                    code: 500,
+                    data: {
+                        message: err
+                    }
+                })
             } else {
-                console.log(info.response);
+                resolve({
+                    code: 204
+                })
             }
             transporter.close();
         })
-
-        res.status(204).json();
-    }).catch(err => {
-        res.status(500).json({ message: err.sqlMessage })
     })
+
+    createUser().then(sendMail).then(success).catch(fail);
 })
 
 router.get('/activate', (req, res) => {
@@ -111,47 +122,6 @@ router.get('/activate', (req, res) => {
         }
     }).catch(err => {
         res.status(500).json({ message: err.sqlMessage });
-    })
-})
-
-router.put('/me', (req, res) => {
-    const token = req.headers['x-access-token'];
-    const { email, password } = jwt.decode(token);
-
-    const option = [];
-    let SET_string = "";
-    ['name','introduce','password'].forEach(idx => {
-        const item = req.body[idx];
-        if (item) {
-            SET_string += `${idx} = ?,`;
-            option.push(item);
-        }
-    })
-    SET_string = SET_string.substring(0, SET_string.length-1);
-    option.push(email, password);
-    db.query(`UPDATE users SET ${SET_string} WHERE email = ? AND password = ?`,option)
-    .then(rows => {
-        if (rows.affectedRows === 0) {
-            res.status(404).json({ message: 'user not found' })
-        } else {
-            res.status(204)
-        }
-    })
-})
-
-router.delete('/me', (req, res) => {
-    const token = req.headers['x-access-token'];
-    const { email, password } = jwt.decode(token);
-
-    db.query('DELETE FROM users WHERE email = ? AND password = ?',[email, password])
-    .then(rows => {
-        if (rows.affectedRows === 0) {
-            res.status(404).json({ message: 'user not found' });
-        } else {
-            res.status(204);
-        }
-    }).catch(err => {
-        res.status(500).json({ message: err.sqlMessage })
     })
 })
 
