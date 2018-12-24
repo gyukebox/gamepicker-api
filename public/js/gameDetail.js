@@ -28,24 +28,28 @@ const renderGame = () => {
         document.querySelector(`article#${key} > input`).value = game[key];
     })
 
-    console.log(game.images);
-    
-    game.images.forEach(image => {
-        const img = document.createElement('img');
-        img.src = image;
-        document.querySelector(`article#images > .container`).prepend(img)
+    game.images.forEach(link => {
+        renderImage(link)
     })
 
     game.videos.forEach(link => {
-        const iframe = document.createElement('iframe');
-        iframe.setAttribute('frameborder',0);
-        iframe.setAttribute('allow', 'autoplay; encrypted-media')
-        iframe.setAttribute('allowfullscreen', null);
-        console.log(link.split('/')[3]);
-        
-        iframe.src = `https://www.youtube.com/embed/${link.split('/')[3]}`;
-        document.querySelector(`article#videos > .container`).prepend(iframe)
+        renderVideo(link)
     })
+}
+
+const renderImage = (link) => {
+    const img = document.createElement('img');
+    img.src = link;
+    document.querySelector(`article#images > .container`).prepend(img)
+}
+
+const renderVideo = (link) => {
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('frameborder',0);
+    iframe.setAttribute('allow', 'autoplay; encrypted-media')
+    iframe.setAttribute('allowfullscreen', null);        
+    iframe.src = `https://www.youtube.com/embed/${link.split('/')[3]}`;
+    document.querySelector(`article#videos > .container`).prepend(iframe)
 }
 
 const putGame = () => {
@@ -53,3 +57,17 @@ const putGame = () => {
 }
 
 getGame().then(renderGame)
+
+document.addEventListener('DOMContentLoaded',() => {
+    document.querySelector(`#imageAdder`).addEventListener('click', ()=> {
+        const link = prompt('이미지 링크를 입력해주세요');
+        if (link)
+            renderImage(link);
+    })
+
+    document.querySelector(`#videoAdder`).addEventListener('click', ()=> {
+        const link = prompt('영상 링크를 입력해주세요');
+        if (link)
+            enderVideo(link);
+    })
+})
