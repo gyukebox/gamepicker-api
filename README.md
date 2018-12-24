@@ -4,7 +4,6 @@
 
 * [Login](documents/auth/login.md) : `POST /auth/login`
 * [Register](documents/auth/register.md) : `POST /auth/register`
-* [MailAuthentication](document/auth/MailAuthentication.md) : `GET /auth/activate`
 
 ## Curent User related
 
