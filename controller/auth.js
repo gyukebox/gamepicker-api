@@ -107,7 +107,7 @@ router.get('/activate', (req, res) => {
         if (rows.affectedRows === 0) {
             res.status(404).json({ message: 'user not found' });
         } else {
-            res.status(204).json();
+            res.status(301).redirect('http://www.gamepicker.co.kr')
         }
     }).catch(err => {
         res.status(500).json({ message: err.sqlMessage });
