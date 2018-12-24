@@ -15,7 +15,7 @@
 * [View User info](documents/users/read) : `GET /users/:user_id`
 * [View user-created posts](documents/users/posts) : `GET /users/:user_id/posts`
 * [View user-created comments](documents/users/comments) : `GET /users/:user_id/posts`
-* [View user-created reviews](documents/users/reviews) : `GET /users/:user_id/games/comments`
+* [View user-created reviews](documents/users/reviews) : `GET /users/:user_id/reviews`
 
 ## Account related
 
