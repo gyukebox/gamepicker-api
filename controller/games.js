@@ -173,17 +173,26 @@ router.put('/:id', (req, res) => {
 
 })
 
-router.delete('/:id', (req, res) => {
+router.delete('/:game_id', (req, res) => {
     const token = req.headers['x-access-token'];
-    const { id } = req.params;
+    const { game_id } = req.params;
     const { decodeToken ,adminAuth, success, fail } = require('./common')(res);
 
     const deleteGame = () => new Promise((resolve, reject) => {
-        db.query(`DELETE FROM games WHERE id = ?`,[id])
+        db.query(`DELETE FROM games WHERE id = ?`,[game_id])
         .then(rows => {
-            resolve({
-                code: 204
-            })
+            if (rows.affectedRows === 0) {
+                reject({
+                    code: 404,
+                    data: {
+                        message: 'Game not found'
+                    }
+                })
+            } else {
+                resolve({
+                    code: 204
+                })
+            }
         }).catch(reject)
     })
 
