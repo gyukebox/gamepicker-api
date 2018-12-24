@@ -65,8 +65,8 @@ router.get('/', (req, res) => {
     getAllGames().then(success).catch(fail);
 });
 
-router.get('/:id', (req, res) => {
-    const { id } = req.params;
+router.get('/:game_id', (req, res) => {
+    const { game_id } = req.params;
     const { success, fail } = require('./common')(res);
     
     const getGame = () => new Promise((resolve, reject) => {
@@ -101,21 +101,30 @@ router.get('/:id', (req, res) => {
             ON game_comments.game_id = games.id
         WHERE games.id = ?
         GROUP BY games.id`
-        const option = [id];
+        const option = [game_id];
         db.query(sql,option)
         .then(rows => {
-            rows.map(row => {
-                row.images = row.images===null?[]:row.images.split(',');
-                row.videos = row.videos===null?[]:row.videos.split(',');
-                row.tags = row.tags===null?[]:row.tags.split(',');
-                row.platforms = row.platforms===null?[]:row.platforms.split(',');
-            })
-            resolve({
-                code: 200,
-                data: {
-                    game: rows[0]
-                }
-            })
+            if (rows.length === 0) {
+                reject({
+                    code: 404,
+                    data: {
+                        message: 'Game not found'
+                    }
+                })
+            } else {
+                rows.map(row => {
+                    row.images = row.images===null?[]:row.images.split(',');
+                    row.videos = row.videos===null?[]:row.videos.split(',');
+                    row.tags = row.tags===null?[]:row.tags.split(',');
+                    row.platforms = row.platforms===null?[]:row.platforms.split(',');
+                })
+                resolve({
+                    code: 200,
+                    data: {
+                        game: rows[0]
+                    }
+                })
+            }
         }).catch(reject)
     })
 
