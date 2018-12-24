@@ -1,35 +1,21 @@
 {
-  "name": "gamepickerapi",
+  "name": "gamepickerapi_v2",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {
-    "body-parser": "^1.18.3",
-    "cors": "^2.8.4",
-    "express": "^4.16.3",
-    "express-session": "^1.15.6",
-    "jwt-simple": "^0.5.1",
-    "moment": "^2.22.2",
-    "moment-timezone": "^0.5.21",
-    "mysql": "^2.16.0",
-    "nodemon": "^1.18.6",
-    "passport": "^0.4.0",
-    "passport-jwt": "^4.0.0",
-    "passport-local": "^1.0.0"
-  },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ansrl0107/GamePickerAPI.git"
-  },
-  "author": "ansrl0107",
+  "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ansrl0107/GamePickerAPI/issues"
-  },
-  "homepage": "https://github.com/ansrl0107/GamePickerAPI#readme"
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "jwt-simple": "^0.5.5",
+    "mysql2": "^1.6.4",
+    "nodemailer": "^4.7.0"
+  }
 }

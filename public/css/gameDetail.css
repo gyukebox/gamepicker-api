@@ -1,0 +1,41 @@
+article {
+    padding: 8px;
+    overflow: hidden;
+    box-sizing: border-box;
+    position: relative;
+}
+
+article > h1 {
+    margin: 16px 0;
+}
+
+article > input {
+    width: 100%;
+}
+
+.container > img {
+    height: 150px;
+}
+
+.contianer > iframe {
+    width: 300px;
+}
+
+.container {
+    width: calc(100% - 150px);
+    overflow: hidden;
+    float: left;
+    overflow-x: scroll;
+    white-space:nowrap;
+}
+
+.addButton {
+    width: 150px;
+    height: 150px;
+    float: left;
+    background-color: #aaa;
+}
+
+article#videos {
+    height: 219px;
+}

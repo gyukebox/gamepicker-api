@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>푸시알람 | GamePicker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="/public/css/global.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="/public/css/push.css" />
+</head>
+<body>
+    <nav id='sidebar'></nav>
+    <section id='main'>
+        <section id='age' class='pushOption'>
+            <h1>나이</h1>
+            <article><input type="checkbox" name="age" value="10">10대</article>
+            <article><input type="checkbox" name="age" value="20">20대</article>
+            <article><input type="checkbox" name="age" value="30">30대</article>
+            <article><input type="checkbox" name="age" value="40">40대</article>
+            <article><input type="checkbox" name="age" value="50">50대 이상</article>
+        </section>
+
+        <section id='gender' class='pushOption'>
+            <h1>성별</h1>
+            <article><input type="radio" name="gender" value="male">남자</article>
+            <article><input type="radio" name="gender" value="female">여자</article>
+        </section>
+
+        <section id='lastLogin' class='pushOption'>
+            <h1>마지막 로그인</h1>
+            <article><input type="text" name="lastLogin"></article>
+        </section>
+
+        <section id='reservation' class='pushOption'>
+            <h1>예약 전송</h1>
+        </section>
+
+        <section id='message' class='pushOption'>
+            <h1>푸시 전송</h1>
+            <article><input type="text" name='pushMessage'></article>
+            <div class='button'>확인</div>
+        </section>
+    </section>
+</body>
+</html>
