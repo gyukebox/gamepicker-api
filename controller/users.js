@@ -30,32 +30,35 @@ router.get('/:user_id', (req, res) => {
     getUser().then(success).catch(fail);
 });
 
-router.get('/:name/posts', (req, res) => {
-    const { name } = req.params;
+router.get('/:user_id/posts', (req, res) => {
+    const { user_id } = req.params;
     const { limit, offset } = req.query;
-    const option = [name];
-    let sql = 'SELECT id, title FROM posts WHERE user_id = (SELECT id FROM users WHERE name = ?)';
+    const { success, fail } = require('./common')(res);
+    const option = [user_id];
+    let sql = 'SELECT id, title FROM posts WHERE user_id = ?';
 
-    if (!isNaN(limit)) {
+    if (limit) {
         sql += ' LIMIT ?'
-        option.push(limit);
-        if (!isNaN(offset)) {
+        option.push(Number(limit));
+        if (offset) {
             sql += ' OFFSET ?';
-            option.push(offset);
+            option.push(Number(offset));
         }
     }
-    db.query(sql,option)
-    .then(rows => {
-        res.status(200).json({
-            success: true,
-            data: rows
-        })
-    }).catch(err => {
-        res.status(500).json({
-            success: false,
-            data: err
-        })
+
+    const getUserPosts = () => new Promise((resolve, reject) => {
+        db.query(sql,option)
+        .then(rows => {
+            resolve({
+                code: 200,
+                data: {
+                    posts: rows
+                }
+            })
+        }).catch(reject)
     })
+
+    getUserPosts().then(success).catch(fail);
 })
 
 router.get('/:name/posts/comments', (req, res) => {
