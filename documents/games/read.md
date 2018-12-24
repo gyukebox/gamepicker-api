@@ -1,4 +1,4 @@
-# Login
+# View game
 
 **Method** : `GET`
 
