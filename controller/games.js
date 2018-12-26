@@ -83,8 +83,8 @@ router.get('/:game_id', (req, res) => {
             GROUP_CONCAT(DISTINCT game_videos.link) AS videos, 
             GROUP_CONCAT(DISTINCT game_tags.tag_id) AS tags, 
             GROUP_CONCAT(DISTINCT platforms.value) AS platforms,
-            AVG(game_comments.rate) AS rate,
-            COUNT(game_comments.rate) AS rate_count
+            AVG(game_reviews.score) AS score,
+            COUNT(game_reviews.score) AS rate_count
         FROM 
             games
             LEFT JOIN game_images
@@ -97,8 +97,8 @@ router.get('/:game_id', (req, res) => {
             ON games.id = game_platforms.game_id
             LEFT JOIN platforms
             ON game_platforms.platform_id = platforms.id
-            LEFT JOIN game_comments
-            ON game_comments.game_id = games.id
+            LEFT JOIN game_reviews
+            ON game_reviews.game_id = games.id
         WHERE games.id = ?
         GROUP BY games.id`
         const option = [game_id];
