@@ -30,6 +30,42 @@ router.get('/:user_id', (req, res) => {
     getUser().then(success).catch(fail);
 });
 
+router.put('/:user_id', (req, res) => {
+    const token = req.headers['x-access-token'];
+    const u_id = req.params.user_id;
+    const { introduce } = req.body;
+    const { decodeToken, success, fail } = require('./common')(res);
+
+    const updateUser = (user_id) => new Promise((resolve, reject) => {
+        if (user_id!= u_id) {
+            reject({
+                code: 401,
+                data: {
+                    message: 'Authentication failed'
+                }
+            })
+        } else {
+            db.query(`UPDATE users SET introduce = ? WHERE user_id = ?`,[introduce, user_id])
+            .then(rows => {
+                if (rows.affectedRows === 0) {
+                    reject({
+                        code: 404,
+                        data: {
+                            message: "User not found"
+                        }
+                    })
+                } else {
+                    resolve({
+                        code: 204
+                    })
+                }
+            })
+        }
+    })
+
+    decodeToken(token).then(updateUser).then(success).catch(fail);
+})
+
 router.get('/:user_id/posts', (req, res) => {
     const { user_id } = req.params;
     const { limit, offset } = req.query;
@@ -92,13 +128,12 @@ router.get('/:user_id/posts/comments', (req, res) => {
     getUserComments().then(success).catch(fail);
 })
 
-//FIXME: To be fixed when Database structure change
 router.get('/:user_id/reviews', (req, res) => {
     const { user_id } = req.params;
     const { limit, offset } = req.query;
     const { success, fail } = require('./common')(res);
     const option = [user_id];
-    let sql = 'SELECT id, value FROM game_comments WHERE user_id = ?';
+    let sql = 'SELECT id, value, score FROM game_reviews WHERE user_id = ?';
 
     if (limit) {
         sql += ' LIMIT ?'

@@ -1,6 +1,6 @@
-# Write review (Not implements)
+# Read review
 
-**Method** : `POST`
+**Method** : `GET`
 
 **URL** : `/games/:game_id/reviews`
 
@@ -31,15 +31,3 @@ NULL
 ```
 
 ## Error Response
-
-**Condition** : Game not found
-
-**Code** : `404 Not Found`
-
-**Content**
-
-```
-{
-    message: "Game not found"
-}
-```

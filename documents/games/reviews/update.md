@@ -1,6 +1,6 @@
-# Update review (Not implements)
+# Update review 
 
-**Method** : `POST`
+**Method** : `PUT`
 
 **URL** : `/games/:game_id/reviews/:review_id`
 
@@ -29,7 +29,7 @@ NULL
 
 ## Error Response
 
-**Condition** : Review not found
+**Condition** : Can not find review matching game_id and review_id
 
 **Code** : `404 Not Found`
 
@@ -43,12 +43,11 @@ NULL
 
 ***
 
-**Condition** : Token is required
+**Condition** : 'x-access-token' is not included in the header
 
 **Code** : `400 Bad Request`
 
 **Content**
-
 ```
 {
     message: "Token is required"
@@ -57,12 +56,11 @@ NULL
 
 ***
 
-**Condition** : Token is invalid
+**Condition** : 'x-access-token' is included, but can not be decoded
 
-**Code** : `401 Unauthorized`
+**Code** : `400 Bad Request`
 
 **Content**
-
 ```
 {
     message: "Token is invalid"
@@ -71,14 +69,13 @@ NULL
 
 ***
 
-**Condition** : Game not found
+**Condition** : Can not find user matching token. It may be an old token.
 
 **Code** : `404 Not Found`
 
 **Content**
-
 ```
 {
-    message: "Game not found"
+    message: 'User not found'
 }
 ```

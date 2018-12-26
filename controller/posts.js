@@ -9,12 +9,12 @@ router.get('/', (req, res) => {
     const getAllPosts = () => new Promise((resolve, reject) => {
         let sql = 'SELECT id, title, (SELECT name FROM users WHERE users.id = user_id) AS name, views, updated_at FROM posts';
         const option = [];
-        if (!isNaN(limit)) {
+        if (limit) {
             sql += ' LIMIT ?';
-            option.push(limit);
-            if (!isNaN(offset)) {
+            option.push(Number(limit));
+            if (offset) {
                 sql += ' OFFSET ?';
-                option.push(offset);
+                option.push(Number(offset));
             }
         }
         db.query(sql, option)
@@ -33,9 +33,32 @@ router.get('/', (req, res) => {
     .catch(fail);
 })
 
-router.get('/:id', (req, res) => {
-    const { id } = req.params;
-    //db.query(`SELECT id, title, (SELECT name FROM users WHERE id = ?) AS name, views, updated_at, value,`)
+router.get('/:post_id', (req, res) => {
+    const { post_id } = req.params;
+    const { success, fail } = require('./common')(res);
+
+    const getPost = () => new Promise((resolve, reject) => {
+        db.query('SELECT id, title, (SELECT name FROM users WHERE users.id = user_id) AS name, views, updated_at FROM posts WHERE post_id = ?',[post_id])
+        .then(rows => {
+            if (rows.length === 0) {
+                resolve({
+                    code: 404,
+                    data: {
+                        message: 'Post not found'
+                    }
+                })
+            } else {
+                resolve({
+                    code: 200,
+                    data: {
+                        post : rows[0]
+                    }
+                })
+            }
+        })
+    })
+
+    getPost().then(success).catch(fail);
 })
 
 router.post('/', (req, res) => {
@@ -58,8 +81,8 @@ router.post('/', (req, res) => {
     .catch(fail)
 })
 
-router.put('/:id', (req, res) => {
-    const { id } = req.params;
+router.put('/:post_id', (req, res) => {
+    const { post_id } = req.params;
     const token = req.headers['x-access-token'];
     const { decodeToken, success, fail } = require('./common')(res);
 
@@ -74,14 +97,23 @@ router.put('/:id', (req, res) => {
             }
         })
         SET_string = SET_string.substring(0,SET_string.length-1);
-        option.push(id, user_id);
+        option.push(post_id, user_id);
 
-        db.query(`UPDATE posts SET ${SET_string} WHERE id = ? AND user_id = ?`,option)
-        .then(rows => {
-            resolve({
-                code: 204
+        if (SET_string === "") {
+            reject({
+                code: 400,
+                data: {
+                    message: "Either title or value is required"
+                }
             })
-        }).catch(reject)
+        } else {
+            db.query(`UPDATE posts SET ${SET_string} WHERE id = ? AND user_id = ?`,option)
+            .then(rows => {
+                resolve({
+                    code: 204
+                })
+            }).catch(reject)
+        }
     })
 
     decodeToken(token)
@@ -90,17 +122,26 @@ router.put('/:id', (req, res) => {
     .catch(fail)
 })
 
-router.delete('/:id', (req, res) => {
-    const { id } = req.params;
+router.delete('/:post_id', (req, res) => {
+    const { post_id } = req.params;
     const token = req.headers['x-access-token'];
     const { decodeToken, success, fail } = require('./common')(res);
 
     const deletePost = (user_id) => new Promise((resolve, reject) =>{
-        db.query(`DELETE FROM posts WHERE user_id = ? AND id = ?`,[user_id, id])
+        db.query(`DELETE FROM posts WHERE user_id = ? AND id = ?`,[user_id, post_id])
         .then(rows => {
-            resolve({
-                code: 204
-            })
+            if (rows.affectedRows === 0) {
+                reject({
+                    code: 404,
+                    data: {
+                        message: 'Post not found'
+                    }
+                })
+            } else {
+                resolve({
+                    code: 204
+                })
+            }
         }).catch(reject)
     })
 
@@ -118,9 +159,18 @@ router.post('/:post_id/recommend', (req, res) => {
     const recommendPost = (user_id) => new Promise((resolve, reject) => {
         db.query(`INSERT INTO post_recommends (user_id, post_id) VALUES (?, ?)`,[user_id, post_id])
         .then(rows => {
-            resolve({
-                code: 204
-            })
+            if (rows.affectedRows === 0) {
+                reject({
+                    code: 404,
+                    data: {
+                        message: 'Post not found'
+                    }
+                })
+            } else {
+                resolve({
+                    code: 204
+                })
+            }
         }).catch(reject)
     })
 
@@ -138,9 +188,18 @@ router.post('/:post_id/disrecommend', (req, res) => {
     const recommendPost = (user_id) => new Promise((resolve, reject) => {
         db.query(`INSERT INTO post_disrecommends (user_id, post_id) VALUES (?, ?)`,[user_id, post_id])
         .then(rows => {
-            resolve({
-                code: 204
-            })
+            if (rows.affectedRows === 0) {
+                reject({
+                    code: 404,
+                    data: {
+                        message: 'Post not found'
+                    }
+                })
+            } else {
+                resolve({
+                    code: 204
+                })
+            }
         }).catch(reject)
     })
 
@@ -242,7 +301,7 @@ router.put('/:post_id/comments/:comment_id', (req, res) => {
                 resolve({
                     code: 404,
                     data: {
-                        message: 'comment not found'
+                        message: 'Comment not found'
                     }
                 })
             } else {
@@ -271,7 +330,7 @@ router.delete('/:post_id/comments/:comment_id', (req, res) => {
                 resolve({
                     code: 404,
                     data: {
-                        message: 'comment not found'
+                        message: 'Comment not found'
                     }
                 })
             } else {

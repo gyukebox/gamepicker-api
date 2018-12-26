@@ -24,7 +24,7 @@ module.exports = (res) => {
                 reject({
                     code: 400,
                     data: {
-                        message: 'token required'
+                        message: 'Token is required'
                     }
                 })
             }
@@ -37,7 +37,7 @@ module.exports = (res) => {
                 reject({
                     code: 400,
                     data: {
-                        message: 'token is invalid'
+                        message: 'Token is invalid'
                     }
                 });
             }  
@@ -48,7 +48,7 @@ module.exports = (res) => {
                     reject({
                         code: 404,
                         data: {
-                            message: 'user not found'
+                            message: 'User not found'
                         }
                     })
                 } else {

@@ -131,11 +131,13 @@ router.get('/:game_id', (req, res) => {
     getGame().then(success).catch(fail);
 })
 
+//FIXME: transaction required
 router.post('/', (req, res) => {
     const { id } = req.params;
     const token = req.headers['x-access-token'];
     const { title, developer, publisher, summary, age_rate } = req.body;
     const { adminAuth, decodeToken, success, fail } = require('./common')(res);
+    const { images, videos, tags, platforms } = req.body;
 
     const createGame = () => new Promise((resolve, reject) => {
         ['title', 'developer', 'publisher', 'summary', 'age_rate'].forEach(key => {
@@ -159,17 +161,78 @@ router.post('/', (req, res) => {
                 })
             }
         })
-        //FIXME: transaction required
         db.query(`INSERT INTO games (title, developer, publisher, summary, age_rate) VALUES (?, ?, ?, ?, ?)`[title, developer, publisher, summary, age_rate])
         .then(rows => {
-
+            resolve(rows.insertId)
         }).catch(reject)
     })
 
-    decodeToken(token).then(adminAuth).then(createGame).then(success).catch(fail);
+    const insertImages = (game_id) => new Promise((resolve, reject) => {
+        let sql = "INSERT INTO game_images (game_id, link) VALUES ";
+        const option = [];
+        images.forEach(image => {
+            sql += `(?, ?),`
+            option.push(game_id, image);
+        })
+        sql = sql.substring(0, sql.length-1);
+        db.query(sql, option)
+        .then(rows => {
+            resolve(game_id)
+        }).catch(reject)
+    })
+
+    const insertVideos = (game_id) => new Promise((resolve, reject) => {
+        let sql = "INSERT INTO game_videos (game_id, link) VALUES ";
+        const option = [];
+        videos.forEach(video => {
+            sql += `(?, ?),`
+            option.push(game_id, video);
+        })
+        sql = sql.substring(0, sql.length-1);
+        db.query(sql, option)
+        .then(rows => {
+            resolve(game_id)
+        }).catch(reject)
+    })
+
+    const insertTags = (game_id) => new Promise((resolve, reject) => {
+        let sql = `INSERT INTO game_tags (game_id, tag_id) VALUES `
+        const option = [];
+        tags.forEach(tag => {
+            sql +=`(?, (SELECT id FROM tags WHERE value = ?))`
+            option.push(game_id, tag)
+        })
+        sql = sql.substring(0, sql.length-1);
+        db.query(sql, option)
+        .then(rows => {
+            resolve(game_id)
+        }).catch(reject)
+    })
+
+    const insertPlatforms = (game_id) => new Promise((resolve, reject) => {
+        let sql = `INSERT INTO game_platforms (game_id, tag_id) VALUES `
+        const option = [];
+        platforms.forEach(platform => {
+            sql +=`(?, (SELECT id FROM platforms WHERE value = ?))`
+            option.push(game_id, platform)
+        })
+        sql = sql.substring(0, sql.length-1);
+        db.query(sql, option)
+        .then(rows => {
+            resolve(game_id)
+        }).catch(reject)
+    })
+
+    decodeToken(token).then(adminAuth)
+    .then(createGame)
+    .then(insertImages)
+    .then(insertVideos)
+    .then(insertTags)
+    .then(insertPlatforms)
+    .then(success).catch(fail);
 })
 
-router.put('/:id', (req, res) => {
+router.put('/:game_id', (req, res) => {
 
 })
 
@@ -199,58 +262,94 @@ router.delete('/:game_id', (req, res) => {
     decodeToken(token).then(adminAuth).then(deleteGame).then(success).catch(fail);
 })
 
-//FIXME: detail
-router.get('/:id/comments', (req, res) => {
-    const { id } = req.params;
+router.post('/:game_id/reviews', (req, res) => {
+    const { decodeToken, success, fail } = require('./common')(res);
+    const { game_id } = req.params;
+    const { value, score } = req.body;
+    const token = req.headers['x-access-token'];
+
+    const createReview = (user_id) => new Promise((resolve, reject) => {
+        let sql = `
+        INSERT INTO game_reviews (game_id, value, score)
+        SELECT ?, ?, ? FROM DUAL
+        WHERE NOT EXISTS (SELECT * FROM game_reviews WHERE user_id = ?)
+        `
+        const option = [game_id, value, score, user_id];
+        db.query(sql, option)
+        .then(rows => {
+            if (rows.affectedRows === 0) {
+                reject({
+                    code: 400,
+                    data: {
+                        message: "Already write review this game"
+                    }
+                })
+            } else {
+                resolve({
+                    code: 204
+                })
+            }
+        }).catch(reject)
+    })
+
+    decodeToken(token).then(createReview).then(success).catch(fail);
+})
+
+router.get('/:game_id/reviews', (req, res) => {
+    const { game_id } = req.params;
     const { success, fail } = require('./common')(res);
-    
-    const getComments = () => new Promise((resolve, reject) => {
-        db.query(`SELECT id, value FROM game_comments WHERE game_id = ?`,[id])
+
+    const readReviews = () => new Promise((resolve, reject) => {
+        let sql = `
+        SELECT id, name, value, score
+        FROM
+            game_reviews
+            LEFT JOIN users ON game_reviews.user_id = users.id
+        WHERE game_id = ?
+        `
+        const option = [game_id]
+        db.query(sql, option)
         .then(rows => {
             resolve({
                 code: 200,
                 data: {
-                    comments: rows
+                    reviews: rows
                 }
             })
-        }).catch(reject);
+        }).catch(reject)
     })
 
-    getComments().then(success).catch(fail);
+    readReviews().then(success).catch(fail);
 })
 
-router.post('/:game_id/comments', (req, res) => {
-    const { game_id } = req.params;
+router.put('/:game_id/reviews/:review_id', (req, res) => {
+    const { game_id, review_id } = req.params;
+    const { value, score } = req.body;
     const token = req.headers['x-access-token'];
     const { decodeToken, success, fail } = require('./common')(res);
-    const { value, parent_id } = req.body;
 
-    const createComment = (user_id) => new Promise((resolve, reject) => {
-        db.query(`INSERT INTO game_comments (parent_id, user_id, game_id, value) VALUES (?, ?, ?, ?)`,[parent_id, user_id, game_id, value])
-        .then(rows => {
-            resolve({
-                code: 204
-            })
-        }).catch(reject);
-    })
+    const updateReview = (user_id) => new Promise((resolve, reject) => {
+        let sql = `
+        UPDATE FROM game_reviews SET ~~~ WHERE id = ? AND game_id = ?`
+        const option = [];
+        let set_string = "";
+        ["value", "score"].forEach(key => {
+            const item = req.body[key];
+            if (item) {
+                set_string += `${key} = ?,`
+                option.push(item)
+            }
+        })
+        option.push(review_id, game_id, user_id);
+        set_string = set_string.substring(0, set_string.length-1);
 
-    decodeToken(token).then(createComment).then(success).catch(fail);
-})
-
-router.put('/:game_id/comments/:comment_id', (req, res) => {
-    const { game_id, comment_id } = req.params;
-    const token = req.headers['x-access-token'];
-    const { decodeToken, success, fail } = require('./common')(res);
-    const { value } = req.body;
-
-    const updateComment = (user_id) => new Promise((resolve, reject) => {
-        db.query(`UPDATE game_comments SET value = ? WHERE game_id = ? AND id = ? AND user_id = ?`,[value, game_id, comment_id, user_id])
+        db.query(`UPDATE FROM game_reviews SET ${set_string} WHERE id = ? AND game_id = ?, user_id = ?`, option)
         .then(rows => {
             if (rows.affectedRows === 0) {
                 reject({
                     code: 404,
                     data: {
-                        message: 'comment not found'
+                        message: 'Review not found'
                     }
                 })
             } else {
@@ -258,25 +357,24 @@ router.put('/:game_id/comments/:comment_id', (req, res) => {
                     code: 204
                 })
             }
-        }).catch(reject);
+        }).catch(reject)
     })
 
-    decodeToken(token).then(updateComment).then(success).catch(fail);
+    decodeToken(token).then(updateReview).then(success).catch(fail);
 })
 
-router.delete('/:game_id/comments/:comment_id', (req, res) => {
-    const { game_id, comment_id } = req.params;
-    const token = req.headers['x-access-token'];
+router.delete('/:game_id/reviews/:review_id', (req, res) => {
+    const { game_id, review_id } = req.params;
     const { decodeToken, success, fail } = require('./common')(res);
 
-    const deleteComment = (user_id) => new Promise((resolve, reject) => {
-        db.query(`DELETE FROM game_comments WHERE game_id = ? AND id = ? AND user_id = ?`,[game_id, comment_id, user_id])
+    const deleteReview = (user_id) => new Promise((resolve, reject) => {
+        db.query(`DELETE FROM game_reviews WHERE user_id = ? AND game_id = ? AND id = ?`,[user_id, game_id, review_id])
         .then(rows => {
             if (rows.affectedRows === 0) {
                 reject({
                     code: 404,
                     data: {
-                        message: 'comment not found'
+                        message: "Review not found"
                     }
                 })
             } else {
@@ -284,10 +382,8 @@ router.delete('/:game_id/comments/:comment_id', (req, res) => {
                     code: 204
                 })
             }
-        }).catch(reject);
+        }).catch(fail);
     })
-
-    decodeToken(token).then(deleteComment).then(success).catch(fail);
 })
 
 router.post('/:game_id/favor', (req, res) => {

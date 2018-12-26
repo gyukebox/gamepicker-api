@@ -1,15 +1,16 @@
-# Delete comment
+# Write post
 
-**Method** : `DELETE`
+**Method** : `POST`
 
-**URL** : `/posts/:post_id/comments/:comment_id`
+**URL** : `/posts/:post_id`
 
 **Auth required** : `True`
 
 **Data constraints** 
 ```
-Headers {
-    x-access-token : Token from '/auth/login'
+Body {
+    title: Title of post,
+    value: Value of post
 }
 ```
 
@@ -23,20 +24,6 @@ NULL
 ```
 
 ## Error Response
-
-**Condition** : Can not find comment matching post_id, comment_id and user_id
-
-**Code** : `404 Not Found`
-
-**Content**
-
-```
-{
-    message: "Comment not found" 
-}
-```
-
-***
 
 **Condition** : 'x-access-token' is not included in the header
 

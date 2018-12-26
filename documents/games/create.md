@@ -1,4 +1,4 @@
-# Write game (Not implements)
+# Write game
 
 **Method** : `POST`
 
@@ -9,7 +9,6 @@
 **Data constraints** 
 ```
 {
-    id: 1,
     title: "Call of Duty®: WWII",
     developer: " Sledgehammer Games, Raven Software",
     publisher: "Activision",
@@ -48,5 +47,57 @@ NULL
 ```
 {
     message: "[key] is required" or "At least one [key] is required"
+}
+```
+
+***
+
+**Condition** : Log in successfully, but you need administrator privileges
+
+**Code** : `401 Unauthorized`
+
+**Content**
+```
+{
+    message: "Administrator authentication required"
+}
+```
+
+***
+
+**Condition** : 'x-access-token' is not included in the header
+
+**Code** : `400 Bad Request`
+
+**Content**
+```
+{
+    message: "Token is required"
+}
+```
+
+***
+
+**Condition** : 'x-access-token' is included, but can not be decoded
+
+**Code** : `400 Bad Request`
+
+**Content**
+```
+{
+    message: "Token is invalid"
+}
+```
+
+***
+
+**Condition** : Can not find user matching token. It may be an old token.
+
+**Code** : `404 Not Found`
+
+**Content**
+```
+{
+    message: 'User not found'
 }
 ```

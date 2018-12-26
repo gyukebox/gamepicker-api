@@ -20,16 +20,17 @@
 * [Write game](documents/games/create.md) : `POST /games`
 * [Update game](documents/games/update.md) : `PUT /games/:game_id`
 * [Delete game](documents/games/delete.md) : `DELETE /games/:game_id`
-* [Write review](documents/games/reviews/create.md) : `POST /games/:game_id/comments`
-* [View review](documents/games/reviews/read.md) : `GET /games/:game_id/comments`
-* [Update review](documents/games/reviews/update.md) : `PUT /games/:game_id/comments/:comment_id`
-* [Delete review](documents/games/reviews/delete.md) : `DELETE /games/:game_id/comments/:comment_id`
+* [Write review](documents/games/reviews/create.md) : `POST /games/:game_id/reviews`
+* [View review](documents/games/reviews/read.md) : `GET /games/:game_id/reviews`
+* [Update review](documents/games/reviews/update.md) : `PUT /games/:game_id/reviews/:review_id`
+* [Delete review](documents/games/reviews/delete.md) : `DELETE /games/:game_id/reviews/:review_id`
 * [Favorites game](documents/games/favor.md) : `POST /games/:game_id/favor`
 
 ## Post related 
 
 * [View all posts](documents/posts/all.md) : `GET /posts`
 * [View post](documents/posts/read.md) : `GET /posts/:post_id`
+* [Write post](documents/posts/write.md) : `POST /posts/:postid`
 * [Update post](documents/posts/update.md) : `PUT /posts/:post_id`
 * [Delete post](documents/posts/delete.md) : `DELETE /posts/:post_id`
 * [Recommend post](documents/posts/recommend.md) : `POST /posts/:post_id/recommend`

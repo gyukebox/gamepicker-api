@@ -1,4 +1,4 @@
-# Write review (Not implements)
+# Write review
 
 **Method** : `POST`
 

@@ -14,7 +14,6 @@ Headers {
 }
 
 Body {
-    id: 1,
     title: "Call of Duty®: WWII",
     developer: " Sledgehammer Games, Raven Software",
     publisher: "Activision",

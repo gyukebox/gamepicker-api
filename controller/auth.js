@@ -7,26 +7,49 @@ const mail_config = require('../config/mail');
 
 router.post('/login', (req, res) => {
     const { email, password, os_type, reg_id } = req.body;
-    db.query('SELECT active, password FROM users WHERE email = ?',[email])
-    .then(rows => {
-        if (rows.length === 0) {    //incorrect email
-            res.status(400).json({ message: 'user not found' })
-        } else if (rows[0].password !== password) { //incorrect password
-            res.status(401).json({ message: 'incorrect password' })
-        } else if (!rows[0].active) {   //login success, but not authenticate
-            res.status(401).json({ message: 'Mail authentication required' })
-        } else {    //login success
-            db.query('UPDATE users SET os_type = ?, reg_id = ? WHERE email = ?',[os_type, reg_id, email])
-            res.status(200).json({
-                token: jwt.encode({
-                    email: email,
-                    password: password
+    const { success, fail } = require('./common')(res);
+
+    const login = () => new Promise((resolve, reject) => {
+        db.query(`SELECT active, password FROM users WHERE email = ?`,[email])
+        .then(rows => {
+            if (rows.length === 0) {
+                reject({
+                    code: 400,
+                    data: {
+                        message: 'User not found'
+                    }
                 })
-            })
-        }
-    }).catch(err => {
-        res.status(500).json({ message: err.sqlMessage })
+            } else if (rows[0].password !== password) {
+                reject({
+                    code: 400,
+                    data: {
+                        message: 'Incorrect password'
+                    }
+                })
+            } else if (!rows[0].active) {
+                reject({
+                    code: 401,
+                    data: {
+                        message: `Mail authentication required`
+                    }
+                })
+            } else {
+                db.query('UPDATE users SET os_type = ?, reg_id = ? WHERE email = ?',[os_type, reg_id, email])
+                .then(rows => {
+                    resolve({
+                        code: 200,
+                        data: {
+                            token: jwt.encode({
+                                email: email,
+                                password: password
+                            })
+                        }
+                    })
+                }).catch(reject)
+            }
+        }).catch(reject);
     })
+    login().then(success).catch(fail);
 })
 
 router.post('/manage/login', (req, res) => {
@@ -58,9 +81,9 @@ router.post('/manage/login', (req, res) => {
     })
 
     login().then(success).catch(fail);
-
 })
 
+//FIXME: transaction required
 router.post('/register', (req, res) => {
     const { name, email, password } = req.body;
     const { success, fail } = require('./common')(res);
@@ -92,10 +115,11 @@ router.post('/register', (req, res) => {
         }
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
+                console.log(err);
                 reject({
                     code: 500,
                     data: {
-                        message: err
+                        message: "Failed to send authentication mail. Please contact the developer"
                     }
                 })
             } else {
@@ -110,6 +134,7 @@ router.post('/register', (req, res) => {
     createUser().then(sendMail).then(success).catch(fail);
 })
 
+//FIXME: change redirect link
 router.get('/activate', (req, res) => {
     const { token } = req.query;
     const { email, password } = jwt.decode(token);

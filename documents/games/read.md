@@ -44,7 +44,7 @@ NULL
 
 ## Error Response
 
-**Condition** : There is no matching game with 'user_id'
+**Condition** : There is no matching game with 'game_id'
 
 **Code** : `404 Not Found`
 
@@ -52,6 +52,6 @@ NULL
 
 ```
 {
-    message: "game not found"
+    message: "Game not found"
 }
 ```

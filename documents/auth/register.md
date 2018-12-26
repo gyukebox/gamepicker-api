@@ -1,4 +1,4 @@
-# Login
+# Register
 
 **Method** : `POST`
 

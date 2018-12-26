@@ -37,6 +37,32 @@
 
 ```
 {
-    message: "user not found"
+    message: "User not found"
+}
+```
+
+***
+
+**Condition** : If 'password' is invalid.
+
+**Code** : `400 Bad Request`
+
+**Content**
+```
+{
+    message: "Incorrect password"
+}
+```
+
+***
+
+**Condition** : When mail authentication is not completed
+
+**Code** : `401 Unauthorized`
+
+**Content**
+```
+{
+    message: "Mail authentication required"
 }
 ```
