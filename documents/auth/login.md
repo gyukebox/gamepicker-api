@@ -23,6 +23,7 @@
 **Content example**
 ```
 {
+    user_id: 1,
     token: "93144b288eb1fdccbe46d6fc0f241a51766ecd3d"
 }
 ```

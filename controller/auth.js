@@ -10,7 +10,7 @@ router.post('/login', (req, res) => {
     const { success, fail } = require('./common')(res);
 
     const login = () => new Promise((resolve, reject) => {
-        db.query(`SELECT active, password FROM users WHERE email = ?`,[email])
+        db.query(`SELECT id, active, password FROM users WHERE email = ?`,[email])
         .then(rows => {
             if (rows.length === 0) {
                 reject({
@@ -34,11 +34,13 @@ router.post('/login', (req, res) => {
                     }
                 })
             } else {
+                const user_id = rows[0].id
                 db.query('UPDATE users SET os_type = ?, reg_id = ? WHERE email = ?',[os_type, reg_id, email])
                 .then(rows => {
                     resolve({
                         code: 200,
                         data: {
+                            user_id: user_id,
                             token: jwt.encode({
                                 email: email,
                                 password: password
