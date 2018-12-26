@@ -21,6 +21,7 @@ NULL
     user : {
         name : "smk0107",
         email : "ansrl0107@gmail.com",
+        introduce: "dsada",
         birthday : "1998-01-07",
         gender : "M",
         points : 57321

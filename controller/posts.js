@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
     const { success, fail } = require('./common')(res);
 
     const getAllPosts = () => new Promise((resolve, reject) => {
-        let sql = 'SELECT id, title, (SELECT name FROM users WHERE users.id = user_id) AS name, views, updated_at FROM posts';
+        let sql = 'SELECT id, title, (SELECT name FROM users WHERE users.id = user_id) AS name, views, updated_at, (SELECT COUNT(*) FROM post_comments WHERE post_id = posts.id) AS comment_count FROM posts';
         const option = [];
         if (limit) {
             sql += ' LIMIT ?';

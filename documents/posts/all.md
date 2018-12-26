@@ -27,14 +27,16 @@ Query {
             "title": "post sample",
             "name": "user_a",
             "views": 0,
-            "updated_at": "2018-12-20T23:35:26.000Z"
+            "updated_at": "2018-12-20T23:35:26.000Z",
+            "comment_count": 5
         },
         {
             "id": 3,
             "title": "post sample",
             "name": "user_a",
             "views": 0,
-            "updated_at": "2018-12-20T23:37:18.000Z"
+            "updated_at": "2018-12-20T23:37:18.000Z",
+            "comment_count": 1
         }
     ]
 }

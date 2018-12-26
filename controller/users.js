@@ -7,7 +7,7 @@ router.get('/:user_id', (req, res) => {
     const { success, fail } = require('./common')(res);
 
     const getUser = () => new Promise((resolve, reject) => {
-        db.query(`SELECT name, email, birthday, gender, points FROM users WHERE id = ?`,[user_id])
+        db.query(`SELECT name, email, birthday, introduce, gender, points FROM users WHERE id = ?`,[user_id])
         .then(rows => {
             if (rows.length === 0) {
                 reject({

@@ -298,6 +298,7 @@ router.post('/:game_id/reviews', (req, res) => {
 router.get('/:game_id/reviews', (req, res) => {
     const { game_id } = req.params;
     const { success, fail } = require('./common')(res);
+    const { limit, offset } = req.query;
 
     const readReviews = () => new Promise((resolve, reject) => {
         let sql = `
@@ -308,6 +309,14 @@ router.get('/:game_id/reviews', (req, res) => {
         WHERE game_id = ?
         `
         const option = [game_id]
+        if (limit) {
+            sql += ` LIMIT ?`;
+            option.push(Number(limit));
+            if (offset) {
+                sql += ` OFFSET ?`;
+                option.push(Number(offset));
+            }
+        }
         db.query(sql, option)
         .then(rows => {
             resolve({
