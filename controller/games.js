@@ -301,7 +301,7 @@ router.get('/:game_id/reviews', (req, res) => {
 
     const readReviews = () => new Promise((resolve, reject) => {
         let sql = `
-        SELECT id, name, value, score
+        SELECT game_reviews.id, name, value, score
         FROM
             game_reviews
             LEFT JOIN users ON game_reviews.user_id = users.id
