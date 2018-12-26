@@ -9,6 +9,7 @@ const tags = require('./controller/tags');
 const platforms = require('./controller/platforms');
 const auth = require('./controller/auth');
 const manage = require('./controller/manage');
+const admin = require('./controller/admin');
 
 const app = express();
 
@@ -35,5 +36,6 @@ app.use('/tags', tags);
 app.use('/platforms', platforms);
 app.use('/auth', auth);
 app.use('/manage', manage);
+app.use('/admin', admin);
 
 app.listen(port);

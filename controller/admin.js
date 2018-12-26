@@ -32,14 +32,14 @@ router.get('/questions', (req, res) => {
     getQuestions().then(success).catch(fail)
 })
 
-router.post('/answer/:question_id', (req, res) => {
+router.post('/questions/:question_id/reply', (req, res) => {
     const { question_id } = req.params;
     const { decodeToken, adminAuth, success, fail } = require('./common')(res);
-    const { answer } = req.body;
+    const { reply } = req.body;
     const token = req.headers['x-access-token'];
 
     const task = () => new Promise((resolve, reject) => {
-        db.query(`UPDATE questions SET answer = ? WHERE id = ?`,[answer, question_id])
+        db.query(`UPDATE questions SET reply = ? WHERE id = ?`,[reply, question_id])
         .then(rows => {
             if (rows.affectedRows === 0) {
                 reject({

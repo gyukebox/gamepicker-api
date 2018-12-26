@@ -39,3 +39,10 @@
 * [Write comments](documents/posts/comments/create.md) : `POST /posts/:post_id/comments`
 * [Update comments](documents/posts/comments/update.md) : `UPDATE /posts/:post_id/comments/:comment_id`
 * [Delete comments](documents/posts/comments/delete.md) : `DELETE /posts/:post_id/comments/:comment_id`
+
+## Admin related
+
+* [View all questions](documents/admin/questions/read.md) : `GET /admin/questions`
+* [Create questions](documents/admin/questions/create.md) : `POST /admin/questions`
+* [Reply questions](documents/admin/questions/reply.md) : `POST /admin/questions/:question_id/reply`
+* [Push notification(Not implemented)](documents/admin/push/create.md) : `POST /admin/push`
