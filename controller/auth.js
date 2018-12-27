@@ -54,37 +54,6 @@ router.post('/login', (req, res) => {
     login().then(success).catch(fail);
 })
 
-router.post('/manage/login', (req, res) => {
-    const { success, fail } = require('./common')(res);
-    const { email, password } = req.body;
-
-    const login = () => new Promise((resolve, reject) => {
-        db.query(`SELECT * FROM admin WHERE user_id = (SELECT id FROM users WHERE email = ? AND password = ?)`,[email, password])
-        .then(rows => {
-            if (rows.length === 0) {
-                reject({
-                    code: 404,
-                    data: {
-                        message: 'Admin not found'
-                    }
-                })
-            } else {
-                resolve({
-                    code: 200,
-                    data: {
-                        token: jwt.encode({
-                            email: email,
-                            password: password
-                        })
-                    }
-                })
-            }
-        })
-    })
-
-    login().then(success).catch(fail);
-})
-
 //FIXME: transaction required
 router.post('/register', (req, res) => {
     const { name, email, password } = req.body;

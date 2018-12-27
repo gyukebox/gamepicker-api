@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.querySelector('input#password').value;
 
 
-        fetch('/auth/manage/login', {
+        fetch('/admin/login', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'
@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } 
         })
         .then(json => {
-            console.log(json);
             sessionStorage.setItem('token', json.token);
             const prevUrl = sessionStorage.getItem('prevUrl');
             window.location.href = prevUrl?prevUrl:'/manage'

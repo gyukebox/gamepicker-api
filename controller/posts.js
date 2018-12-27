@@ -38,7 +38,7 @@ router.get('/:post_id', (req, res) => {
     const { success, fail } = require('./common')(res);
 
     const getPost = () => new Promise((resolve, reject) => {
-        db.query('SELECT id, title, (SELECT name FROM users WHERE users.id = user_id) AS name, views, updated_at FROM posts WHERE post_id = ?',[post_id])
+        db.query('SELECT id, title, (SELECT name FROM users WHERE users.id = user_id) AS name, views, value, updated_at FROM posts WHERE id = ?',[post_id])
         .then(rows => {
             if (rows.length === 0) {
                 resolve({
@@ -55,7 +55,7 @@ router.get('/:post_id', (req, res) => {
                     }
                 })
             }
-        })
+        }).catch(reject)
     })
 
     getPost().then(success).catch(fail);

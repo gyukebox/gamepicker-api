@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../model/database');
+const jwt = require('../model/jwt');
 
 router.post('/questions', (req, res) => {
     const { title, email, value } = req.body;
@@ -57,6 +58,37 @@ router.post('/questions/:question_id/reply', (req, res) => {
     })
 
     decodeToken(token).then(adminAuth).then(task).then(success).catch(fail);
+})
+
+router.post('/login', (req, res) => {
+    const { success, fail } = require('./common')(res);
+    const { email, password } = req.body;
+
+    const login = () => new Promise((resolve, reject) => {
+        db.query(`SELECT * FROM admin WHERE user_id = (SELECT id FROM users WHERE email = ? AND password = ?)`,[email, password])
+        .then(rows => {
+            if (rows.length === 0) {
+                reject({
+                    code: 404,
+                    data: {
+                        message: 'Admin not found'
+                    }
+                })
+            } else {
+                resolve({
+                    code: 200,
+                    data: {
+                        token: jwt.encode({
+                            email: email,
+                            password: password
+                        })
+                    }
+                })
+            }
+        })
+    })
+
+    login().then(success).catch(fail);
 })
 
 module.exports = router;
