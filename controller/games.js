@@ -280,11 +280,11 @@ router.post('/:game_id/reviews', (req, res) => {
 
     const createReview = (user_id) => new Promise((resolve, reject) => {
         let sql = `
-        INSERT INTO game_reviews (game_id, value, score)
-        SELECT ?, ?, ? FROM DUAL
+        INSERT INTO game_reviews (game_id, user_id, value, score)
+        SELECT ?, ?, ?, ? FROM DUAL
         WHERE NOT EXISTS (SELECT * FROM game_reviews WHERE user_id = ?)
         `
-        const option = [game_id, value, score, user_id];
+        const option = [game_id, user_id, value, score, user_id];
         db.query(sql, option)
         .then(rows => {
             if (rows.affectedRows === 0) {
