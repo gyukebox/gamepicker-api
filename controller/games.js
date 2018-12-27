@@ -5,6 +5,7 @@ const db = require('../model/database');
 router.get('/', (req, res) => {
     const { limit, offset } = req.query;
     const { success, fail } = require('./common')(res);
+    const { sort } = req.query;
     
     const getAllGames = () => new Promise((resolve, reject) => {
         let sql = `
@@ -44,6 +45,14 @@ router.get('/', (req, res) => {
                 sql += ` OFFSET ?`
                 option.push(Number(offset))
             }
+        }
+        switch (sort) {
+            case "random":
+                sql += ` ORDER BY RAND()`
+                break;
+        
+            default:
+                break;
         }
         db.query(sql,option)
         .then(rows => {
@@ -333,7 +342,6 @@ router.get('/:game_id/reviews', (req, res) => {
 
 router.put('/:game_id/reviews/:review_id', (req, res) => {
     const { game_id, review_id } = req.params;
-    const { value, score } = req.body;
     const token = req.headers['x-access-token'];
     const { decodeToken, success, fail } = require('./common')(res);
 
