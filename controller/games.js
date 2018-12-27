@@ -434,4 +434,50 @@ router.post('/:game_id/favor', (req, res) => {
     decodeToken(token).then(enrollFavor).then(success).catch(fail)
 })
 
+router.get('/:game_id/favor', (req, res) => {
+    const token = req.headers['x-access-token'];
+    const { decodeToken, success, fail } = require('./common')(res);
+    const { game_id } = req.params;
+
+    const getFavor = (user_id) => new Promise((resolve, reject) => {
+        db.query(`SELECT COUNT(*) as cnt FROM favor WHERE user_id = ? AND game_id`,[user_id, game_id])
+        .then(rows => {
+            resolve({
+                code: 200,
+                data: {
+                    favor: rows[0].cnt?true:false
+                }
+            })
+        }).catch(reject)
+    })
+
+    decodeToken(token).then(getFavor).then(success).catch(fail)
+})
+
+router.delete('/:game_id/favor', (req, res) => {
+    const token = req.headers['x-access-token'];
+    const { decodeToken, success, fail } = require('./common')(res);
+    const { game_id } = req.params;
+
+    const deleteFavor = (user_id) => new Promise((resolve, reject) => {
+        db.query(`DELETE FROM favor WHERE user_id = ? AND game_id = ?`,[user_id, game_id])
+        .then(rows => {
+            if (rows.affectedRows === 0) {
+                reject({
+                    code : 400,
+                    data: {
+                        message: `You are not favorite this game`
+                    }
+                })
+            } else {
+                resolve({
+                    code: 204
+                })
+            }
+        }).catch(reject)
+
+        decodeToken(token).then(deleteFavor).then(success).catch(fail);
+    })
+})
+
 module.exports = router;

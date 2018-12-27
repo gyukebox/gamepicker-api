@@ -10,7 +10,8 @@
 ```
 Query {
     limit : Limit the number of data,
-    offset : Set start index, required 'limit'
+    offset : Set start index, required 'limit',
+    game_id : Gets a review of a specific game
 }
 ```
 

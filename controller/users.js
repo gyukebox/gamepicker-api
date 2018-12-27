@@ -130,10 +130,14 @@ router.get('/:user_id/posts/comments', (req, res) => {
 
 router.get('/:user_id/reviews', (req, res) => {
     const { user_id } = req.params;
-    const { limit, offset } = req.query;
+    const { limit, offset, game_id } = req.query;
     const { success, fail } = require('./common')(res);
     const option = [user_id];
     let sql = 'SELECT id, value, score FROM game_reviews WHERE user_id = ?';
+    if (game_id) {
+        sql += ` AND game_id = ?`
+        option.push(game_id)
+    }
 
     if (limit) {
         sql += ' LIMIT ?'
