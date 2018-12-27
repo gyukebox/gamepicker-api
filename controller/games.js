@@ -440,7 +440,7 @@ router.get('/:game_id/favor', (req, res) => {
     const { game_id } = req.params;
 
     const getFavor = (user_id) => new Promise((resolve, reject) => {
-        db.query(`SELECT COUNT(*) as cnt FROM favor WHERE user_id = ? AND game_id`,[user_id, game_id])
+        db.query(`SELECT COUNT(*) as cnt FROM favor WHERE user_id = ? AND game_id = ?`,[user_id, game_id])
         .then(rows => {
             resolve({
                 code: 200,
