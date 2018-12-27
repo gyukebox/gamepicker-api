@@ -23,6 +23,11 @@ section#main > article.games > div {
     padding: 0 16px;
     margin: 8px 0;
     font-weight: bold;
+    display: none;
+}
+
+section#main > article.games:hover > div {
+    display: inline;
 }
 
 section#main > article.games > div:hover {

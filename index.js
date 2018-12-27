@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const expressSession = require('express-session');
 
 const games = require('./controller/games');
 const users = require('./controller/users');
@@ -17,11 +16,6 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(expressSession({
-    secret: require('./config/jwt').secret,
-    resave: true,
-    saveUninitialized: true
-}))
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
