@@ -475,9 +475,9 @@ router.delete('/:game_id/favor', (req, res) => {
                 })
             }
         }).catch(reject)
-
-        decodeToken(token).then(deleteFavor).then(success).catch(fail);
     })
+
+    decodeToken(token).then(deleteFavor).then(success).catch(fail);
 })
 
 module.exports = router;
