@@ -38,14 +38,7 @@ router.get('/', (req, res) => {
         GROUP BY games.id
             `
         const option = [];
-        if (limit) {
-            sql += ` LIMIT ?`
-            option.push(Number(limit))
-            if (offset) {
-                sql += ` OFFSET ?`
-                option.push(Number(offset))
-            }
-        }
+
         switch (sort) {
             case "random":
                 sql += ` ORDER BY RAND()`
@@ -53,6 +46,14 @@ router.get('/', (req, res) => {
         
             default:
                 break;
+        }
+        if (limit) {
+            sql += ` LIMIT ?`
+            option.push(Number(limit))
+            if (offset) {
+                sql += ` OFFSET ?`
+                option.push(Number(offset))
+            }
         }
         db.query(sql,option)
         .then(rows => {
