@@ -82,7 +82,7 @@ router.post('/register', (req, res) => {
             from: mail_config.user,
             to: email,
             subject: 'GamePicker 인증',
-            html: `<p>Test</p><a href='http://localhost/auth/activate?token=${token}'>인증하기</a>`
+            html: `<p>Test</p><a href='http://api.gamepicker.co.kr/auth/activate?token=${token}'>인증하기</a>`
         }
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
