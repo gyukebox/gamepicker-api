@@ -1,4 +1,4 @@
-section#main > article.games {
+.games {
     height: 48px;
     line-height: 48px;
     padding: 0 16px;
@@ -7,14 +7,15 @@ section#main > article.games {
     border-radius: 4px;
     box-shadow: 0px 1px 3px rgba(0,0,0,0.1);
     transition: 0.1s ease-in-out;
+    box-sizing: border-box;
+    background-color: #fff;
 }
 
-section#main > article.games:hover {
+.games:hover {
     box-shadow: 0px 3px 5px rgba(0,0,0,0.2);
-    transform: translateY(-2px);
 }
 
-section#main > article.games > div {
+.games > div {
     float: right;
     color: #d9534f;
     border-radius: 4px;
@@ -26,10 +27,39 @@ section#main > article.games > div {
     display: none;
 }
 
-section#main > article.games:hover > div {
+.games:hover > div {
     display: inline;
 }
 
-section#main > article.games > div:hover {
+.games > div:hover {
     color: #c9302c;
+}
+
+#game-list {
+    padding-top: 64px;
+    width: 100%;
+}
+
+#search-games {
+    width: inherit;
+    background-color: #F1F2F7;
+    height: 64px;
+    overflow: hidden;
+    top: 0;
+    position: fixed;
+}
+
+#search-games > input[type='text'] {
+    width: calc(100% - 128px - 16px);
+    height: 48px;
+    margin: 8px;
+    padding: 0 16px;
+    font-size: 1.2em;
+}
+
+#search-games > input[type='button'] {
+    height: 48px;
+    width: 112px;
+    margin: 8px;
+    float: right;
 }

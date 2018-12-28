@@ -1,5 +1,4 @@
 const token = sessionStorage.getItem('token');
-console.log(token);
 
 if (!token) {
     alert('관리자 로그인이 필요합니다.')
@@ -28,5 +27,17 @@ const addGames = (game) => {
     deleteButton.innerText = '삭제';
     container.appendChild(deleteButton);
 
-    document.querySelector('section#main').appendChild(container);
+    document.querySelector('#game-list').appendChild(container);
 }
+
+document.addEventListener('DOMContentLoaded', () => {    
+    document.querySelector('input').addEventListener('keyup', (e) => {
+        const value = document.querySelector('input').value;
+        document.querySelectorAll('.games').forEach(game => {
+            game.style.display = 'inherit'
+            if (!game.innerText.toLowerCase().includes(value) && game.innerText) {
+                game.style.display = 'none'
+            }
+        })
+    })
+})

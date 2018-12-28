@@ -164,7 +164,7 @@ router.get('/:user_id/reviews', (req, res) => {
 })
 
 router.get('/:user_id/games/rating', (req, res) => {
-    const { user_id, game_id } = req.params;
+    const { user_id } = req.params;
     const { success, fail } = require('./common')(res);
 
     const getUserRating = () => new Promise((resolve, reject) => {
@@ -176,7 +176,11 @@ router.get('/:user_id/games/rating', (req, res) => {
         GROUP BY game_reviews.game_id
         `
         db.query(sql,[user_id]).then(rows => {
-            console.log(rows);
+            rows.map(row => {
+                if (row.tags[0] === null) {
+                    row.tags = [];
+                }
+            })
             resolve({
                 code: 200,
                 data: {
