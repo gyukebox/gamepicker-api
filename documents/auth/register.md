@@ -8,10 +8,12 @@
 
 **Data constraints** 
 ```
-{
+Body {
     email: Vaild email address,
     password : password in plain text,
-    name : Unique nickname
+    name : Unique nickname,
+    birthday : Birthday(yyyy-mm-dd),
+    gender : Gender(M or F)
 }
 ```
 

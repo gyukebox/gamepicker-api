@@ -56,11 +56,11 @@ router.post('/login', (req, res) => {
 
 //FIXME: transaction required
 router.post('/register', (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, birthday, gender } = req.body;
     const { success, fail } = require('./common')(res);
 
     const createUser = () => new Promise((resolve, reject) => {
-        db.query('INSERT INTO users(name, email, password) VALUES (?, ?, ?)', [name, email, password])
+        db.query('INSERT INTO users(name, email, password, birthday, gender) VALUES (?, ?, ?, ?, ?)', [name, email, password, birthday, gender])
         .then(rows => {
             const token = jwt.encode({
                 email: email,

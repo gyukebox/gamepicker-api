@@ -38,7 +38,14 @@ router.get('/:post_id', (req, res) => {
     const { success, fail } = require('./common')(res);
 
     const getPost = () => new Promise((resolve, reject) => {
-        db.query('SELECT id, title, (SELECT name FROM users WHERE users.id = user_id) AS name, views, value, updated_at FROM posts WHERE id = ?',[post_id])
+        const sql = `
+        SELECT posts.id, title, name, views, value, posts.updated_at, COUNT(post_disrecommends.post_id) AS disrecommends, COUNT(post_recommends.post_id) AS recommends
+        FROM posts 
+            LEFT JOIN users on users.id = posts.user_id
+            LEFT JOIN post_recommends ON post_recommends.post_id = posts.id
+            LEFT JOIN post_disrecommends ON post_disrecommends.post_id = posts.id
+        WHERE posts.id = ?`
+        db.query(sql,[post_id])
         .then(rows => {
             if (rows.length === 0) {
                 resolve({
