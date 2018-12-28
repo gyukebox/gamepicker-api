@@ -91,4 +91,71 @@ router.post('/login', (req, res) => {
     login().then(success).catch(fail);
 })
 
+router.get('/notices', (req, res) => {
+    const { success, fail } = require('./common')(res);
+    const { limit, offset } = req.query;
+    const getNotices = () => new Promise((resolve, reject) => {
+        let sql = `SELECT id, title, value, created_at FROM notices`;
+        const option = [];
+        if (limit) {
+            sql += ` LIMIT ?`;
+            option.push(Number(limit))
+            if (offset) {
+                sql += ` OFFSET ?`;
+                option.push(Number(offset));
+            }
+        }
+        db.query(sql, option)
+        .then(rows => {
+            resolve({
+                code: 200,
+                data: {
+                    notices: rows
+                }
+            })
+        }).catch(reject)
+    })
+
+    getNotices().then(success).catch(fail);
+})
+
+router.post('/notices', (req, res) => {
+    const { decodeToken, adminAuth, success, fail } = require('./common')(res);
+    const token = req.headers['x-access-token'];
+    const { title, value } = req.body;
+    const createNotice = () => new Promise((resolve, reject) => {
+        db.query(`INSERT INTO notices (title, value) VALUES (?, ?)`,[title, value])
+        .then(rows => {
+            resolve({
+                code: 204
+            })
+        }).catch(reject)
+    })
+    decodeToken(token).then(adminAuth).then(createNotice).then(success).catch(fail);
+})
+
+router.delete('/notices/:notice_id', (req, res) => {
+    const { decodeToken, adminAuth, success, fail } = require('./common')(res);
+    const token = req.headers['x-access-token'];
+    const { notice_id } = req.params;
+    const deleteNotice = () => new Promise((resolve, reject) => {
+        db.query(`DELETE FROM notices WHERE id = ?`,[notice_id])
+        .then(rows => {
+            if (rows.affectedRows === 0) {
+                reject({
+                    code: 404,
+                    data: {
+                        message: 'Notice not found'
+                    }
+                })
+            } else {
+                resolve({
+                    code: 204
+                })
+            }
+        }).catch(reject)
+    })
+    decodeToken(token).then(adminAuth).then(deleteNotice).then(success).catch(fail);
+})
+
 module.exports = router;

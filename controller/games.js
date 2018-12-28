@@ -9,34 +9,19 @@ router.get('/', (req, res) => {
     
     const getAllGames = () => new Promise((resolve, reject) => {
         let sql = `
-        SELECT 
-            games.id, 
-            title, 
-            developer, 
-            publisher, 
-            updated_at, 
-            GROUP_CONCAT(DISTINCT game_images.link) AS images, 
-            GROUP_CONCAT(DISTINCT game_videos.link) AS videos, 
-            GROUP_CONCAT(DISTINCT game_tags.tag_id) AS tags, 
-            GROUP_CONCAT(DISTINCT platforms.value) AS platforms,
-            AVG(game_reviews.score) AS score,
-            COUNT(game_reviews.score) AS rate_count
-        FROM 
-            games
-            LEFT JOIN game_images
-            ON games.id = game_images.game_id
-            LEFT JOIN game_videos
-            ON games.id = game_videos.game_id
-            LEFT JOIN game_tags
-            ON games.id = game_tags.game_id
-            LEFT JOIN game_platforms
-            ON games.id = game_platforms.game_id
-            LEFT JOIN platforms
-            ON game_platforms.platform_id = platforms.id
-            LEFT JOIN game_reviews
-            ON game_reviews.game_id = games.id
-        GROUP BY games.id
-            `
+        SELECT
+            id,
+            title,
+            developer,
+            publisher,
+            updated_at,
+            (SELECT JSON_ARRAYAGG(link) FROM game_images WHERE game_id = games.id) AS images,
+            (SELECT JSON_ARRAYAGG(link) FROM game_videos WHERE game_id = games.id) AS videos,
+            (SELECT JSON_ARRAYAGG(tag_id) FROM game_tags WHERE game_id = games.id) AS tags,
+            (SELECT JSON_ARRAYAGG(platform_id) FROM game_platforms WHERE game_id = games.id) AS platforms,
+            (SELECT AVG(score) FROM game_reviews WHERE game_id = games.id) AS score,
+            (SELECT COUNT(score) FROM game_reviews WHERE game_id = games.id) AS score_count
+        FROM games`
         const option = [];
 
         switch (sort) {
