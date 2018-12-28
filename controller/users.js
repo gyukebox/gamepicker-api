@@ -169,7 +169,7 @@ router.get('/:user_id/games/rating', (req, res) => {
 
     const getUserRating = () => new Promise((resolve, reject) => {
         const sql = `
-        SELECT game_reviews.game_id, GROUP_CONCAT(DISTINCT score) AS score, JSON_ARRAYAGG(tag_id) AS tags
+        SELECT game_reviews.game_id, AVG(score) AS score, JSON_ARRAYAGG(tag_id) AS tags
         FROM game_reviews 
             LEFT JOIN game_tags ON game_tags.game_id = game_reviews.game_id
         WHERE game_reviews.user_id = ?
