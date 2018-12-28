@@ -1,14 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../model/database');
 
 router.get('/', (req, res) => {
     res.render('../views/index.html')
 })
 
 router.get('/login', (req, res) => {
-    console.log(req.session.user);
-    
     res.render('../views/login.html')
 })
 
