@@ -163,4 +163,29 @@ router.get('/:user_id/reviews', (req, res) => {
     getUserReviews().then(success).catch(fail);
 })
 
+router.get('/:user_id/rating/games', (req, res) => {
+    const { user_id, game_id } = req.params;
+    const { success, fail } = require('./common')(res);
+
+    const getUserRating = () => new Promise((resolve, reject) => {
+        const sql = `
+        SELECT game_reviews.game_id, GROUP_CONCAT(DISTINCT score) AS score, JSON_ARRAYAGG(tag_id) AS tags
+        FROM game_reviews 
+            LEFT JOIN game_tags ON game_tags.game_id = game_reviews.game_id
+        WHERE game_reviews.user_id = ?
+        GROUP BY game_reviews.game_id
+        `
+        db.query(sql,[user_id]).then(rows => {
+            console.log(rows);
+            resolve({
+                code: 200,
+                data: {
+                    data: rows
+                }
+            })
+        }).catch(reject)
+    })
+    getUserRating().then(success).catch(fail);
+})
+
 module.exports = router;

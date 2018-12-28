@@ -17,6 +17,11 @@ ul {
     padding: 0;
 }
 
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
 input {
     border-radius: 4px;
     height: 40px;
@@ -24,16 +29,25 @@ input {
     box-sizing: border-box;
 }
 
-nav#sidebar {
-    background-color: #313942;
-    width: 200px;
+nav {
+    background-color: #272C33;
+    width: 240px;
     float: left;
     height: 100%;
 }
 
-nav#sidebar li {
-    color: #CCCCCC;
-    font-size: 1em;
+nav li {
+    color: #c8c9ce;
+    font-size: 0.9em;
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+    padding: 0 16px;
+    font-weight: bold;
+}
+
+nav li:hover {
+    color: #FFFFFF;
 }
 
 ::-webkit-scrollbar {
@@ -41,8 +55,8 @@ nav#sidebar li {
 }
 
 section#main {
-    background-color: #EFF3F6;
-    width: calc(100% - 200px);
+    background-color: #F1F2F7;
+    width: calc(100% - 240px);
     float: left;
     height: 100%;
     overflow-y: scroll;

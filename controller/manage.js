@@ -21,6 +21,10 @@ router.get('/push', (req, res) => {
     res.render('../views/push.html')
 })
 
+router.get('/reply', (req, res) => {
+    res.render('../views/reply.html')
+})
+
 router.get('/working', (req, res) => {
     res.render('../views/working.html')
 })
