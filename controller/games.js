@@ -42,12 +42,6 @@ router.get('/', (req, res) => {
         }
         db.query(sql,option)
         .then(rows => {
-            rows.map(row => {
-                row.images = row.images===null?[]:row.images.split(',');
-                row.videos = row.videos===null?[]:row.videos.split(',');
-                row.tags = row.tags===null?[]:row.tags.split(',');
-                row.platforms = row.platforms===null?[]:row.platforms.split(',');
-            })
             resolve({
                 code: 200,
                 data: {
