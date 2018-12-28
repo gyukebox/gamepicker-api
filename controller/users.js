@@ -163,7 +163,7 @@ router.get('/:user_id/reviews', (req, res) => {
     getUserReviews().then(success).catch(fail);
 })
 
-router.get('/:user_id/rating/games', (req, res) => {
+router.get('/:user_id/games/rating', (req, res) => {
     const { user_id, game_id } = req.params;
     const { success, fail } = require('./common')(res);
 
