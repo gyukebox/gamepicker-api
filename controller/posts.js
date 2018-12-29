@@ -14,7 +14,7 @@ router.get('/', (req, res) => {
             LEFT JOIN post_recommends ON post_recommends.post_id = posts.id
             LEFT JOIN post_disrecommends ON post_disrecommends.post_id = posts.id
         GROUP BY posts.id
-        ORDER BY updated_at DESC`
+        `
         const option = [];
         if (limit) {
             sql += ' LIMIT ?';
