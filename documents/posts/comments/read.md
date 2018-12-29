@@ -21,6 +21,7 @@ NULL
     reviews : [
         {
             id : 1,
+            user_id : 3,
             name : "smk0107",
             value : "This post is Terrible",
             updated_at: "2018-10-04T21:39:39.000Z",
@@ -29,6 +30,7 @@ NULL
             comments : [
                 {
                     id : 4,
+                    user_id : 5,
                     name : "smk0109",
                     value : "Haaaaaaa",
                     updated_at: "2018-10-04T21:39:39.000Z",

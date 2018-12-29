@@ -53,7 +53,7 @@ router.put('/:user_id', (req, res) => {
                 }
             })
         } else {
-            db.query(`UPDATE users SET introduce = ? WHERE user_id = ?`,[introduce, user_id])
+            db.query(`UPDATE users SET introduce = ? WHERE id = ?`,[introduce, user_id])
             .then(rows => {
                 if (rows.affectedRows === 0) {
                     reject({
@@ -67,7 +67,7 @@ router.put('/:user_id', (req, res) => {
                         code: 204
                     })
                 }
-            })
+            }).catch(reject)
         }
     })
 

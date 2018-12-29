@@ -7,7 +7,14 @@ router.get('/', (req, res) => {
     const { success, fail } = require('./common')(res);
 
     const getAllPosts = () => new Promise((resolve, reject) => {
-        let sql = 'SELECT id, title, (SELECT name FROM users WHERE users.id = user_id) AS name, views, updated_at, (SELECT COUNT(*) FROM post_comments WHERE post_id = posts.id) AS comment_count FROM posts';
+        const sql = `
+        SELECT posts.id, title, name, views, value, posts.updated_at, COUNT(post_disrecommends.post_id) AS disrecommends, COUNT(post_recommends.post_id) AS recommends
+        FROM posts 
+            LEFT JOIN users on users.id = posts.user_id
+            LEFT JOIN post_recommends ON post_recommends.post_id = posts.id
+            LEFT JOIN post_disrecommends ON post_disrecommends.post_id = posts.id
+        GROUP BY posts.id
+        ORDER BY updated_at DESC`
         const option = [];
         if (limit) {
             sql += ' LIMIT ?';
@@ -224,7 +231,7 @@ router.get('/:post_id/comments', (req, res) => {
     const readComments = () => new Promise((resolve, reject) => {
         let sql = `
         SELECT 
-            p.id, p.value, p.updated_at,
+            p.id, p.value, p.updated_at, p.user_id,
             (SELECT name FROM users WHERE id = p.user_id) AS name, 
             (SELECT COUNT(*) FROM post_comment_recommends WHERE comment_id = p.id) AS recommends,
             (SELECT COUNT(*) FROM post_comment_disrecommends WHERE comment_id = p.id) AS disrecommends, 
@@ -232,6 +239,7 @@ router.get('/:post_id/comments', (req, res) => {
                 JSON_OBJECT(
                     "id",c.id, 
                     "value",c.value, 
+                    "user_id",c.user_id,
                     "updated_at",c.updated_at,
                     "name",(SELECT name FROM users WHERE id = c.user_id),
                     "recommends", (SELECT COUNT(*) FROM post_comment_recommends WHERE comment_id = c.id),

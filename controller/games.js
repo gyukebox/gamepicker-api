@@ -17,8 +17,8 @@ router.get('/', (req, res) => {
             updated_at,
             (SELECT JSON_ARRAYAGG(link) FROM game_images WHERE game_id = games.id) AS images,
             (SELECT JSON_ARRAYAGG(link) FROM game_videos WHERE game_id = games.id) AS videos,
-            (SELECT JSON_ARRAYAGG(tag_id) FROM game_tags WHERE game_id = games.id) AS tags,
-            (SELECT JSON_ARRAYAGG(platform_id) FROM game_platforms WHERE game_id = games.id) AS platforms,
+            (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_id = games.id) AS tags,
+            (SELECT JSON_ARRAYAGG(value) FROM game_platforms LEFT JOIN platforms ON platforms.id = game_platforms.platform_id WHERE game_id = games.id) AS platforms,
             (SELECT AVG(score) FROM game_reviews WHERE game_id = games.id) AS score,
             (SELECT COUNT(score) FROM game_reviews WHERE game_id = games.id) AS score_count
         FROM games`
@@ -60,36 +60,20 @@ router.get('/:game_id', (req, res) => {
     
     const getGame = () => new Promise((resolve, reject) => {
         let sql = `
-        SELECT 
-            games.id, 
-            title, 
-            developer, 
-            publisher, 
-            summary,
-            age_rate,
-            updated_at, 
-            GROUP_CONCAT(DISTINCT game_images.link) AS images, 
-            GROUP_CONCAT(DISTINCT game_videos.link) AS videos, 
-            GROUP_CONCAT(DISTINCT game_tags.tag_id) AS tags, 
-            GROUP_CONCAT(DISTINCT platforms.value) AS platforms,
-            AVG(game_reviews.score) AS score,
-            COUNT(game_reviews.score) AS rate_count
-        FROM 
-            games
-            LEFT JOIN game_images
-            ON games.id = game_images.game_id
-            LEFT JOIN game_videos
-            ON games.id = game_videos.game_id
-            LEFT JOIN game_tags
-            ON games.id = game_tags.game_id
-            LEFT JOIN game_platforms
-            ON games.id = game_platforms.game_id
-            LEFT JOIN platforms
-            ON game_platforms.platform_id = platforms.id
-            LEFT JOIN game_reviews
-            ON game_reviews.game_id = games.id
-        WHERE games.id = ?
-        GROUP BY games.id`
+        SELECT
+            id,
+            title,
+            developer,
+            publisher,
+            updated_at,
+            (SELECT JSON_ARRAYAGG(link) FROM game_images WHERE game_id = games.id) AS images,
+            (SELECT JSON_ARRAYAGG(link) FROM game_videos WHERE game_id = games.id) AS videos,
+            (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_id = games.id) AS tags,
+            (SELECT JSON_ARRAYAGG(value) FROM game_platforms LEFT JOIN platforms ON platforms.id = game_platforms.platform_id WHERE game_id = games.id) AS platforms,
+            (SELECT AVG(score) FROM game_reviews WHERE game_id = games.id) AS score,
+            (SELECT COUNT(score) FROM game_reviews WHERE game_id = games.id) AS score_count
+        FROM games
+        WHERE games.id = ?`
         const option = [game_id];
         db.query(sql,option)
         .then(rows => {
@@ -101,12 +85,6 @@ router.get('/:game_id', (req, res) => {
                     }
                 })
             } else {
-                rows.map(row => {
-                    row.images = row.images===null?[]:row.images.split(',');
-                    row.videos = row.videos===null?[]:row.videos.split(',');
-                    row.tags = row.tags===null?[]:row.tags.split(',');
-                    row.platforms = row.platforms===null?[]:row.platforms.split(',');
-                })
                 resolve({
                     code: 200,
                     data: {
