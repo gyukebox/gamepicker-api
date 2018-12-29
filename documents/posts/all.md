@@ -10,7 +10,8 @@
 ```
 Query {
     limit : Limit the number of data,
-    offset : Set start index, required 'limit'
+    offset : Set start index, required 'limit',
+    game_id : Get posts matching 'game_id'
 }
 ```
 
@@ -27,17 +28,22 @@ Query {
             "title": "post sample",
             "name": "user_a",
             "views": 0,
+            "value": "test",
             "updated_at": "2018-12-20T23:35:26.000Z",
-            "comment_count": 5
+            "disrecommends": 0,
+            "recommends": 0
         },
         {
             "id": 3,
             "title": "post sample",
             "name": "user_a",
             "views": 0,
+            "value": "test",
             "updated_at": "2018-12-20T23:37:18.000Z",
-            "comment_count": 1
-        }
+            "disrecommends": 0,
+            "recommends": 0
+        },
+        ...
     ]
 }
 ```

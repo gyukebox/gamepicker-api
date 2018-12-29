@@ -141,19 +141,21 @@ router.delete('/:user_id/profile', (req, res) => {
                 }
             })
         }
-
     })
 
 
     decodeToken(token).then(deleteProfile).then(success).catch(fail);
 })
 
-router.get('/:user_id/posts', (req, res) => {
+router.get('/:user_id/posts', (req, res) => {    
     const { user_id } = req.params;
     const { limit, offset } = req.query;
     const { success, fail } = require('./common')(res);
     const option = [user_id];
-    let sql = 'SELECT id, title FROM posts WHERE user_id = ?';
+    let sql = `SELECT posts.id, posts.title, games.title AS game_title, games.id AS game_id
+    FROM posts 
+        LEFT JOIN games ON games.id = posts.game_id
+    WHERE user_id = ?`;
 
     if (limit) {
         sql += ' LIMIT ?'

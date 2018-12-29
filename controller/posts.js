@@ -3,22 +3,25 @@ const router = express.Router();
 const db = require('../model/database');
 
 router.get('/', (req, res) => {
-    const { limit, offset } = req.query;
+    const { limit, offset, game_id } = req.query;
     const { success, fail } = require('./common')(res);
 
     const getAllPosts = () => new Promise((resolve, reject) => {
-        const sql = `
+        let sql = `
         SELECT posts.id, title, name, views, value, posts.updated_at, COUNT(post_disrecommends.post_id) AS disrecommends, COUNT(post_recommends.post_id) AS recommends
         FROM posts 
             LEFT JOIN users on users.id = posts.user_id
             LEFT JOIN post_recommends ON post_recommends.post_id = posts.id
-            LEFT JOIN post_disrecommends ON post_disrecommends.post_id = posts.id
-        GROUP BY posts.id
-        `
+            LEFT JOIN post_disrecommends ON post_disrecommends.post_id = posts.id`
         const option = [];
+        if (game_id) {
+            sql += ` WHERE game_id = ?`
+            option.push(Number(game_id));
+        }
+        sql += ` GROUP BY posts.id`
         if (limit) {
             sql += ' LIMIT ?';
-            option.push(Number(limit));
+            option.push(Number(limit));            
             if (offset) {
                 sql += ' OFFSET ?';
                 option.push(Number(offset));

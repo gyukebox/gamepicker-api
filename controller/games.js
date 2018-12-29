@@ -273,7 +273,7 @@ router.get('/:game_id/reviews', (req, res) => {
         FROM
             game_reviews
             LEFT JOIN users ON game_reviews.user_id = users.id
-        WHERE game_id = ?
+        WHERE game_id = ? AND value IS NOT NULL
         `
         const option = [game_id]
         if (limit) {

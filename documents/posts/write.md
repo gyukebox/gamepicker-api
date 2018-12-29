@@ -10,7 +10,8 @@
 ```
 Body {
     title: Title of post,
-    value: Value of post
+    value: Value of post,
+    game_id: Game of post(optional)
 }
 ```
 
