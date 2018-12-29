@@ -270,4 +270,37 @@ router.get('/:user_id/games/rating', (req, res) => {
     getUserRating().then(success).catch(fail);
 })
 
+router.get('/:user_id/games/recommend', (req, res) => {
+    const { tags, limit } = req.query;
+    const { success, fail } = require('./common')(res);
+    const count = JSON.parse(tags).length;
+    const tmp = '(' + tags.substring(1,tags.length-1) + ')'
+    
+    const recommendGames = () => new Promise((resolve ,reject) => {
+        let sql = `
+        SELECT id, title 
+        FROM games 
+        WHERE id IN (
+            SELECT game_id 
+            FROM (SELECT game_id, COUNT(game_id) AS count FROM game_tags WHERE tag_id IN ${tmp} GROUP BY game_id) AS tmp 
+            WHERE count = ?
+        )`;
+        const option = [count];
+        if (limit) {
+            sql += ` LIMIT ?`;
+            option.push(Number(limit));
+        }
+        db.query(sql, option)
+        .then(rows => {
+            resolve({
+                code: 200,
+                data: {
+                    games: rows
+                }
+            })
+        }).catch(reject);
+    })
+    recommendGames().then(success).catch(fail);
+})
+
 module.exports = router;
