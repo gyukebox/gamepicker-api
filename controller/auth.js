@@ -7,57 +7,76 @@ const mail_config = require('../config/mail');
 const pbkdf2Password = require('pbkdf2-password');
 const hasher = pbkdf2Password(); 
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password, os_type, reg_id } = req.body;
     const { success, fail } = require('./common')(res);
+    const { admin } = req.query;
 
-    const login = () => new Promise((resolve, reject) => {
+    const getUser = (email) => new Promise((resolve, reject) => {
         db.query(`SELECT salt, id, active, password FROM users WHERE email = ?`,[email])
         .then(rows => {
             if (rows.length === 0) {
-                reject({
-                    code: 400,
-                    data: {
-                        message: 'User not found'
-                    }
-                })
+                reject({ code: 404, data: { message: "User not found" } })
             } else {
-                hasher({password: password, salt: rows[0].salt}, (err, pass, salt, hash) => {
-                    if (hash !== rows[0].password) {
-                        reject({
-                            code: 400,
-                            data: {
-                                message: 'Incorrect password'
-                            }
-                        })
-                    } else if (!rows[0].active) {
-                        reject({
-                            code: 401,
-                            data: {
-                                message: `Mail authentication required`
-                            }
-                        })
-                    } else {
-                        const user_id = rows[0].id
-                        db.query('UPDATE users SET os_type = ?, reg_id = ? WHERE email = ?',[os_type, reg_id, email])
-                        .then(rows => {
-                            resolve({
-                                code: 200,
-                                data: {
-                                    user_id: user_id,
-                                    token: jwt.encode({
-                                        email: email,
-                                        password: hash
-                                    })
-                                }
-                            })
-                        }).catch(reject)
-                    }
+                resolve(rows[0])
+            }
+        }).catch(reject);
+    })
+
+    const checkPassword = (user) => new Promise((resolve, reject) => {
+        hasher({ password: password, salt: user.salt }, (err, pass, salt, hash) => {
+            if (hash !== user.password) {
+                reject({code:400, data: { message: "Incorrect password"} })
+            } else {
+                resolve(hash);
+            }
+        })
+    })
+
+    const checkMailAuth = (user) => new Promise((resolve, reject) => {
+        if (user.active) {
+            resolve()
+        } else {
+            reject({ code: 400, data: { message: "Mail authentication required"} })
+        }
+    })
+
+    const checkAdmin = (user) => new Promise((resolve, reject) => {        
+        db.query(`SELECT user_id FROM admin WHERE user_id = ?`,[user.id])
+        .then(rows => {
+            if (rows.length === 0) {
+                reject({ code: 404, data: { message: "Admin not found" } })
+            } else {
+                resolve();
+            }
+        }).catch(reject)
+    })
+
+    const login = (user) => new Promise((resolve ,reject) => {
+        db.query(`UPDATE users SET os_type = ?, reg_id = ? WHERE id = ?`,[os_type, reg_id, user.id])
+        resolve({
+            code: 200,
+            data: {
+                user_id: user.id,
+                token: jwt.encode({
+                    email: email,
+                    password: user.hash
                 })
             }
         })
     })
-    login().then(success).catch(fail);
+
+    try {
+        const user = await getUser(email);
+        user.hash = await checkPassword(user);        
+        await checkMailAuth(user);
+        if (admin)
+            await checkAdmin(user);        
+        const json = await login(user);        
+        success(json)
+    } catch (err) {
+        fail(err);
+    }
 })
 
 //FIXME: transaction required

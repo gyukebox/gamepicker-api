@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.querySelector('input#password').value;
 
 
-        fetch('/admin/login', {
+        fetch('/auth/login?admin=1', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'

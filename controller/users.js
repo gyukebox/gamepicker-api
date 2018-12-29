@@ -260,8 +260,11 @@ router.get('/:user_id/games/rating', (req, res) => {
     const { success, fail } = require('./common')(res);
 
     const getUserRating = () => new Promise((resolve, reject) => {
+        /*(SELECT JSON_ARRAYAGG(JSON_OBJECT("id",id,"value",value)) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_tags.game_id = game_reviews.game_id) AS tag_id*/
         const sql = `
-        SELECT game_reviews.game_id, AVG(score) AS score, (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_tags.game_id = game_reviews.game_id) AS tags
+        SELECT 
+            game_reviews.game_id, AVG(score) AS score, 
+            (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_tags.game_id = game_reviews.game_id) AS tags        
         FROM game_reviews 
         WHERE game_reviews.user_id = ?
         GROUP BY game_reviews.game_id
