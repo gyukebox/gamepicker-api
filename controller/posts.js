@@ -8,11 +8,16 @@ router.get('/', (req, res) => {
 
     const getAllPosts = () => new Promise((resolve, reject) => {
         let sql = `
-        SELECT posts.id, title, name, views, value, posts.updated_at, COUNT(post_disrecommends.post_id) AS disrecommends, COUNT(post_recommends.post_id) AS recommends
-        FROM posts 
-            LEFT JOIN users on users.id = posts.user_id
-            LEFT JOIN post_recommends ON post_recommends.post_id = posts.id
-            LEFT JOIN post_disrecommends ON post_disrecommends.post_id = posts.id`
+        SELECT
+            posts.id, posts.title, views, value, posts.updated_at,
+            users.name, users.id as user_id,  
+            games.title AS game_title, games.id AS game_id,
+            (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) as recommends,
+            (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) as disrecommends
+        FROM
+            posts
+            LEFT JOIN users ON users.id = posts.user_id
+            LEFT JOIN games ON games.id = posts.game_id`
         const option = [];
         if (game_id) {
             sql += ` WHERE game_id = ?`
@@ -49,11 +54,16 @@ router.get('/:post_id', (req, res) => {
 
     const getPost = () => new Promise((resolve, reject) => {
         const sql = `
-        SELECT posts.id, title, name, views, value, posts.updated_at, COUNT(post_disrecommends.post_id) AS disrecommends, COUNT(post_recommends.post_id) AS recommends
-        FROM posts 
-            LEFT JOIN users on users.id = posts.user_id
-            LEFT JOIN post_recommends ON post_recommends.post_id = posts.id
-            LEFT JOIN post_disrecommends ON post_disrecommends.post_id = posts.id
+        SELECT
+            posts.id, posts.title, views, value, posts.updated_at,
+            users.name, users.id as user_id,  
+            games.title AS game_title, games.id AS game_id,
+            (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) as recommends,
+            (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) as disrecommends
+        FROM
+            posts
+            LEFT JOIN users ON users.id = posts.user_id
+            LEFT JOIN games ON games.id = posts.game_id
         WHERE posts.id = ?`
         db.query(sql,[post_id])
         .then(rows => {

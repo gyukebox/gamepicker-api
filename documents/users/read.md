@@ -18,14 +18,34 @@ NULL
 **Content example**
 ```
 {
-    user : {
-        name : "smk0107",
-        email : "ansrl0107@gmail.com",
-        introduce: "dsada",
-        birthday : "1998-01-07",
-        gender : "M",
-        points : 57321
-    }
+    "posts": [
+        {
+            "id": 1,
+            "title": "post sample",
+            "views": 0,
+            "value": "test",
+            "updated_at": "2018-12-20T14:35:26.000Z",
+            "name": "user_a",
+            "user_id": 1,
+            "game_title": null,
+            "game_id": null,
+            "recommends": 0,
+            "disrecommends": 0
+        },
+        {
+            "id": 3,
+            "title": "post sample",
+            "views": 0,
+            "value": "test",
+            "updated_at": "2018-12-20T14:37:18.000Z",
+            "name": "user_a",
+            "user_id": 1,
+            "game_title": null,
+            "game_id": null,
+            "recommends": 0,
+            "disrecommends": 0
+        }
+    ]
 }
 ```
 

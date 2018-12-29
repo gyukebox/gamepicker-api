@@ -26,22 +26,28 @@ Query {
         {
             "id": 1,
             "title": "post sample",
-            "name": "user_a",
             "views": 0,
             "value": "test",
-            "updated_at": "2018-12-20T23:35:26.000Z",
-            "disrecommends": 0,
-            "recommends": 0
+            "updated_at": "2018-12-20T14:35:26.000Z",
+            "name": "user_a",
+            "user_id": 1,
+            "game_title": null,
+            "game_id": null,
+            "recommends": 0,
+            "disrecommends": 0
         },
         {
             "id": 3,
             "title": "post sample",
-            "name": "user_a",
             "views": 0,
             "value": "test",
-            "updated_at": "2018-12-20T23:37:18.000Z",
-            "disrecommends": 0,
-            "recommends": 0
+            "updated_at": "2018-12-20T14:37:18.000Z",
+            "name": "user_a",
+            "user_id": 1,
+            "game_title": null,
+            "game_id": null,
+            "recommends": 0,
+            "disrecommends": 0
         },
         ...
     ]
