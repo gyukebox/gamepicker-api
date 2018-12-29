@@ -152,7 +152,7 @@ router.get('/:user_id/posts', (req, res) => {
     const { limit, offset } = req.query;
     const { success, fail } = require('./common')(res);
     const option = [user_id];
-    let sql = `SELECT posts.id, posts.title, games.title AS game_title, games.id AS game_id
+    let sql = `SELECT posts.id, posts.title, games.title AS game_title, games.id AS game_id, posts.updated_at, (SELECT COUNT(1) FROM post_comments WHERE post_id = posts.id) AS comment_count
     FROM posts 
         LEFT JOIN games ON games.id = posts.game_id
     WHERE user_id = ?`;

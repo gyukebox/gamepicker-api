@@ -21,16 +21,23 @@ Query {
 **Content example**
 ```
 {
-    posts : [
-        {
-            id : 1,
-            title : "How to be a great developer"
-        },
-        {
-            id : 2,
-            title : "Way to be rich"
-        },
-        ...
+    "posts": [
+    {
+        "id": 1,
+        "title": "post sample",
+        "game_title": null,
+        "game_id": null,
+        "updated_at": "2018-12-20T14:35:26.000Z",
+        "comment_count": 12
+    },
+    {
+        "id": 3,
+        "title": "post sample",
+        "game_title": null,
+        "game_id": null,
+        "updated_at": "2018-12-20T14:37:18.000Z",
+        "comment_count": 0
+        }
     ]
 }
 ```
