@@ -1,6 +1,6 @@
 # Get all notice
 
-**Method** : `POST`
+**Method** : `GET`
 
 **URL** : `/admin/notices`
 
@@ -24,7 +24,8 @@ NULL
             title: "First notice",
             value: "My first notice",
             created_at: "2018-10-04T12:39:39.000Z"
-        }
+        },
+        ...
     ]
 }
 ```

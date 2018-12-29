@@ -24,13 +24,7 @@ router.get('/:user_id', (req, res) => {
                     user_id: user_id,
                     object: 'profile'
                 })
-                if (fs.existsSync(`uploads/${filename}.jpg`)) {
-                    res.status(301).redirect(`/uploads/${filename}.jpg`)
-                } else {
-                    res.status(404).json({
-                        message: 'Profile not found'
-                    })
-                }
+                rows[0].profile = fs.existsSync(`uploads/${filename}.jpg`)?`api.gamepicker.co.kr/uploads/${filename}.jpg`:null;
                 resolve({
                     code: 200,
                     data: {
@@ -80,25 +74,42 @@ router.put('/:user_id', (req, res) => {
     decodeToken(token).then(updateUser).then(success).catch(fail);
 })
 
-router.get('/:user_id/profile', (req, res) => {
-    const { user_id } = req.params;
-
-    const filename = jwt.encode({
-        user_id: user_id,
-        object: 'profile'
-    })
-    if (fs.existsSync(`uploads/${filename}.jpg`)) {
-        res.status(301).redirect(`/uploads/${filename}.jpg`)
-    } else {
-        res.status(404).json({
-            message: 'Profile not found'
-        })
-    }
-})
-
+/*
 router.post('/:user_id/profile', (req, res) => {
     const { user_id } = req.params;
-    const { success, fail } = require('./common')(res);
+    const { decodeToken, success, fail } = require('./common')(res);
+
+    const createProfile = (u_id) => new Promise((resolve, reject) => {
+        
+        const storage = multer.diskStorage({
+            destination: (req, file, cb) => {
+                cb(null, `uploads/`)
+            },
+            filename: (req, file, cb) => {
+                const filename = jwt.encode({
+                    user_id: user_id,
+                    object: 'profile'
+                })
+                cb(null, filename + '.jpg');
+            }
+        });
+
+        const up = multer({ storage: storage }).single('file');
+        up(req, res, err => {
+            if (err) {
+                reject({
+                    code: 400,
+                    data: {
+                        message: err
+                    }
+                })
+            } else {
+                resolve({
+                    code: 204
+                })
+            }
+        })
+    })
 
     const upload = (req, res) => new Promise((resolve, reject) => {    
         const storage = multer.diskStorage({
@@ -118,7 +129,7 @@ router.post('/:user_id/profile', (req, res) => {
         up(req, res, err => {
             if (err) {
                 reject({
-                    code: 500,
+                    code: 400,
                     data: {
                         message: err
                     }
@@ -132,23 +143,36 @@ router.post('/:user_id/profile', (req, res) => {
     })
     upload(req, res).then(success).catch(fail);
 })
+*/
 
 router.delete('/:user_id/profile', (req, res) => {
     const { user_id } = req.params;
-    const { success, fail } = require('./common')(res);
+    const { decodeToken, success, fail } = require('./common')(res);
+    const token = req.headers['x-access-token'];
 
-    const deleteProfile = () => new Promise((resolve, reject) => {
-        const filename = jwt.encode({
-            user_id: user_id,
-            object: 'profile'
-        })
-        fs.unlinkSync(`./uploads/${filename}.jpg`);
-        resolve({
-            code: 204
-        })
+    const deleteProfile = (u_id) => new Promise((resolve, reject) => {
+        if (user_id === u_id) {
+            const filename = jwt.encode({
+                user_id: user_id,
+                object: 'profile'
+            })
+            fs.unlinkSync(`./uploads/${filename}.jpg`);
+            resolve({
+                code: 204
+            })
+        } else {
+            reject({
+                code: 401,
+                data: {
+                    message: "Authentication failed"
+                }
+            })
+        }
+
     })
 
-    deleteProfile().then(success).catch(fail);
+
+    decodeToken(token).then(deleteProfile).then(success).catch(fail);
 })
 
 router.get('/:user_id/posts', (req, res) => {
