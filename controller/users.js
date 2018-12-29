@@ -253,18 +253,12 @@ router.get('/:user_id/games/rating', (req, res) => {
 
     const getUserRating = () => new Promise((resolve, reject) => {
         const sql = `
-        SELECT game_reviews.game_id, AVG(score) AS score, JSON_ARRAYAGG(tag_id) AS tags
+        SELECT game_reviews.game_id, AVG(score) AS score, (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_tags.game_id = game_reviews.game_id) AS tags
         FROM game_reviews 
-            LEFT JOIN game_tags ON game_tags.game_id = game_reviews.game_id
         WHERE game_reviews.user_id = ?
         GROUP BY game_reviews.game_id
         `
         db.query(sql,[user_id]).then(rows => {
-            rows.map(row => {
-                if (row.tags[0] === null) {
-                    row.tags = [];
-                }
-            })
             resolve({
                 code: 200,
                 data: {
