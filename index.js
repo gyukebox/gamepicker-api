@@ -22,6 +22,7 @@ app.set('view engine', 'ejs');
 app.engine('html', require('ejs').renderFile);
 
 app.use('/public', express.static(__dirname + '/public'))
+app.use('/uploads', express.static(__dirname + '/uploads'))
 
 const port = process.env.PORT || 80;
 

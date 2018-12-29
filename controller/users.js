@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../model/database');
+const multer = require('multer');
+const fs = require('fs');
+const jwt = require('../model/jwt');
 
 router.get('/:user_id', (req, res) => {
     const { user_id } = req.params;
@@ -17,6 +20,17 @@ router.get('/:user_id', (req, res) => {
                     }
                 })
             } else {
+                const filename = jwt.encode({
+                    user_id: user_id,
+                    object: 'profile'
+                })
+                if (fs.existsSync(`uploads/${filename}.jpg`)) {
+                    res.status(301).redirect(`/uploads/${filename}.jpg`)
+                } else {
+                    res.status(404).json({
+                        message: 'Profile not found'
+                    })
+                }
                 resolve({
                     code: 200,
                     data: {
@@ -64,6 +78,77 @@ router.put('/:user_id', (req, res) => {
     })
 
     decodeToken(token).then(updateUser).then(success).catch(fail);
+})
+
+router.get('/:user_id/profile', (req, res) => {
+    const { user_id } = req.params;
+
+    const filename = jwt.encode({
+        user_id: user_id,
+        object: 'profile'
+    })
+    if (fs.existsSync(`uploads/${filename}.jpg`)) {
+        res.status(301).redirect(`/uploads/${filename}.jpg`)
+    } else {
+        res.status(404).json({
+            message: 'Profile not found'
+        })
+    }
+})
+
+router.post('/:user_id/profile', (req, res) => {
+    const { user_id } = req.params;
+    const { success, fail } = require('./common')(res);
+
+    const upload = (req, res) => new Promise((resolve, reject) => {    
+        const storage = multer.diskStorage({
+            destination: (req, file, cb) => {
+                cb(null, `uploads/`)
+            },
+            filename: (req, file, cb) => {
+                const filename = jwt.encode({
+                    user_id: user_id,
+                    object: 'profile'
+                })
+                cb(null, filename + '.jpg');
+            }
+        });
+
+        const up = multer({ storage: storage }).single('file');
+        up(req, res, err => {
+            if (err) {
+                reject({
+                    code: 500,
+                    data: {
+                        message: err
+                    }
+                })
+            } else {
+                resolve({
+                    code: 204
+                })
+            }
+        })
+    })
+    upload(req, res).then(success).catch(fail);
+})
+
+router.delete('/:user_id/profile', (req, res) => {
+    const { user_id } = req.params;
+    const { success, fail } = require('./common')(res);
+
+    const deleteProfile = () => new Promise((resolve, reject) => {
+        const filename = jwt.encode({
+            user_id: user_id,
+            object: 'profile'
+        })
+        fs.unlinkSync(`./uploads/${filename}.jpg`);
+        resolve({
+            code: 204
+        })
+    })
+
+    deleteProfile().then(success).catch(fail);
 })
 
 router.get('/:user_id/posts', (req, res) => {
