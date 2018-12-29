@@ -14,6 +14,7 @@
 * [View created reviews](documents/users/reviews.md) : `GET /users/:user_id/reviews`
 * [Register profile photo](documents/users/profile/create.md) : `POST /users/:user_id/profile`
 * [Delete profile photo](documents/users/profile/delete.md) : `DELETE /users/:user_id/profile`
+* [Recommend games](documents/users/recommend.md) : `GET /users/:user_id/recommend`
 
 ## Game related
 
