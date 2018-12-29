@@ -12,6 +12,8 @@
 * [View created posts](documents/users/posts.md) : `GET /users/:user_id/posts`
 * [View created comments](documents/users/comments.md) : `GET /users/:user_id/posts`
 * [View created reviews](documents/users/reviews.md) : `GET /users/:user_id/reviews`
+* [Register profile photo](documents/users/profile/create.md) : `POST /users/:user_id/profile`
+* [Delete profile photo](documents/users/profile/delete.md) : `DELETE /users/:user_id/profile`
 
 ## Game related
 
@@ -48,3 +50,6 @@
 * [Create questions](documents/admin/questions/create.md) : `POST /admin/questions`
 * [Reply questions](documents/admin/questions/reply.md) : `POST /admin/questions/:question_id/reply`
 * [Push notification(Not implemented)](documents/admin/push/create.md) : `POST /admin/push`
+* [Write notice](documents/admin/notice/create.md) : `POST /admin/notices`
+* [Get all notice](documents/admin/notice/read.md) : `GET /admin/notices`
+* [Delete notice](documents/admin/notice/delete.md) : `DELETE /admin/notices/:notice_id`

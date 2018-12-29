@@ -74,76 +74,49 @@ router.put('/:user_id', (req, res) => {
     decodeToken(token).then(updateUser).then(success).catch(fail);
 })
 
-/*
 router.post('/:user_id/profile', (req, res) => {
     const { user_id } = req.params;
     const { decodeToken, success, fail } = require('./common')(res);
 
     const createProfile = (u_id) => new Promise((resolve, reject) => {
-        
-        const storage = multer.diskStorage({
-            destination: (req, file, cb) => {
-                cb(null, `uploads/`)
-            },
-            filename: (req, file, cb) => {
-                const filename = jwt.encode({
-                    user_id: user_id,
-                    object: 'profile'
-                })
-                cb(null, filename + '.jpg');
-            }
-        });
-
-        const up = multer({ storage: storage }).single('file');
-        up(req, res, err => {
-            if (err) {
-                reject({
-                    code: 400,
-                    data: {
-                        message: err
-                    }
-                })
-            } else {
-                resolve({
-                    code: 204
-                })
-            }
-        })
+        if (u_id != user_id) {
+            reject({
+                code: 401,
+                message: "Authentication failed"
+            })
+        } else {
+            const storage = multer.diskStorage({
+                destination: (req, file, cb) => {
+                    cb(null, `uploads/`)
+                },
+                filename: (req, file, cb) => {
+                    const filename = jwt.encode({
+                        user_id: user_id,
+                        object: 'profile'
+                    })
+                    cb(null, filename + '.jpg');
+                }
+            });
+    
+            const up = multer({ storage: storage }).single('file');
+            up(req, res, err => {
+                if (err) {
+                    reject({
+                        code: 400,
+                        data: {
+                            message: err
+                        }
+                    })
+                } else {
+                    resolve({
+                        code: 204
+                    })
+                }
+            })
+        }
     })
-
-    const upload = (req, res) => new Promise((resolve, reject) => {    
-        const storage = multer.diskStorage({
-            destination: (req, file, cb) => {
-                cb(null, `uploads/`)
-            },
-            filename: (req, file, cb) => {
-                const filename = jwt.encode({
-                    user_id: user_id,
-                    object: 'profile'
-                })
-                cb(null, filename + '.jpg');
-            }
-        });
-
-        const up = multer({ storage: storage }).single('file');
-        up(req, res, err => {
-            if (err) {
-                reject({
-                    code: 400,
-                    data: {
-                        message: err
-                    }
-                })
-            } else {
-                resolve({
-                    code: 204
-                })
-            }
-        })
-    })
-    upload(req, res).then(success).catch(fail);
+    decodeToken(token).then(createProfile).then(success).catch(fail);
 })
-*/
 
 router.delete('/:user_id/profile', (req, res) => {
     const { user_id } = req.params;
