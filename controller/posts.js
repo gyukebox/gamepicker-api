@@ -23,7 +23,8 @@ router.get('/', (req, res) => {
             sql += ` WHERE game_id = ?`
             option.push(Number(game_id));
         }
-        sql += ` GROUP BY posts.id`
+
+        sql += ` GROUP BY posts.id ORDER BY posts.updated_at DESC`
         if (limit) {
             sql += ' LIMIT ?';
             option.push(Number(limit));            
