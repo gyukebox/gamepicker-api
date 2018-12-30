@@ -1,24 +1,15 @@
-
-
 .pushOption {
     float: left;
-    width: 128px;
-    margin: 16px;
+    width: calc(50% - 32px);
+    margin: 0 16px;
 }
 
-.pushOption > h1 {
-    background-color: #313942;
-    text-align: center;
-    height: 40px;
-    line-height: 40px;
-    color: white;
-    margin: 0;
-    margin-bottom: 16px;
+@media (max-width: 1024px) {
+    .pushOption {
+        width: calc(100% - 32px)
+    }
 }
 
-.pushOption > article {
-    text-align: center;
-    background-color: #313942;
-    color: white;
-    margin: 4px 0;
+.pushOption:last-child {
+    width: calc(100% - 32px);
 }

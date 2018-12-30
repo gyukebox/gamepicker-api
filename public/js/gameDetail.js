@@ -21,11 +21,26 @@ const getGame = () => new Promise((resolve, reject) => {
 })
 
 
-const renderGame = () => {
-    const keyList = ['title', 'developer', 'publisher', 'age_rate', 'summary'];
+const renderGame = () => {    
+    const keyList = ['title', 'developer', 'publisher', 'age_rate'];
     keyList.forEach(key => {
-        console.log(game[key]);
         document.querySelector(`article#${key} > input`).value = game[key];
+    })
+
+    document.querySelector(`article#summary > textarea`).value = game.summary
+
+    const tagContainer = document.querySelector('#tags > .container > ul');
+    game.tags.forEach(value => {
+        const li = document.createElement('li');
+        li.textContent = value;
+        tagContainer.appendChild(li);
+    })
+
+    const platformContainer = document.querySelector('#platforms > .container > ul');
+    game.platforms.forEach(value => {
+        const li = document.createElement('li');
+        li.textContent = value;
+        platformContainer.appendChild(li);
     })
 
     game.images.forEach(link => {
@@ -50,6 +65,15 @@ const renderVideo = (link) => {
     iframe.setAttribute('allowfullscreen', null);        
     iframe.src = `https://www.youtube.com/embed/${link.split('/')[3]}`;
     document.querySelector(`article#videos > .container`).prepend(iframe)
+}
+
+const renderTags = (value) => {
+    const container = document.querySelector('#tags > .container');
+    
+}
+
+const renderPlatforms = (value) => {
+
 }
 
 const putGame = () => {

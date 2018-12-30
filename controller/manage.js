@@ -29,4 +29,8 @@ router.get('/working', (req, res) => {
     res.render('../views/working.html')
 })
 
+router.get('/notice', (req, res) => {
+    res.render('../views/notice.html')
+})
+
 module.exports = router;

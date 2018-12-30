@@ -30,6 +30,10 @@ process.on('uncaughtException', (err) => {
     console.log(err);
 })
 
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(__dirname + '/public/images/favicon.ico')
+})
+
 app.use('/games', games);
 app.use('/users', users);
 app.use('/posts', posts);
@@ -38,5 +42,8 @@ app.use('/platforms', platforms);
 app.use('/auth', auth);
 app.use('/manage', manage);
 app.use('/admin', admin);
+app.use('*', (req, res) => {
+    res.status(404).send('Page Not Found')
+})
 
 app.listen(port);

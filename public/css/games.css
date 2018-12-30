@@ -36,29 +36,28 @@
 }
 
 #game-list {
-    padding-top: 64px;
     width: 100%;
+    height: calc(100% - 56px);
+    overflow-y: auto;
 }
 
 #search-games {
-    width: inherit;
+    width: 100%;
     background-color: #F1F2F7;
-    height: 64px;
     overflow: hidden;
-    top: 0;
-    position: fixed;
 }
 
 #search-games > input[type='text'] {
-    width: calc(100% - 128px - 16px);
-    height: 48px;
+    width: calc(100% - 128px - 8px);
+    height: 40px;
     margin: 8px;
     padding: 0 16px;
     font-size: 1.2em;
+    margin-right: 0;
 }
 
 #search-games > input[type='button'] {
-    height: 48px;
+    height: 40px;
     width: 112px;
     margin: 8px;
     float: right;

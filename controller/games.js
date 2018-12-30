@@ -66,6 +66,8 @@ router.get('/:game_id', (req, res) => {
             developer,
             publisher,
             updated_at,
+            summary,
+            age_rate,
             (SELECT JSON_ARRAYAGG(link) FROM game_images WHERE game_id = games.id) AS images,
             (SELECT JSON_ARRAYAGG(link) FROM game_videos WHERE game_id = games.id) AS videos,
             (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_id = games.id) AS tags,

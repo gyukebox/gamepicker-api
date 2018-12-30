@@ -9,10 +9,6 @@ article > h1 {
     margin: 16px 0;
 }
 
-article > input {
-    width: 100%;
-}
-
 .container > img {
     height: 150px;
     border-radius: 4px;

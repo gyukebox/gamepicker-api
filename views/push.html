@@ -3,56 +3,67 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>푸시알람 | GamePicker</title>
+    <title>Push Notification - GamePicker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="/public/images/favi.ico" type="image/x-icon">
     <link rel="stylesheet" type="text/css" media="screen" href="/public/css/global.css" />
     <link rel="stylesheet" type="text/css" media="screen" href="/public/css/push.css" />
+    <script src="/public/js/nav.js"></script>
+
 </head>
 <body>
-    <nav>
-        <ul>
-            <li><a href="/manage">GamePicker</a></li>
-            <li><a href="/manage/games">Games Manage</a></li>
-            <li><a href="/manage/push">Push Notification</a></li>
-            <li><a href="/manage/reply">Reply Questions</a></li>
-            <li><a href="/manage/working">Working logs</a></li>
-        </ul>
-    </nav>
     <section id='main'>
         <section id='age' class='pushOption'>
             <h1>나이</h1>
-            <article><input type="checkbox" name="age" value="10">10대</article>
-            <article><input type="checkbox" name="age" value="20">20대</article>
-            <article><input type="checkbox" name="age" value="30">30대</article>
-            <article><input type="checkbox" name="age" value="40">40대</article>
-            <article><input type="checkbox" name="age" value="50">50대 이상</article>
-            <input type="button" value='10대' class='toggle off'>
-            <input type="button" value='20대' class='toggle off'>
-            <input type="button" value='30대' class='toggle off'>
-            <input type="button" value='40대' class='toggle off'>
-            <input type="button" value='50대 이상' class='toggle off'>
+            <div>
+                <input type="checkbox" name="" id="age-0" class="age">
+                <label for="age-0">10대 이하</label>
+            </div>
+            <div>
+                <input type="checkbox" name="" id="age-10" class="age">
+                <label for="age-10">10대</label>
+            </div>
+            <div>
+                <input type="checkbox" name="" id="age-20" class="age">
+                <label for="age-20">20대</label>
+            </div>
+            <div>
+                <input type="checkbox" name="" id="age-30" class="age">
+                <label for="age-30">30대</label>
+            </div>
+            <div>
+                <input type="checkbox" name="" id="age-40" class="age">
+                <label for="age-40">40대</label>
+            </div>
+            <div>
+                <input type="checkbox" name="" id="age-50" class="age">
+                <label for="age-50">50대 이상</label>
+            </div>
         </section>
 
         <section id='gender' class='pushOption'>
             <h1>성별</h1>
-            <article><input type="radio" name="gender" value="male">남자</article>
-            <article><input type="radio" name="gender" value="female">여자</article>
+            <div>
+                <input type="radio" name="gender" id="male" checked>
+                <label for="male">Male</label>
+                <input type="radio" name="gender" id="female">
+                <label for="female">Female</label>
+            </div>
         </section>
 
         <section id='lastLogin' class='pushOption'>
             <h1>마지막 로그인</h1>
-            <article><input type="text" name="lastLogin"></article>
+            <input type="date" name="" id="">
+            <input type="date" name="" id="">
         </section>
 
         <section id='reservation' class='pushOption'>
             <h1>예약 전송</h1>
+            <input type="date" name="" id="">
         </section>
 
         <section id='message' class='pushOption'>
-            <h1>푸시 전송</h1>
-            <article><input type="text" name='pushMessage'></article>
-            <div class='button'>확인</div>
+            <textarea name="" id="" placeholder="푸시내용을 입력해주세요"></textarea>
+            <input type="button" value='확인'>
         </section>
     </section>
     <script src="/public/js/auth.js"></script>
