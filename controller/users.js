@@ -265,7 +265,7 @@ router.get('/:user_id/games/rating', (req, res) => {
         SELECT 
             game_reviews.game_id, AVG(score) AS score, 
             (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_tags.game_id = game_reviews.game_id) AS tags,
-            (SELECT JSON_ARRAYAGG(value) FROM game_platforms LEFT JOIN platforms ON platforms.id = game_platforms.platform_id WHERE game_platforms.game_id = game_reviews.game_id) AS platofrms 
+            (SELECT JSON_ARRAYAGG(value) FROM game_platforms LEFT JOIN platforms ON platforms.id = game_platforms.platform_id WHERE game_platforms.game_id = game_reviews.game_id) AS platforms 
         FROM game_reviews 
         WHERE game_reviews.user_id = ?
         GROUP BY game_reviews.game_id
