@@ -200,7 +200,29 @@ router.post('/', (req, res) => {
 })
 
 router.put('/:game_id', (req, res) => {
+    const { game_id } = req.params;
+    const token = req.headers['x-access-token'];
+    const { decodeToken, adminAuth, success, fail } = require('./common')(res);
 
+    const insertGame = () => new Promise((resolve, reject) => {
+
+    })
+
+    const insertImages = () => new Promise((resolve, reject) => {
+
+    })
+
+    const insertVideos = () => new Promise((resolve, reject) => {
+
+    })
+
+    const insertTags = () => new Promise((resolve, reject) => {
+
+    })
+
+    const insertPlatforms = () => new Promise((resolve, reject) => {
+
+    })
 })
 
 router.delete('/:game_id', (req, res) => {
