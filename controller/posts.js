@@ -93,10 +93,10 @@ router.get('/:post_id', (req, res) => {
 router.post('/', (req, res) => {
     const token = req.headers['x-access-token'];
     const { decodeToken, success, fail } = require('./common')(res);
-    const { title, value } = req.body;
+    const { title, value, game_id } = req.body;
 
     const createPost = (user_id) => new Promise((resolve, reject) => {        
-        db.query(`INSERT INTO posts (user_id, title, value) VALUES (?, ?, ?)`,[user_id, title, value])
+        db.query(`INSERT INTO posts (user_id, title, value, game_id) VALUES (?, ?, ?, ?)`,[user_id, title, value, game_id])
         .then(rows => {
             resolve({
                 code: 204
