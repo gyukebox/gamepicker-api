@@ -8,7 +8,13 @@
 
 **Data constraints** 
 ```
-NULL
+Query {
+    limit : Limit the number of data,
+    offset : Set start index, required 'limit',
+    sort: {
+        random: Loads the game in random order
+    }
+}
 ```
 
 ## Success Response
