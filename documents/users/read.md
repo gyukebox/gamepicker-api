@@ -18,34 +18,15 @@ NULL
 **Content example**
 ```
 {
-    "posts": [
-        {
-            "id": 1,
-            "title": "post sample",
-            "views": 0,
-            "value": "test",
-            "updated_at": "2018-12-20T14:35:26.000Z",
-            "name": "user_a",
-            "user_id": 1,
-            "game_title": null,
-            "game_id": null,
-            "recommends": 0,
-            "disrecommends": 0
-        },
-        {
-            "id": 3,
-            "title": "post sample",
-            "views": 0,
-            "value": "test",
-            "updated_at": "2018-12-20T14:37:18.000Z",
-            "name": "user_a",
-            "user_id": 1,
-            "game_title": null,
-            "game_id": null,
-            "recommends": 0,
-            "disrecommends": 0
-        }
-    ]
+    "user": {
+        "name": "user_a",
+        "email": "test",
+        "birthday": "1998-01-07T00:00:00.000Z",
+        "introduce": null,
+        "gender": "M",
+        "points": 0,
+        "profile": null
+    }
 }
 ```
 
