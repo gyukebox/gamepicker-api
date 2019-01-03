@@ -1,156 +1,98 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../model/database');
 const multer = require('multer');
 const fs = require('fs');
 const jwt = require('../model/jwt');
 
-router.get('/:user_id', (req, res) => {
+router.get('/:user_id', async (req, res, next) => {
     const { user_id } = req.params;
-    const { success, fail } = require('./common')(res);
+    try {
+        const [[user]] = await pool.query(`SELECT name, email, birthday, introduce, gender, points FROM users WHERE id = ?`,[user_id]);
+        if (!user)
+            throw { status: 404, message: 'User not found' }
+        const filename = jwt.encode({
+            user_id: user_id,
+            object: 'profile'
+        });
+        user.profile = fs.existsSync(`uploads/${filename}.jpg`)?`api.gamepicker.co.kr/uploads/${filename}.jpg`:null;
+        res.status(200).json({ user });  
+    } catch (err) {
+        next(err);
+    }
+});
 
-    const getUser = () => new Promise((resolve, reject) => {
-        db.query(`SELECT name, email, birthday, introduce, gender, points FROM users WHERE id = ?`,[user_id])
-        .then(rows => {
-            if (rows.length === 0) {
-                reject({
-                    code: 404,
-                    data: {
-                        message: 'User not found'
-                    }
-                })
-            } else {
+router.put('/:user_id', async (req, res, next) => {
+    const token = req.headers['x-access-token'];
+    const { user_id } = req.params;
+    const { introduce } = req.body;
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`,[email, password]);
+        if (!user)
+            throw { status: 404, message: 'User not found' }
+        if (user.id != user_id)
+            throw { status: 401, message: 'Authentication failed' }
+        await pool.query(`UPDATE users SET introduce = ? WHERE id = ?`,[introduce, user.id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+})
+
+router.post('/:user_id/profile', async (req, res, next) => {
+    const { user_id } = req.params;
+    const token = req.headers['x-access-token'];
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`,[email, password]);
+        if (user.id != user_id)
+            throw { status: 401, message: "Authentication failed" }
+        const storage = multer.diskStorage({
+            destination: (req, file, cb) => {
+                cb(null, `uploads/`)
+            },
+            filename: (req, file, cb) => {
                 const filename = jwt.encode({
                     user_id: user_id,
                     object: 'profile'
                 })
-                rows[0].profile = fs.existsSync(`uploads/${filename}.jpg`)?`api.gamepicker.co.kr/uploads/${filename}.jpg`:null;
-                resolve({
-                    code: 200,
-                    data: {
-                        user: rows[0]
-                    }
-                })
+                cb(null, filename + '.jpg');
             }
-        }).catch(reject)
-    })
+        });
 
-    getUser().then(success).catch(fail);
-});
-
-router.put('/:user_id', (req, res) => {
-    const token = req.headers['x-access-token'];
-    const u_id = req.params.user_id;
-    const { introduce } = req.body;
-    const { decodeToken, success, fail } = require('./common')(res);
-
-    const updateUser = (user_id) => new Promise((resolve, reject) => {
-        if (user_id!= u_id) {
-            reject({
-                code: 401,
-                data: {
-                    message: 'Authentication failed'
-                }
-            })
-        } else {
-            db.query(`UPDATE users SET introduce = ? WHERE id = ?`,[introduce, user_id])
-            .then(rows => {
-                if (rows.affectedRows === 0) {
-                    reject({
-                        code: 404,
-                        data: {
-                            message: "User not found"
-                        }
-                    })
-                } else {
-                    resolve({
-                        code: 204
-                    })
-                }
-            }).catch(reject)
-        }
-    })
-
-    decodeToken(token).then(updateUser).then(success).catch(fail);
+        const up = multer({ storage: storage }).single('file');
+        up(req, res, err => {
+            if (err)
+                throw err;
+            res.status(204).json();
+        })
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.post('/:user_id/profile', (req, res) => {
+router.delete('/:user_id/profile', async (req, res, next) => {
     const { user_id } = req.params;
-    const { decodeToken, success, fail } = require('./common')(res);
-
-    const createProfile = (u_id) => new Promise((resolve, reject) => {
-        if (u_id != user_id) {
-            reject({
-                code: 401,
-                message: "Authentication failed"
-            })
-        } else {
-            const storage = multer.diskStorage({
-                destination: (req, file, cb) => {
-                    cb(null, `uploads/`)
-                },
-                filename: (req, file, cb) => {
-                    const filename = jwt.encode({
-                        user_id: user_id,
-                        object: 'profile'
-                    })
-                    cb(null, filename + '.jpg');
-                }
-            });
-    
-            const up = multer({ storage: storage }).single('file');
-            up(req, res, err => {
-                if (err) {
-                    reject({
-                        code: 400,
-                        data: {
-                            message: err
-                        }
-                    })
-                } else {
-                    resolve({
-                        code: 204
-                    })
-                }
-            })
-        }
-    })
-    decodeToken(token).then(createProfile).then(success).catch(fail);
-})
-
-router.delete('/:user_id/profile', (req, res) => {
-    const { user_id } = req.params;
-    const { decodeToken, success, fail } = require('./common')(res);
     const token = req.headers['x-access-token'];
-
-    const deleteProfile = (u_id) => new Promise((resolve, reject) => {
-        if (user_id === u_id) {
-            const filename = jwt.encode({
-                user_id: user_id,
-                object: 'profile'
-            })
-            fs.unlinkSync(`./uploads/${filename}.jpg`);
-            resolve({
-                code: 204
-            })
-        } else {
-            reject({
-                code: 401,
-                data: {
-                    message: "Authentication failed"
-                }
-            })
-        }
-    })
-
-
-    decodeToken(token).then(deleteProfile).then(success).catch(fail);
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`,[email, password]);
+        if (user.id != user_id) 
+            throw { status: 401, message: "Authentication failed" }
+        const filename = jwt.encode({
+            user_id: user_id,
+            object: 'profile'
+        })
+        fs.unlinkSync(`./uploads/${filename}.jpg`);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.get('/:user_id/posts', (req, res) => {    
+router.get('/:user_id/posts', async (req, res, next) => {    
     const { user_id } = req.params;
     const { limit, offset } = req.query;
-    const { success, fail } = require('./common')(res);
     const option = [user_id];
     let sql = `
     SELECT
@@ -174,25 +116,17 @@ router.get('/:user_id/posts', (req, res) => {
         }
     }
 
-    const getUserPosts = () => new Promise((resolve, reject) => {
-        db.query(sql,option)
-        .then(rows => {
-            resolve({
-                code: 200,
-                data: {
-                    posts: rows
-                }
-            })
-        }).catch(reject)
-    })
-
-    getUserPosts().then(success).catch(fail);
+    try {
+        const [posts] = await pool.query(sql, option);
+        res.status(200).json({ posts });
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.get('/:user_id/posts/comments', (req, res) => {
+router.get('/:user_id/posts/comments', async (req, res, next) => {
     const { user_id } = req.params;
     const { limit, offset } = req.query;
-    const { success, fail } = require('./common')(res);
     const option = [user_id];
     let sql = 'SELECT id, value FROM post_comments WHERE user_id = ?';
 
@@ -205,25 +139,17 @@ router.get('/:user_id/posts/comments', (req, res) => {
         }
     }
 
-    const getUserComments = () => new Promise((resolve, reject) => {
-        db.query(sql,option)
-        .then(rows => {
-            resolve({
-                code: 200,
-                data: {
-                    comments: rows
-                }
-            })
-        }).catch(reject)
-    })
-    
-    getUserComments().then(success).catch(fail);
+    try {
+        const [comments] = await pool.query(sql, option);
+        res.status(200).json({ comments });
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.get('/:user_id/reviews', (req, res) => {
+router.get('/:user_id/reviews', async (req, res, next) => {
     const { user_id } = req.params;
     const { limit, offset, game_id } = req.query;
-    const { success, fail } = require('./common')(res);
     const option = [user_id];
     let sql = 'SELECT id, value, score FROM game_reviews WHERE user_id = ?';
     if (game_id) {
@@ -240,28 +166,17 @@ router.get('/:user_id/reviews', (req, res) => {
         }
     }
 
-    const getUserReviews = () => new Promise((resolve, reject) => {
-        db.query(sql,option)
-        .then(rows => {
-            resolve({
-                code: 200,
-                data: {
-                    reviews: rows
-                }
-            })
-        }).catch(reject)
-    })
-
-    getUserReviews().then(success).catch(fail);
+    try {
+        const [reviews] = await pool.query(sql, option);
+        res.status(200).json({ reviews });
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.get('/:user_id/games/rating', (req, res) => {
+router.get('/:user_id/games/rating', async (req, res, next) => {
     const { user_id } = req.params;
-    const { success, fail } = require('./common')(res);
-
-    const getUserRating = () => new Promise((resolve, reject) => {
-        /*(SELECT JSON_ARRAYAGG(JSON_OBJECT("id",id,"value",value)) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_tags.game_id = game_reviews.game_id) AS tag_id*/
-        const sql = `
+    const sql = `
         SELECT 
             game_reviews.game_id, AVG(score) AS score, 
             (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_tags.game_id = game_reviews.game_id) AS tags,
@@ -270,49 +185,39 @@ router.get('/:user_id/games/rating', (req, res) => {
         WHERE game_reviews.user_id = ?
         GROUP BY game_reviews.game_id
         `
-        db.query(sql,[user_id]).then(rows => {
-            resolve({
-                code: 200,
-                data: {
-                    data: rows
-                }
-            })
-        }).catch(reject)
-    })
-    getUserRating().then(success).catch(fail);
+    
+    try {
+        const [data] = await pool.query(sql,[user_id]);
+        res.status(200).json({ data });
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.get('/:user_id/games/recommend', (req, res) => {
+router.get('/:user_id/games/recommend', async (req, res, next) => {
     const { tags, limit } = req.query;
-    const { success, fail } = require('./common')(res);
     const count = JSON.parse(tags).length;
     const tmp = '(' + tags.substring(1,tags.length-1) + ')'
-    
-    const recommendGames = () => new Promise((resolve ,reject) => {
-        let sql = `
-        SELECT id, title 
-        FROM games 
-        WHERE id IN (
-            SELECT game_id 
-            FROM (SELECT game_id, COUNT(game_id) AS count FROM game_tags WHERE tag_id IN ${tmp} GROUP BY game_id) AS tmp 
-            WHERE count = ?
-        )`;
-        const option = [count];
-        if (limit) {
-            sql += ` LIMIT ?`;
-            option.push(Number(limit));
-        }
-        db.query(sql, option)
-        .then(rows => {
-            resolve({
-                code: 200,
-                data: {
-                    games: rows
-                }
-            })
-        }).catch(reject);
-    })
-    recommendGames().then(success).catch(fail);
+
+    let sql = `
+    SELECT id, title 
+    FROM games 
+    WHERE id IN (
+        SELECT game_id 
+        FROM (SELECT game_id, COUNT(game_id) AS count FROM game_tags WHERE tag_id IN ${tmp} GROUP BY game_id) AS tmp 
+        WHERE count = ?
+    )`;
+    const option = [count];
+    if (limit) {
+        sql += ` LIMIT ?`;
+        option.push(Number(limit));
+    }
+    try {
+        const [games] = pool.query(sql, option);
+        res.status(200).json({ games });
+    } catch (err) {
+        next(err);
+    }
 })
 
 module.exports = router;

@@ -12,11 +12,11 @@ module.exports = {
                 }
                 conn.query(sql, opt, (err, rows) => {
                     if (err) {
-                        reject(err);
                         conn.release();
+                        reject(err);
                     }
-                    resolve(rows);
                     conn.release();
+                    resolve(rows);
                 })
             })
         })

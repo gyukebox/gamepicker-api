@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const mysql = require('mysql2/promise');
 
 const games = require('./controller/games');
 const users = require('./controller/users');
@@ -16,6 +17,10 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use((req, res, next) => {
+    global.pool = mysql.createPool(require('./config/database'));
+    next();
+})
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -42,8 +47,13 @@ app.use('/platforms', platforms);
 app.use('/auth', auth);
 app.use('/manage', manage);
 app.use('/admin', admin);
-app.use('*', (req, res) => {
-    res.status(404).send('Page Not Found')
+app.use('*', (req, res, next) => {
+    res.status(404).send('Page Not Found');
+})
+app.use((err, req, res, next) => {    
+    res.status(err.status || 500).json({
+        message: err.message
+    })
 })
 
 app.listen(port);

@@ -1,161 +1,95 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../model/database');
 const jwt = require('../model/jwt');
 
-router.post('/questions', (req, res) => {
+router.post('/questions', async (req, res, next) => {
     const { title, email, value } = req.body;
-    const { success, fail } = require('./common')(res);
-    const createQuestion = () => new Promise((resolve, reject) => {
-        db.query(`INSERT INTO questions (title, email, value) VALUES (?, ?, ?)`,[title, email, value])
-        .then(rows => {
-            resolve({
-                code: 204
-            })
-        }).catch(reject)
-    })  
-    createQuestion().then(success).catch(fail);
+    try {
+        await pool.query(`INSERT INTO questions (title, email, value) VALUES (?, ?, ?)`,[title, email, value]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.get('/questions', (req, res) => {
-    const { success, fail } = require('./common')(res);
-    const getQuestions = () => new Promise((resolve, reject) => {
-        db.query(`SELECT id, title, email, value FROM questions`)
-        .then(rows => {
-            resolve({
-                code: 200,
-                data: {
-                    questions: rows
-                }
-            })
-        }).catch(reject)
-    })
-    getQuestions().then(success).catch(fail)
+router.get('/questions', async (req, res, next) => {
+    try {
+        const [questions] = await pool.query(`SELECT id, title, email, value FROM questions WHERE reply IS NULL`);
+        res.status(200).json({ questions })
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.post('/questions/:question_id/reply', (req, res) => {
+router.post('/questions/:question_id/reply', async (req, res, next) => {
     const { question_id } = req.params;
-    const { decodeToken, adminAuth, success, fail } = require('./common')(res);
     const { reply } = req.body;
     const token = req.headers['x-access-token'];
-
-    const task = () => new Promise((resolve, reject) => {
-        db.query(`UPDATE questions SET reply = ? WHERE id = ?`,[reply, question_id])
-        .then(rows => {
-            if (rows.affectedRows === 0) {
-                reject({
-                    code: 404,
-                    data: {
-                        message: 'Question not found'
-                    }
-                })
-            } else {
-                resolve({
-                    code: 204
-                })
-            }
-        }).catch(reject)
-    })
-
-    decodeToken(token).then(adminAuth).then(task).then(success).catch(fail);
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[admin]] = await pool.query(`SELECT 1 FROM admin LEFT JOIN users IN users.id = admin.user_id WHERE email = ? AND password = ?`,[email, password]);
+        if (!admin)
+            throw { status: 401, message: '관리자 권한이 필요합니다' }
+        const [rows] = await pool.query(`UPDATE questions SET reply = ? WHERE id = ?`, [reply, question_id]);
+        if (rows.affectedRows === 0)
+            throw { status: 404, message: 'Question not found' }
+        res.status(204).json()
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.post('/login', (req, res) => {
-    const { success, fail } = require('./common')(res);
-    const { email, password } = req.body;
-
-    const login = () => new Promise((resolve, reject) => {
-        db.query(`SELECT * FROM admin WHERE user_id = (SELECT id FROM users WHERE email = ? AND password = ?)`,[email, password])
-        .then(rows => {
-            if (rows.length === 0) {
-                reject({
-                    code: 404,
-                    data: {
-                        message: 'Admin not found'
-                    }
-                })
-            } else {
-                resolve({
-                    code: 200,
-                    data: {
-                        token: jwt.encode({
-                            email: email,
-                            password: password
-                        })
-                    }
-                })
-            }
-        })
-    })
-
-    login().then(success).catch(fail);
-})
-
-router.get('/notices', (req, res) => {
-    const { success, fail } = require('./common')(res);
+router.get('/notices', async (req, res, next) => {
     const { limit, offset } = req.query;
-    const getNotices = () => new Promise((resolve, reject) => {
-        let sql = `SELECT id, title, value, created_at FROM notices`;
-        const option = [];
-        if (limit) {
-            sql += ` LIMIT ?`;
-            option.push(Number(limit))
-            if (offset) {
-                sql += ` OFFSET ?`;
-                option.push(Number(offset));
-            }
+    let sql = `SELECT id, title, value, created_at FROM notices`;
+    const option = [];
+    if (limit) {
+        sql += ` LIMIT ?`;
+        option.push(Number(limit))
+        if (offset) {
+            sql += ` OFFSET ?`;
+            option.push(Number(offset));
         }
-        db.query(sql, option)
-        .then(rows => {
-            resolve({
-                code: 200,
-                data: {
-                    notices: rows
-                }
-            })
-        }).catch(reject)
-    })
-
-    getNotices().then(success).catch(fail);
+    }
+    try {
+        const [notices] = await pool.query(sql, option);
+        res.status(200).json({ notices })
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.post('/notices', (req, res) => {
-    const { decodeToken, adminAuth, success, fail } = require('./common')(res);
+router.post('/notices', async (req, res, next) => {
     const token = req.headers['x-access-token'];
     const { title, value } = req.body;
-    const createNotice = () => new Promise((resolve, reject) => {
-        db.query(`INSERT INTO notices (title, value) VALUES (?, ?)`,[title, value])
-        .then(rows => {
-            resolve({
-                code: 204
-            })
-        }).catch(reject)
-    })
-    decodeToken(token).then(adminAuth).then(createNotice).then(success).catch(fail);
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[admin]] = await pool.query(`SELECT user_id FROM admin LEFT JOIN users ON users.id = admin.user_id WHERE email = ? AND password = ?`,[email, password]);
+        if (!admin)
+            throw { status: '401', message: '관리자 권한이 필요합니다'}
+        await pool.query(`INSERT INTO notices (title, value) VALUES (?, ?)`,[title, value]);
+        res.status(204).json()
+    } catch (err) {
+        next(err);
+    }
 })
 
-router.delete('/notices/:notice_id', (req, res) => {
-    const { decodeToken, adminAuth, success, fail } = require('./common')(res);
+router.delete('/notices/:notice_id', async (req, res, next) => {
     const token = req.headers['x-access-token'];
     const { notice_id } = req.params;
-    const deleteNotice = () => new Promise((resolve, reject) => {
-        db.query(`DELETE FROM notices WHERE id = ?`,[notice_id])
-        .then(rows => {
-            if (rows.affectedRows === 0) {
-                reject({
-                    code: 404,
-                    data: {
-                        message: 'Notice not found'
-                    }
-                })
-            } else {
-                resolve({
-                    code: 204
-                })
-            }
-        }).catch(reject)
-    })
-    decodeToken(token).then(adminAuth).then(deleteNotice).then(success).catch(fail);
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[admin]] = await pool.query(`SELECT user_id FROM admin LEFT JOIN users ON users.id = admin.user_id WHERE email = ? AND password = ?`,[email, password]);
+        if (!admin)
+            throw { status: 401, message: '관리자 권한이 필요합니다'}
+        const [rows] = await pool.query(`DELETE FROM notices WHERE id = ?`[notice_id]);
+        if (rows.affectedRows === 0)
+            throw { status: 410, message: '이미 삭제된 공지입니다'}
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
 })
+
 
 module.exports = router;
