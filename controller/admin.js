@@ -91,5 +91,24 @@ router.delete('/notices/:notice_id', async (req, res, next) => {
     }
 })
 
+/*
+router.post('/push', async (req, res, next) => {
+    const token = req.headers['x-access-token'];
+    const { age, gender, login, reserve } = req.body;
+    let sql = `SELECT os_type, reg_id FROM users WHERE `;
+    if (age) {
+        const today = new Date().toISOString().slice(0,10);
+    }
+    if (gender) {
+
+    }
+    if (login) {
+
+    }
+    if (reserve) {
+
+    }
+})
+*/
 
 module.exports = router;

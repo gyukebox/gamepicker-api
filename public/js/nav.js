@@ -20,5 +20,4 @@ document.addEventListener('DOMContentLoaded', () => {
     faLink.crossOrigin = "anonymous"
     document.querySelector('head').appendChild(faLink);
     document.querySelector('body').prepend(nav);
-
 })

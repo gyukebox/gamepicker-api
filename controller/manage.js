@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.render('../views/index.html')
+    res.render('../views/index', {
+        title: 'test',
+        length: 6
+    })
 })
 
 router.get('/login', (req, res) => {
@@ -11,6 +14,10 @@ router.get('/login', (req, res) => {
 
 router.get('/games', (req, res) => {
     res.render('../views/games.html')
+})
+
+router.get('/games/create', (req, res) => {
+    res.render('../views/games/create')
 })
 
 router.get('/games/:id', (req, res) => {
