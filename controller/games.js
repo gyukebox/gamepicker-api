@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('../model/jwt');
 
 router.get('/', async (req, res, next) => {
-    const { limit, offset } = req.query;
+    const { limit, offset, platform_id } = req.query;
     const { sort } = req.query;
 
     let sql = `
@@ -21,6 +21,11 @@ router.get('/', async (req, res, next) => {
             (SELECT COUNT(score) FROM game_reviews WHERE game_id = games.id) AS score_count
         FROM games`
     const option = [];
+
+    if (platform_id) {
+        sql += ` WHERE EXISTS (SELECT 1 FROM game_platforms WHERE game_id = games.id AND platform_id = ?)`;
+        option.push(platform_id);
+    }
 
     switch (sort) {
         case "random":

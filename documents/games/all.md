@@ -11,6 +11,7 @@
 Query {
     limit : Limit the number of data,
     offset : Set start index, required 'limit',
+    platform_id : Get games containing 'platform_id',
     sort: {
         random: Loads the game in random order
     }
