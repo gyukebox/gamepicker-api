@@ -220,4 +220,16 @@ router.get('/:user_id/games/recommend', async (req, res, next) => {
     }
 })
 
+router.get('/:user_id/games/favor', async (req, res, next) => {
+    const { user_id } = req.params;
+    
+    try {
+        const [rows] = await pool.query(`SELECT game_id FROM favor WHERE user_id = ?`,[user_id]);
+        const favor = rows.map(obj => obj.game_id);
+        res.status(200).json({ favor });
+    } catch (err) {
+        next(err);
+    }
+})
+
 module.exports = router;
