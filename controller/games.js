@@ -230,7 +230,7 @@ router.put('/:game_id/reviews/:review_id', async (req, res, next) => {
         if (!user)
             throw { status: 404, message: 'User not found' }
         option.push(review_id, game_id, user.id);
-        const [rows] = await pool.query(`UPDATE FROM game_reviews SET ${set_string} WHERE id = ? AND game_id = ? AND user_id = ?`, option);
+        const [rows] = await pool.query(`UPDATE INTO game_reviews SET ${set_string} WHERE id = ? AND game_id = ? AND user_id = ?`, option);
         if (rows.affectedRows === 0)
             throw { status: 404, message: 'Review not found' }
         res.status(204).json();
