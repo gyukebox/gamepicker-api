@@ -76,7 +76,7 @@ router.post('/register', async (req, res, next) => {
     })
     try {
         const {salt, hash} = await encrypt(password);
-        const token = jwt.encode({ email: email, hash: hash })
+        const token = jwt.encode({ email: email, password: hash })
         await sendMail(token);
         await pool.query('INSERT INTO users(name, email, password, birthday, gender, salt) VALUES (?, ?, ?, ?, ?, ?)', [name, email, hash, birthday, gender, salt]);
         res.status(204).json();
