@@ -30,6 +30,8 @@
 * [Favorites game](documents/games/favor/create.md) : `POST /games/:game_id/favor`
 * [Check favorite](documents/games/favor/read.md) : `GET /games/:game_id/favor`
 * [Delete favorte](documents/games/favor/delete.md) : `DELETE /games/:game_id/favor`
+* [Register advertising games](documents/games/advertising.md) : `POST /games/:game_id/advertising`
+* [Register affiliate games](documents/games/affiliate.md) : `POST /games/:game_id/affiliate`
 
 ## Post related 
 

@@ -299,4 +299,34 @@ router.delete('/:game_id/favor', async (req, res, next) => {
     }
 })
 
+router.post('/:game_id/advertising', async (req, res, next) => {
+    const token = req.headers['x-access-token'];
+    const { game_id } = req.params;
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[admin]] = await pool.query(`SELECT user_id FROM admin LEFT JOIN users ON admin.user_id = users.id WHERE users.email = ? AND users.password = ?`, [email, password]);
+        if (!admin)
+            throw { status: 401, message: 'Administrator authentication required' }
+        await pool.query(`INSERT INTO advertising_games (game_id) VALUES (?)`, [game_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/:game_id/affiliate', async (req, res, next) => {
+    const token = req.headers['x-access-token'];
+    const { game_id } = req.params;
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[admin]] = await pool.query(`SELECT user_id FROM admin LEFT JOIN users ON admin.user_id = users.id WHERE users.email = ? AND users.password = ?`, [email, password]);
+        if (!admin)
+            throw { status: 401, message: 'Administrator authentication required' }
+        await pool.query(`INSERT INTO affiliate_games (game_id) VALUES (?)`, [game_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;

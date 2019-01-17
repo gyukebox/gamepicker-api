@@ -4,6 +4,29 @@ const multer = require('multer');
 const fs = require('fs');
 const jwt = require('../model/jwt');
 
+router.get('/', async (req, res, next) => {
+    const { name, email } = req.query;
+    try {
+        if (name) {
+            const [[user]] = await pool.query(`SELECT id FROM users WHERE name = ?`,[name]);
+            if (!user)
+                throw { status: 404, message: 'User not found' }
+            res.status(200).json(user);
+        }
+        if (email) {
+            const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ?`,[email]);
+            if (!user)
+                throw { status: 404, message: 'User not found' }
+            res.status(200).json(user);
+        }
+        const [users] = await pool.query(`SELECT id, email, name FROM users`);
+        res.status(200).json(users);
+    } catch (err) {
+        next(err);
+    }
+    
+});
+
 router.get('/:user_id', async (req, res, next) => {
     const { user_id } = req.params;
     try {
