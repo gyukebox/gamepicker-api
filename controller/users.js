@@ -5,22 +5,22 @@ const fs = require('fs');
 const jwt = require('../model/jwt');
 
 router.get('/', async (req, res, next) => {
-    const { name, email } = req.query;
+    const { name, email } = req.query;    
     try {
+        let sql = `SELECT id, email, name FROM users`;
+        const options = [];
+        if (name || email)
+            sql += ` WHERE`
         if (name) {
-            const [[user]] = await pool.query(`SELECT id FROM users WHERE name = ?`,[name]);
-            if (!user)
-                throw { status: 404, message: 'User not found' }
-            res.status(200).json(user);
+            sql += ` name = ?`;
+            options.push(name);
         }
         if (email) {
-            const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ?`,[email]);
-            if (!user)
-                throw { status: 404, message: 'User not found' }
-            res.status(200).json(user);
+            sql += ` email = ?`;
+            options.push(email);
         }
-        const [users] = await pool.query(`SELECT id, email, name FROM users`);
-        res.status(200).json(users);
+        const [users] = await pool.query(sql, options);
+        res.status(200).json({users});
     } catch (err) {
         next(err);
     }
