@@ -255,4 +255,29 @@ router.get('/:user_id/games/favor', async (req, res, next) => {
     }
 })
 
+router.post('/:user_id/push', async (req, res, next) => {
+    const { user_id } = req.params;
+    const { os_type, reg_id } = req.body;
+    try {
+        const [rows] = await pool.query(`UPDATE users SET os_type = ?, reg_id = ? WHERE id = ?`,[os_type, reg_id, user_id]);
+        if (rows.affectedRows === 0)
+            throw { status: 404, message: 'User not found' }
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.delete('/:user_id/push', async (req, res, next) => {
+    const { user_id } = req.params;
+    try {
+        const [rows] = await pool.query(`UPDATE users SET reg_id = ? WHERE id = ?`,[null, user_id]);
+        if (rows.affectedRows === 0)
+            throw { status: 404, message: 'User not found' }
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;

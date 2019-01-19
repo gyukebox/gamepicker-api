@@ -4,14 +4,14 @@ const cors = require('cors');
 const mysql = require('mysql2/promise');
 const logger = require('morgan');
 
-const games = require('./controller/games');
-const users = require('./controller/users');
-const posts = require('./controller/posts');
-const tags = require('./controller/tags');
-const platforms = require('./controller/platforms');
-const auth = require('./controller/auth');
-const manage = require('./controller/manage');
-const admin = require('./controller/admin');
+const games = require('./routes/games');
+const users = require('./routes/users');
+const posts = require('./routes/posts');
+const tags = require('./routes/tags');
+const platforms = require('./routes/platforms');
+const auth = require('./routes/auth');
+const manage = require('./routes/manage');
+const admin = require('./routes/admin');
 
 const app = express();
 

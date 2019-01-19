@@ -1,14 +1,16 @@
 const FCM = require('fcm-push');
-const fcm_config = require(__dirname + '/config/push.js');
+const path = require('path');
+const fcm_config = require('../../config/push');
 const fcm = new FCM(fcm_config.secret);
 
 module.exports = async (req, res, next) => {
     const { age, gender, lastLogin, title, content } = req.body;
-    const users = await getTargets(age, gender, lastLogin);
-    for (const user of users) {
-        await pushSend(user.osType, user.reg_id, title, content);
-    }
-
+    //const users = await getTargets(age, gender, lastLogin);
+    //for (const user of users) {
+        //await pushSend(user.osType, user.reg_id, title, content);
+    //}
+    const reg_id = 'duXqz72gRi8:APA91bG6JKCWkBaHjamI7bQhA_NOwUaNfmDkwyT-OFBAi27z349j6aL88zoxYaTD3BSo0iNXCaBLxvy8tDM1yM8KX-yCGiVLXISjk11VeuT7shLZ5ozB7Jnxy9yKyX6ANlMz603yc50a';
+    pushSend('android', reg_id, 'tttt', 'aaaa');
 }
 
 const getTargets = async (age, gender, lastLogin) => {
@@ -69,6 +71,8 @@ const pushSend = (osType, reg_id, title, msg) => {
             icon: "fcm_push_icon"
         }
     }
+    fcm.send(push_data);
+    /*
     try {
         const res = await fcm.send(push_data);
         console.log(res);
@@ -76,5 +80,7 @@ const pushSend = (osType, reg_id, title, msg) => {
         console.error(err);
         return err;
     }
-    
+    */
 }
+
+module.exports = pushSend;

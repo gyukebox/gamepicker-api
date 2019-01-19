@@ -91,24 +91,14 @@ router.delete('/notices/:notice_id', async (req, res, next) => {
     }
 })
 
-/*
 router.post('/push', async (req, res, next) => {
     const token = req.headers['x-access-token'];
     const { age, gender, login, reserve } = req.body;
-    let sql = `SELECT os_type, reg_id FROM users WHERE `;
-    if (age) {
-        const today = new Date().toISOString().slice(0,10);
-    }
-    if (gender) {
+    const reg_id = 'duXqz72gRi8:APA91bG6JKCWkBaHjamI7bQhA_NOwUaNfmDkwyT-OFBAi27z349j6aL88zoxYaTD3BSo0iNXCaBLxvy8tDM1yM8KX-yCGiVLXISjk11VeuT7shLZ5ozB7Jnxy9yKyX6ANlMz603yc50a';
 
-    }
-    if (login) {
-
-    }
-    if (reserve) {
-
-    }
+    const pushSend = require('./push/create');
+    await pushSend('android', reg_id, 'aaa', 'ttt');
+    res.status(200).json();
 })
-*/
 
 module.exports = router;
