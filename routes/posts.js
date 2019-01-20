@@ -241,7 +241,7 @@ router.delete('/:post_id/comments/:comment_id', async (req, res, next) => {
     try {
         const { email, password } = jwt.decode(token);
         const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        const [rows] = await pool.query(`DELETE FROM post_comments WHERE user_id = ? AND post_id = ? AND id = ?`,[user_id, post_id, comment_id]);
+        const [rows] = await pool.query(`DELETE FROM post_comments WHERE user_id = ? AND post_id = ? AND id = ?`,[user.id, post_id, comment_id]);
         if (rows.affectedRows === 0)
             throw { status: 404, message: 'Comment not found' }
         res.status(204).json();
