@@ -93,11 +93,14 @@ router.delete('/notices/:notice_id', async (req, res, next) => {
 
 router.post('/push', async (req, res, next) => {
     const token = req.headers['x-access-token'];
-    const { age, gender, login, reserve } = req.body;
+    const { age, gender, lastLogin, reserve } = req.body;
+    const { title, content } = req.body;
     const reg_id = 'duXqz72gRi8:APA91bG6JKCWkBaHjamI7bQhA_NOwUaNfmDkwyT-OFBAi27z349j6aL88zoxYaTD3BSo0iNXCaBLxvy8tDM1yM8KX-yCGiVLXISjk11VeuT7shLZ5ozB7Jnxy9yKyX6ANlMz603yc50a';
 
-    const pushSend = require('./push/create');
-    await pushSend('android', reg_id, 'aaa', 'ttt');
+    const push = require('../controller/push-notification');
+    console.log(lastLogin);
+    
+    await push(age, lastLogin, gender, reserve, title, content);
     res.status(200).json();
 })
 

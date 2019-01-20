@@ -1,31 +1,40 @@
 const FCM = require('fcm-push');
-const path = require('path');
-const fcm_config = require('../../config/push');
+const fcm_config = require('../config/push');
 const fcm = new FCM(fcm_config.secret);
+console.log(fcm_config.secret);
 
-module.exports = async (req, res, next) => {
-    const { age, gender, lastLogin, title, content } = req.body;
-    //const users = await getTargets(age, gender, lastLogin);
-    //for (const user of users) {
-        //await pushSend(user.osType, user.reg_id, title, content);
-    //}
+
+
+module.exports = async (age, lastLogin, gender, reserve, title, content) => {
+    console.log(lastLogin);
+    
+    
+    const users = await getTargets(age, gender, lastLogin);
+    console.log(users);
+    
+    
+    for (const user of users) {
+        const res = await pushSend(user.osType, user.reg_id, title, content);
+        console.log(res);
+        
+    }
+    
     const reg_id = 'duXqz72gRi8:APA91bG6JKCWkBaHjamI7bQhA_NOwUaNfmDkwyT-OFBAi27z349j6aL88zoxYaTD3BSo0iNXCaBLxvy8tDM1yM8KX-yCGiVLXISjk11VeuT7shLZ5ozB7Jnxy9yKyX6ANlMz603yc50a';
-    pushSend('android', reg_id, 'tttt', 'aaaa');
 }
 
+
 const getTargets = async (age, gender, lastLogin) => {
-    let sql = `SELECT osType, reg_id FROM users`;
+    let sql = `SELECT os_type, reg_id FROM users`;
     const options = [];
     const conditions = [];
-    
     const today = new Date();
     const year = today.getFullYear();
-    if (!isNan(age.from)) {
+    if (!isNaN(age.from)) {
         today.setFullYear(year-age.from);
         conditions.push(`birthday < ?`);
         options.push(today.toISOString().slice(0,10));
     }
-    if (!isNan(age.to)) {
+    if (!isNaN(age.to)) {
         today.setFullYear(year - age.to);
         conditions.push(`birthday > ?`);
         options.push(today.toISOString().slice(0,10));
@@ -51,16 +60,17 @@ const getTargets = async (age, gender, lastLogin) => {
             sql += ` WHERE `;
         }
         sql += cond;
-        if (idx !== conditions.length-1) {
-            sql += ` AND `
-        }
+        sql += ` AND `
     });
-
+    sql += `reg_id IS NOT NULL`
+    console.log(sql);
+    console.log(options);
+    
     const [users] = await pool.query(sql, options);
     return users;
 }
 
-const pushSend = (osType, reg_id, title, msg) => {
+const pushSend = async (osType, reg_id, title, msg) => {
     const push_data = {
         to: reg_id,
         notification: {
@@ -72,15 +82,14 @@ const pushSend = (osType, reg_id, title, msg) => {
         }
     }
     fcm.send(push_data);
-    /*
     try {
         const res = await fcm.send(push_data);
         console.log(res);
     } catch (err) {
-        console.error(err);
+        console.error("error", err);
         return err;
     }
-    */
+    return;
 }
 
-module.exports = pushSend;
+module.exports.pushSend = pushSend;

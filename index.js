@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
 const logger = require('morgan');
+const path = require('path');
 
 const games = require('./routes/games');
 const users = require('./routes/users');
@@ -21,6 +22,7 @@ app.use(bodyParser.json());
 app.get('/favicon.ico', (req, res) => {
     res.sendFile(__dirname + '/public/images/favicon.ico')
 })
+app.use('/swagger-ui', express.static(path.join(__dirname, './node_modules/swagger-ui/dist')));
 app.use(logger(':date :method :url :status :res[content-length] - :response-time ms'));
 app.use((req, res, next) => {
     global.pool = mysql.createPool(require('./config/database'));

@@ -29,7 +29,7 @@ router.post('/login', async (req, res, next) => {
             if (!admin) 
                 throw { status: 404, message: 'Admin not found' }
         }
-        await pool.query(`UPDATE users SET os_type = ?, reg_id = ? WHERE id = ?`,[os_type, reg_id, user.id])
+        await pool.query(`UPDATE users SET updated_at = NOW() WHERE id = ?`,[user.id])
         res.status(200).json({
             user_id: user.id,
             token: jwt.encode({
