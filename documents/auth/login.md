@@ -10,9 +10,7 @@
 ```
 {
     email: Vaild email address,
-    password : password in plain text,
-    os_type : OS type (android or iphone),
-    reg_id : Unique token of phone (required for push notification)
+    password : password in plain text
 }
 ```
 

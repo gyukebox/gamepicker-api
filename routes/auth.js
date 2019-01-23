@@ -7,7 +7,7 @@ const pbkdf2Password = require('pbkdf2-password');
 const hasher = pbkdf2Password(); 
 
 router.post('/login', async (req, res, next) => {
-    const { email, password, os_type, reg_id } = req.body;
+    const { email, password } = req.body;
     const { admin } = req.query;
     const getHash = (salt, password) => new Promise((resolve, reject) => {
         hasher({ password: password, salt: salt }, (err, pass, salt, hash) => {
