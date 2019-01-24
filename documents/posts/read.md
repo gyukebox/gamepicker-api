@@ -8,7 +8,9 @@
 
 **Data constraints** 
 ```
-NULL
+Header {
+    "x-access-token" : Token from 'GET /auth/login' (Optional)
+}
 ```
 
 ## Success Response
@@ -29,7 +31,9 @@ NULL
         "game_title": null,
         "game_id": null,
         "recommends": 0,
-        "disrecommends": 0
+        "disrecommends": 0,
+        "disreommended": 0,
+        "reommended": 1
     }
 }
 ```
