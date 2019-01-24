@@ -38,6 +38,18 @@ NULL
 
 ***
 
+**Condition** : Already recommended this post
+
+**Code** : `400 Bad Request`
+
+**Content**
+```
+{
+    message: "Already recommended post"
+}
+```
+
+
 **Condition** : 'x-access-token' is not included in the header
 
 **Code** : `400 Bad Request`

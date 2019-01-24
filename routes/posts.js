@@ -128,11 +128,15 @@ router.post('/:post_id/recommend', async (req, res, next) => {
     try {
         const { email, password } = jwt.decode(token);
         const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        const [rows] = await pool.query(`INSERT INTO post_recommends (user_id, post_id) VALUES (?, ?)`,[user.id, post_id]);
-        if (rows.affectedRows === 0)
-            throw { status: 404, message: 'Post not found' }
+        const [rows] = await pool.query(`INSERT INTO post_recommends (user_id, post_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM post_recommends WHERE user_id = ? AND post_id = ?)`,[user.id, post_id, user.id, post_id]);
+        if (rows.affectedRows === 0)                            //recommend twice
+            throw { status: 400, message: 'Already recommended post' }
         res.status(204).json();
     } catch (err) {
+        if (err.errno === 1452 && err.sqlState === '23000') {  //not exists post_id
+            err = new Error('Post not found');
+            err.status = 404;
+        }
         next(err);
     }
 })
@@ -143,11 +147,15 @@ router.post('/:post_id/disrecommend', async (req, res, next) => {
     try {
         const { email, password } = jwt.decode(token);
         const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        const [rows] = await pool.query(`INSERT INTO post_disrecommends (user_id, post_id) VALUES (?, ?)`,[user.id, post_id]);
-        if (rows.affectedRows === 0)
-            throw { status: 404, message: 'Post not found'}
+        const [rows] = await pool.query(`INSERT INTO post_disrecommends (user_id, post_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM post_disrecommends WHERE user_id = ? AND post_id = ?)`,[user.id, post_id, user.id, post_id]);
+        if (rows.affectedRows === 0)                            //recommend twice
+            throw { status: 400, message: 'Already recommended post' }
         res.status(204).json();
     } catch (err) {
+        if (err.errno === 1452 && err.sqlState === '23000') {  //not exists post_id
+            err = new Error('Post not found');
+            err.status = 404;
+        }
         next(err);
     }
 })
