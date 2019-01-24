@@ -41,13 +41,16 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:post_id', async (req, res, next) => {
     const { post_id } = req.params;
+    const token = req.headers['x-access-token'];
     const sql = `
     SELECT
         posts.id, posts.title, views, value, posts.updated_at,
         users.name, users.id as user_id,  
         games.title AS game_title, games.id AS game_id,
-        (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) as recommends,
-        (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) as disrecommends
+        (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) AS recommends,
+        (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) AS disrecommends,
+        FALSE AS recommended,
+        FALSE AS disreommended
     FROM
         posts
         LEFT JOIN users ON users.id = posts.user_id
@@ -58,6 +61,18 @@ router.get('/:post_id', async (req, res, next) => {
         const [[post]] = await pool.query(sql, [post_id]);
         if (!post)
             throw { status: 404, message: 'Post not found' }
+        if (token) {
+            const { email, password } = jwt.decode(token);
+            const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
+            const [recommend] = await pool.query(`SELECT * FROM post_recommends WHERE user_id = ? AND post_id = ?`, [user.id, post_id]);
+            if (recommend.length > 0) {
+                post.reommended = 1;
+            }
+            const [disrecommend] = await pool.query(`SELECT * FROM post_disrecommends WHERE user_id = ? AND post_id = ?`, [user.id, post_id]);
+            if (disrecommend.length > 0) {
+                post.disreommended = 1;
+            }
+        }
         res.status(200).json({ post })
     } catch (err) {
         next(err);
