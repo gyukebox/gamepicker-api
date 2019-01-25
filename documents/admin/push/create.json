@@ -1,0 +1,47 @@
+{
+    "title": "Send push notification",
+    "endpoint": "/admin/push",
+    "method": "post",
+    "request": {
+        "headers": {
+            "x-access-token": "Token from '/auth/login'"
+        },
+        "body": {
+            "age": "Target age group",
+            "gender": "Target gender",
+            "lastLogin": "A positive number means that you are logged in after the base date, and a negative number means that you are logged in before the base date (base date = Today's date - n)",
+            "reservation": "Date to send push notificaion (NULL == send push notificatoin right away)",
+            "message": "Message to push notification"
+        }
+    },
+    "response": [
+        {
+            "status": 204,
+            "data": null
+        },
+        {
+            "status": 400,
+            "data": {
+                "message": "'x-access-token' is required."
+            }
+        },
+        {
+            "status": 400,
+            "data": {
+                "message": "'x-access-token' is included, but can not be decoded."
+            }
+        },
+        {
+            "status": 401,
+            "data": {
+                "message": "Administrator authentication required"
+            }
+        },
+        {
+            "status": 404,
+            "data": {
+                "message": "Can not find user matching token. It may be an old token."
+            }
+        }
+    ]
+}
