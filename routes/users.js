@@ -175,7 +175,7 @@ router.get('/:user_id/reviews', async (req, res, next) => {
     const { user_id } = req.params;
     const { limit, offset, game_id } = req.query;
     const option = [user_id];
-    let sql = 'SELECT id, value, score FROM game_reviews WHERE user_id = ?';
+    let sql = 'SELECT id, game_id, value, score FROM game_reviews WHERE user_id = ?';
     if (game_id) {
         sql += ` AND game_id = ?`
         option.push(game_id)
