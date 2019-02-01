@@ -83,7 +83,8 @@ router.get('/:game_id', async (req, res, next) => {
                 '플레이타임', AVG(플레이타임),
                 '가격', AVG(가격),
                 'DLC', AVG(DLC),
-                '버그', AVG(버그)
+                '버그', AVG(버그),
+                '그래픽', AVG(그래픽)
             ) AS characteristics
         FROM games LEFT JOIN game_features ON games.id = game_features.game_id
         WHERE games.id = ?`
@@ -132,7 +133,7 @@ router.get('/:game_id/features', async (req, res, next) => {
         const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
         if (!user)
             throw { status: 404, message: 'User not found' }
-        const [[feature]] = await pool.query(`SELECT 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그 FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user.id]);
+        const [[feature]] = await pool.query(`SELECT 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user.id]);
         res.status(200).json({ feature });
     } catch (err) {
         next(err);
@@ -152,8 +153,8 @@ router.post('/:game_id/features', async (req, res, next) => {
         if (rows.length !== 0) {
             await pool.query(`DELETE FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user.id]);
         }
-        await pool.query(`INSERT INTO game_features (game_id, user_id, 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [game_id, user.id, 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그]);
+        await pool.query(`INSERT INTO game_features (game_id, user_id, 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [game_id, user.id, 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽]);
         res.status(204).json();
     } catch (err) {
         if (err.errno === 1452)

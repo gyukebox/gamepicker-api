@@ -59,7 +59,7 @@ const getUserFeatures = () => new Promise((resolve, reject) => {
 
 const renderFeatures = async () => {
     const score = await getUserFeatures();
-    const features = [ '게임성', '조작성', '난이도', '스토리', '몰입도', 'BGM', '공포성', '과금유도', '노가다성', '진입장벽', '필요성능', '플레이타임', '가격', 'DLC', '버그' ];
+    const features = [ '게임성', '조작성', '난이도', '스토리', '몰입도', 'BGM', '공포성', '과금유도', '노가다성', '진입장벽', '필요성능', '플레이타임', '가격', 'DLC', '버그', '그래픽' ];
     const tbody = document.querySelector('table.select > tbody');
     features.forEach(feature => {
         const tr = document.createElement('tr');
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded',() => {
 })
 
 const getFeatures = () => {
-    const features = [ '게임성', '조작성', '난이도', '스토리', '몰입도', 'BGM', '공포성', '과금유도', '노가다성', '진입장벽', '필요성능', '플레이타임', '가격', 'DLC', '버그' ];
+    const features = [ '게임성', '조작성', '난이도', '스토리', '몰입도', 'BGM', '공포성', '과금유도', '노가다성', '진입장벽', '필요성능', '플레이타임', '가격', 'DLC', '버그', '그래픽' ];
     const features_score = {};
     features.forEach(feature => {
         const checked = document.querySelector(`#features input[name='${feature}']:checked`);        
