@@ -22,8 +22,6 @@ app.use(bodyParser.json());
 app.get('/favicon.ico', (req, res) => {
     res.sendFile(__dirname + '/public/images/favicon.ico')
 })
-app.use('/swagger-ui', express.static(path.join(__dirname, './node_modules/swagger-ui/dist')));
-app.use(logger(':date :method :url :status :res[content-length] - :response-time ms'));
 app.use((req, res, next) => {
     global.pool = mysql.createPool(require('./config/database'));
     next();
@@ -34,6 +32,7 @@ app.engine('html', require('ejs').renderFile);
 
 app.use('/public', express.static(__dirname + '/public'))
 app.use('/uploads', express.static(__dirname + '/uploads'))
+app.use(logger(':date :method :url :status :res[content-length] - :response-time ms'));
 
 const port = process.env.PORT || 80;
 

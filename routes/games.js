@@ -67,8 +67,25 @@ router.get('/:game_id', async (req, res, next) => {
             (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_id = games.id) AS tags,
             (SELECT JSON_ARRAYAGG(value) FROM game_platforms LEFT JOIN platforms ON platforms.id = game_platforms.platform_id WHERE game_id = games.id) AS platforms,
             (SELECT AVG(score) FROM game_reviews WHERE game_id = games.id) AS score,
-            (SELECT COUNT(score) FROM game_reviews WHERE game_id = games.id) AS score_count
-        FROM games
+            (SELECT COUNT(score) FROM game_reviews WHERE game_id = games.id) AS score_count,
+            JSON_OBJECT(
+                '게임성', AVG(게임성),
+                '조작성', AVG(조작성),
+                '난이도', AVG(난이도),
+                '스토리', AVG(스토리),
+                '몰입도', AVG(몰입도),
+                'BGM', AVG(BGM),
+                '공포성', AVG(공포성),
+                '과금유도', AVG(과금유도),
+                '노가다성', AVG(노가다성),
+                '진입장벽', AVG(진입장벽),
+                '필요성능', AVG(필요성능),
+                '플레이타임', AVG(플레이타임),
+                '가격', AVG(가격),
+                'DLC', AVG(DLC),
+                '버그', AVG(버그)
+            ) AS characteristics
+        FROM games LEFT JOIN game_features ON games.id = game_features.game_id
         WHERE games.id = ?`
     const option = [game_id];
     try {
@@ -105,36 +122,82 @@ router.post('/', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
+});
+
+router.get('/:game_id/features', async (req, res, next) => {
+    const token = req.headers['x-access-token'];
+    const { game_id } = req.params;
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
+        if (!user)
+            throw { status: 404, message: 'User not found' }
+        const [[feature]] = await pool.query(`SELECT 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그 FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user.id]);
+        res.status(200).json({ feature });
+    } catch (err) {
+        next(err);
+    }
+})
+
+router.post('/:game_id/features', async (req, res, next) => {
+    const token = req.headers['x-access-token'];
+    const { game_id } = req.params;
+    const { 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그 } = req.body;
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
+        if (!user)
+            throw { status: 404, message: 'User not found' }
+        const [rows] = await pool.query(`SELECT 1 FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user.id]);
+        if (rows.length !== 0) {
+            await pool.query(`DELETE FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user.id]);
+        }
+        await pool.query(`INSERT INTO game_features (game_id, user_id, 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [game_id, user.id, 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그]);
+        res.status(204).json();
+    } catch (err) {
+        if (err.errno === 1452)
+            err = { status: 400, message: 'Game not found' }
+        next(err);
+    }
+});
+
+router.delete('/:game_id/features', async (req, res, next) => {
+    const token = req.headers['x-access-token'];
+    const { game_id } = req.params;
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
+        if (!user)
+            throw { status: 404, message: 'User not found' }
+        await pool.query(`DELETE FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user.id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
 })
 
 router.put('/:game_id', async (req, res, next) => {
     const { game_id } = req.params;
     const token = req.headers['x-access-token'];
-    const { title, developer, publisher, summary, age_rate } = req.body;
-    let { images, videos, tags, platforms } = req.body;
+    const { title, developer, publisher, summary, age_rate, characteristics } = req.body;
+    let { images, videos, platforms } = req.body;
     
-    images = JSON.parse(images);
-    videos = JSON.parse(videos);
-    tags = JSON.parse(tags);
-    platforms = JSON.parse(platforms);
     try {
         const { email, password } = jwt.decode(token);
         const [rows] = await pool.query(`SELECT 1 FROM admin LEFT JOIN users ON users.id = admin.user_id WHERE email = ? AND password = ?`,[email, password]);
         if (rows.length === 0)
             throw 'Admin required'
-        await pool.beginTransaction();
-        await pool.query(`START TRANSACTION`)
+        await pool.query(`START TRANSACTION`);
 
-        await pool.query(`UPDATE games SET title = ?, developer = ?, publisher = ?, summary = ?, age_rate = ?`,[title, developer, publisher, summary, age_rate]);
+        await pool.query(`UPDATE games SET title = ?, developer = ?, publisher = ?, summary = ?, age_rate = ? WHERE id = ?`,[title, developer, publisher, summary, age_rate, game_id]);
         await pool.query(`DELETE FROM game_images WHERE game_id = ?`,[game_id]);
         await pool.query(`DELETE FROM game_videos WHERE game_id = ?`,[game_id]);
-        await pool.query(`DELETE FROM game_tags WHERE game_id = ?`,[game_id]);
         await pool.query(`DELETE FROM game_platforms WHERE game_id = ?`,[game_id]);
 
-        await pool.query(`INSERT INTO game_images (game_id, link) VALUES ${images.map(image => `(${insertId}, ?)`).toString()}`, images);
-        await pool.query(`INSERT INTO game_videos (game_id, link) VALUES ${videos.map(video => `(${insertId}, ?)`).toString()}`, videos);
-        await pool.query(`INSERT INTO game_tags (game_id, tag_id) VALUES ${tags.map(tag => `(${insertId}, ?)`).toString()}`, tags);
-        await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${insertId}, ?)`).toString()}`, platforms);
+        await pool.query(`INSERT INTO game_images (game_id, link) VALUES ${images.map(image => `(${game_id}, ?)`).toString()}`, images);
+        await pool.query(`INSERT INTO game_videos (game_id, link) VALUES ${videos.map(video => `(${game_id}, ?)`).toString()}`, videos);
+        await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${game_id}, ?)`).toString()}`, platforms);
 
         await pool.query(`COMMIT`);
         res.status(204).json();
