@@ -143,7 +143,7 @@ router.get('/:game_id/features', async (req, res, next) => {
 router.post('/:game_id/features', async (req, res, next) => {
     const token = req.headers['x-access-token'];
     const { game_id } = req.params;
-    const { 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그 } = req.body;
+    const { 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 } = req.body;
     try {
         const { email, password } = jwt.decode(token);
         const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
