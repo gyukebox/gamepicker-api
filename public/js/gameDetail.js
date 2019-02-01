@@ -66,18 +66,17 @@ const renderFeatures = async () => {
         const td = document.createElement('td');
         td.textContent = feature;
         tr.appendChild(td);
-        for (let i=0; i<5; i++) {
+        for (let i=0; i<6; i++) {
             const td = document.createElement('td');
             const input = document.createElement('input');
             input.type = 'radio';
             input.id = feature + '_opt_' + i;
             input.name = feature;
-            input.dataset.score = i+1;
+            input.dataset.score = i;
             const label = document.createElement('label');
             label.setAttribute('for', feature + '_opt_' + i);
-            label.textContent = i+1;
-            
-            if (score && score[feature] === i+1) {
+            label.textContent = i;
+            if (score && score[feature] === i) {
                 input.checked = true;
             }
             td.appendChild(input);
