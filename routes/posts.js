@@ -59,6 +59,7 @@ router.get('/:post_id', async (req, res, next) => {
 
     try {
         const [[post]] = await pool.query(sql, [post_id]);
+        await pool.query(`UPDATE post SET views = views+1 WHERE id = ?`, [post_id]);
         if (!post)
             throw { status: 404, message: 'Post not found' }
         if (token) {
