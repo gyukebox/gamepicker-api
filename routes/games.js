@@ -66,8 +66,8 @@ router.get('/:game_id', async (req, res, next) => {
             (SELECT JSON_ARRAYAGG(link) FROM game_videos WHERE game_id = games.id) AS videos,
             (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_id = games.id) AS tags,
             (SELECT JSON_ARRAYAGG(value) FROM game_platforms LEFT JOIN platforms ON platforms.id = game_platforms.platform_id WHERE game_id = games.id) AS platforms,
-            (SELECT AVG(score) FROM game_reviews WHERE game_id = games.id) AS score,
-            (SELECT COUNT(score) FROM game_reviews WHERE game_id = games.id) AS score_count,
+            (SELECT AVG(score) FROM game_score WHERE game_id = games.id) AS score,
+            (SELECT COUNT(score) FROM game_score WHERE game_id = games.id) AS score_count,
             JSON_OBJECT(
                 '게임성', AVG(게임성),
                 '조작성', AVG(조작성),
