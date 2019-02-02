@@ -85,7 +85,7 @@ router.get('/:game_id', async (req, res, next) => {
                 'DLC', AVG(DLC),
                 '버그', AVG(버그),
                 '그래픽', AVG(그래픽)
-            ) AS characteristics
+            ) AS features
         FROM games LEFT JOIN game_features ON games.id = game_features.game_id
         WHERE games.id = ?`
     const option = [game_id];
