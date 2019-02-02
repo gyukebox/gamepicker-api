@@ -35,6 +35,10 @@
 * [Delete favorte](documents/games/favor/delete.md) : `DELETE /games/:game_id/favor`
 * [Register advertising games](documents/games/advertising.md) : `POST /games/:game_id/advertising`
 * [Register affiliate games](documents/games/affiliate.md) : `POST /games/:game_id/affiliate`
+* [Rate the game](documents/games/score/create.json) : `PUT /games/:game_id/score`
+* [Get the score of the game I rated](documents/games/score/read.json) : `GET /games/:game_id/score`
+* [Get the comment of the game I took](documents/games/score/read.json) : `GET /games/:game_id/comment`
+* [Comment the game](documents/games/comment/create.json) : `PUT /games/:game_id/comment`
 
 ## Post related 
 

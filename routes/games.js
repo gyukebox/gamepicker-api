@@ -393,4 +393,64 @@ router.post('/:game_id/affiliate', async (req, res, next) => {
     }
 });
 
+router.get('/:game_id/score', async (req, res, next) => {
+    const token = req.headers['x-access-token'];
+    const { game_id } = req.params;
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[user]] = await pool.query(`SELECT id FROM users WHERE users.email = ? AND users.password = ?`, [email, password]);
+        if (!user)
+            throw { status: 404, message: 'User not found' }
+        const [[result]] = await pool.query(`SELECT score FROM game_score WHERE user_id = ? AND game_id = ?`, [user.id, game_id]);        
+        const score = result?result.score:null
+        res.status(200).json({ score });
+    } catch (err) {
+        next(err);
+    }
+})
+
+router.put('/:game_id/score', async (req, res, next) => {
+    const token = req.headers['x-access-token'];
+    const { game_id } = req.params;
+    const { score } = req.body;
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[user]] = await pool.query(`SELECT id FROM users WHERE users.email = ? AND users.password = ?`, [email, password]);
+        if (!user)
+            throw { status: 404, message: 'User not found' }
+        const [rows] = await pool.query(`SELECT 1 FROM game_score WHERE user_id = ? AND game_id = ?`, [user.id, game_id]);
+        if (rows.length > 0) {
+            await pool.query(`UPDATE game_score SET score = ? WHERE user_id = ? AND game_id = ?`, [score, user.id, game_id]);
+        } else {
+            await pool.query(`INSERT INTO game_score (user_id, game_id, score) VALUES (?, ?, ?)`, [user.id, game_id, score]);
+        }
+        res.status(204).json();
+    } catch (err) {
+        if (err.errno === 1452)
+            err = { status: 400, message: 'Game not found' }
+        next(err);
+    }
+});
+
+router.put('/:game_id/comment', async (req, res, next) => {
+    const token = req.headers['x-access-token'];
+    const { game_id } = req.params;
+    const { comment } = req.body;
+    try {
+        const { email, password } = jwt.decode(token);
+        const [[user]] = await pool.query(`SELECT id FROM users WHERE users.email = ? AND users.password = ?`, [email, password]);
+        if (!user)
+            throw { status: 404, message: 'User not found' }
+        const [rows] = await pool.query(`SELECT 1 FROM game_comments WHERE user_id = ? AND game_id = ?`, [user.id, game_id]);
+        if (rows.length > 0) {
+            await pool.query(`UPDATE game_comments SET comment = ? WHERE user_id = ? AND game_id = ?`, [comment, user.id, game_id]);
+        } else {
+            await pool.query(`INSERT INTO game_comments (user_id, game_id, comment) VALUES (?, ?, ?)`, [user.id, game_id, comment]);
+        } 
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;

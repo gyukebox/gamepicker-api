@@ -1,0 +1,42 @@
+{
+    "title": "Get the score of the game I rated",
+    "endpoint": "/games/:game_id/score",
+    "method": "get",
+    "request": {
+        "headers": {
+            "x-access-token": "Token from '/auth/login'"
+        }
+    },
+    "response": [
+        {
+            "status": 200,
+            "data": {
+                "score": 4.5
+            }
+        },
+        {
+            "status": 400,
+            "data": {
+                "message": "'x-access-token' is required."
+            }
+        },
+        {
+            "status": 400,
+            "data": {
+                "message": "'x-access-token' is included, but can not be decoded."
+            }
+        },
+        {
+            "status": 401,
+            "data": {
+                "message": "Administrator authentication required"
+            }
+        },
+        {
+            "status": 404,
+            "data": {
+                "message": "Can not find user matching token. It may be an old token."
+            }
+        }
+    ]
+}
