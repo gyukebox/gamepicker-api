@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('../model/jwt');
+const cert = require('../controller/certification')().user;
 
 router.get('/', async (req, res, next) => {
     const { limit, offset, game_id } = req.query;
@@ -63,13 +63,12 @@ router.get('/:post_id', async (req, res, next) => {
         if (!post)
             throw { status: 404, message: 'Post not found' }
         if (token) {
-            const { email, password } = jwt.decode(token);
-            const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-            const [recommend] = await pool.query(`SELECT * FROM post_recommends WHERE user_id = ? AND post_id = ?`, [user.id, post_id]);
+            const user_id = await cert(req);
+            const [recommend] = await pool.query(`SELECT * FROM post_recommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
             if (recommend.length > 0) {
                 post.reommended = 1;
             }
-            const [disrecommend] = await pool.query(`SELECT * FROM post_disrecommends WHERE user_id = ? AND post_id = ?`, [user.id, post_id]);
+            const [disrecommend] = await pool.query(`SELECT * FROM post_disrecommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
             if (disrecommend.length > 0) {
                 post.disreommended = 1;
             }
@@ -81,22 +80,19 @@ router.get('/:post_id', async (req, res, next) => {
 })
 
 router.post('/', async (req, res, next) => {
-    const token = req.headers['x-access-token'];
     const { title, value, game_id } = req.body;
-
     try {
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        await pool.query(`INSERT INTO posts (user_id, title, value, game_id) VALUES (?, ?, ?, ?)`,[user.id, title, value, game_id]);
+        const user_id = await cert(req);
+        await pool.query(`INSERT INTO posts (user_id, title, value, game_id) VALUES (?, ?, ?, ?)`,[user_id, title, value, game_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
     }
 })
 
+//제목, 내용중 내용만 변경하게 할까?
 router.put('/:post_id', async (req, res, next) => {
     const { post_id } = req.params;
-    const token = req.headers['x-access-token'];
 
     let SET_string = "";
         const option = [];
@@ -112,9 +108,8 @@ router.put('/:post_id', async (req, res, next) => {
     try {
         if (SET_string === "")
             throw { status: 400, message: "Either title or value is required" }
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        option.push(post_id, user.id);
+        const user_id = await cert(req);
+        option.push(post_id, user_id);
         await pool.query(`UPDATE posts SET ${SET_string} WHERE id = ? AND user_id = ?`,option);
         res.status(204).json();
     } catch (err) {
@@ -124,14 +119,9 @@ router.put('/:post_id', async (req, res, next) => {
 
 router.delete('/:post_id', async (req, res, next) => {
     const { post_id } = req.params;
-    const token = req.headers['x-access-token'];
-
     try {
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        const [rows] = pool.query(`DELETE FROM posts WHERE user_id = ? AND id = ?`,[user.id, post_id]);
-        if (rows.affectedRows === 0)
-            throw { status: 410, message: '이미 삭제된 게시물입니다'}
+        const user_id = await cert(req);
+        await pool.query(`DELETE FROM posts WHERE user_id = ? AND id = ?`,[user_id, post_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
@@ -140,16 +130,14 @@ router.delete('/:post_id', async (req, res, next) => {
 
 router.post('/:post_id/recommend', async (req, res, next) => {
     const { post_id } = req.params;
-    const token = req.headers['x-access-token'];
     try {
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        const [rows] = await pool.query(`INSERT INTO post_recommends (user_id, post_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM post_recommends WHERE user_id = ? AND post_id = ?)`,[user.id, post_id, user.id, post_id]);
+        const user_id = await cert(req);
+        const [rows] = await pool.query(`INSERT INTO post_recommends (user_id, post_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM post_recommends WHERE user_id = ? AND post_id = ?)`,[user_id, post_id, user_id, post_id]);
         if (rows.affectedRows === 0)                            //recommend twice
             throw { status: 400, message: 'Already recommended post' }
         res.status(204).json();
     } catch (err) {
-        if (err.errno === 1452 && err.sqlState === '23000') {  //not exists post_id
+        if (err.errno === 1452) {  //not exists post_id
             err = new Error('Post not found');
             err.status = 404;
         }
@@ -159,16 +147,14 @@ router.post('/:post_id/recommend', async (req, res, next) => {
 
 router.post('/:post_id/disrecommend', async (req, res, next) => {
     const { post_id } = req.params;
-    const token = req.headers['x-access-token'];
     try {
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        const [rows] = await pool.query(`INSERT INTO post_disrecommends (user_id, post_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM post_disrecommends WHERE user_id = ? AND post_id = ?)`,[user.id, post_id, user.id, post_id]);
+        const user_id = await cert(req);
+        const [rows] = await pool.query(`INSERT INTO post_disrecommends (user_id, post_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM post_disrecommends WHERE user_id = ? AND post_id = ?)`,[user_id, post_id, user_id, post_id]);
         if (rows.affectedRows === 0)                            //recommend twice
             throw { status: 400, message: 'Already recommended post' }
         res.status(204).json();
     } catch (err) {
-        if (err.errno === 1452 && err.sqlState === '23000') {  //not exists post_id
+        if (err.errno === 1452) {  //not exists post_id
             err = new Error('Post not found');
             err.status = 404;
         }
@@ -230,12 +216,10 @@ router.get('/:post_id/comments', async (req, res, next) => {
 
 router.post('/:post_id/comments', async (req, res, next) => {
     const { post_id } = req.params;
-    const token = req.headers['x-access-token'];
     const { value, parent_id } = req.body;
     try {
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        await pool.query(`INSERT INTO post_comments (user_id, post_id, value, parent_id) VALUES (?, ?, ?, ?)`,[user.id, post_id, value, parent_id]);
+        const user_id = await cert(req);
+        await pool.query(`INSERT INTO post_comments (user_id, post_id, value, parent_id) VALUES (?, ?, ?, ?)`,[user_id, post_id, value, parent_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
@@ -244,12 +228,10 @@ router.post('/:post_id/comments', async (req, res, next) => {
 
 router.put('/:post_id/comments/:comment_id', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
-    const token = req.headers['x-access-token'];
     const { value } = req.body;
     try {
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        const [rows] = await pool.query(`UPDATE post_comments SET value = ? WHERE post_id = ? AND id = ? AND user_id = ?`,[value, post_id, comment_id, user.id]);
+        const user_id = await cert(req);
+        const [rows] = await pool.query(`UPDATE post_comments SET value = ? WHERE post_id = ? AND id = ? AND user_id = ?`,[value, post_id, comment_id, user_id]);
         if (rows.affectedRows === 0)
             throw { status: 404, message: 'Comment not found' }
         res.status(204).json();
@@ -260,14 +242,9 @@ router.put('/:post_id/comments/:comment_id', async (req, res, next) => {
 
 router.delete('/:post_id/comments/:comment_id', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
-    const token = req.headers['x-access-token'];
     try {
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`, [email, password]);
-        if (!user) {
-            throw { status: 404, message: 'User not found' }
-        }
-        const [rows] = await pool.query(`DELETE FROM post_comments WHERE user_id = ? AND post_id = ? AND id = ?`,[user.id, post_id, comment_id]);
+        const user_id = await cert(req);
+        const [rows] = await pool.query(`DELETE FROM post_comments WHERE user_id = ? AND post_id = ? AND id = ?`,[user_id, post_id, comment_id]);
         if (rows.affectedRows === 0)
             throw { status: 404, message: 'Comment not found' }
         res.status(204).json();

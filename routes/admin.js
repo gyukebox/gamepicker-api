@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('../model/jwt');
+const cert = require('../controller/certification')().admin;
 
 router.post('/questions', async (req, res, next) => {
     const { title, email, value } = req.body;
@@ -24,12 +24,8 @@ router.get('/questions', async (req, res, next) => {
 router.post('/questions/:question_id/reply', async (req, res, next) => {
     const { question_id } = req.params;
     const { reply } = req.body;
-    const token = req.headers['x-access-token'];
     try {
-        const { email, password } = jwt.decode(token);
-        const [[admin]] = await pool.query(`SELECT 1 FROM admin LEFT JOIN users IN users.id = admin.user_id WHERE email = ? AND password = ?`,[email, password]);
-        if (!admin)
-            throw { status: 401, message: '관리자 권한이 필요합니다' }
+        await cert(req);
         const [rows] = await pool.query(`UPDATE questions SET reply = ? WHERE id = ?`, [reply, question_id]);
         if (rows.affectedRows === 0)
             throw { status: 404, message: 'Question not found' }
@@ -60,13 +56,9 @@ router.get('/notices', async (req, res, next) => {
 })
 
 router.post('/notices', async (req, res, next) => {
-    const token = req.headers['x-access-token'];
     const { title, value } = req.body;
     try {
-        const { email, password } = jwt.decode(token);
-        const [[admin]] = await pool.query(`SELECT user_id FROM admin LEFT JOIN users ON users.id = admin.user_id WHERE email = ? AND password = ?`,[email, password]);
-        if (!admin)
-            throw { status: '401', message: '관리자 권한이 필요합니다'}
+        await cert(req);
         await pool.query(`INSERT INTO notices (title, value) VALUES (?, ?)`,[title, value]);
         res.status(204).json()
     } catch (err) {
@@ -75,13 +67,9 @@ router.post('/notices', async (req, res, next) => {
 })
 
 router.delete('/notices/:notice_id', async (req, res, next) => {
-    const token = req.headers['x-access-token'];
     const { notice_id } = req.params;
     try {
-        const { email, password } = jwt.decode(token);
-        const [[admin]] = await pool.query(`SELECT user_id FROM admin LEFT JOIN users ON users.id = admin.user_id WHERE email = ? AND password = ?`,[email, password]);
-        if (!admin)
-            throw { status: 401, message: '관리자 권한이 필요합니다'}
+        await cert(req);
         const [rows] = await pool.query(`DELETE FROM notices WHERE id = ?`[notice_id]);
         if (rows.affectedRows === 0)
             throw { status: 410, message: '이미 삭제된 공지입니다'}
@@ -92,16 +80,16 @@ router.delete('/notices/:notice_id', async (req, res, next) => {
 })
 
 router.post('/push', async (req, res, next) => {
-    const token = req.headers['x-access-token'];
     const { age, gender, lastLogin, reserve } = req.body;
     const { title, content } = req.body;
-    const reg_id = 'duXqz72gRi8:APA91bG6JKCWkBaHjamI7bQhA_NOwUaNfmDkwyT-OFBAi27z349j6aL88zoxYaTD3BSo0iNXCaBLxvy8tDM1yM8KX-yCGiVLXISjk11VeuT7shLZ5ozB7Jnxy9yKyX6ANlMz603yc50a';
-
     const push = require('../controller/push-notification');
-    console.log(lastLogin);
-    
-    await push(age, lastLogin, gender, reserve, title, content);
-    res.status(200).json();
+    try {
+        await cert(req);
+        await push(age, lastLogin, gender, reserve, title, content);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
 })
 
 module.exports = router;

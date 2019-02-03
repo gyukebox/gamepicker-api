@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
 const jwt = require('../model/jwt');
+const cert = require('../controller/certification')().user;
 
 router.get('/', async (req, res, next) => {
     const { name, email } = req.query;    
@@ -44,32 +45,23 @@ router.get('/:user_id', async (req, res, next) => {
     }
 });
 
+//FIX ME: me 로 이동 가능성
 router.put('/:user_id', async (req, res, next) => {
-    const token = req.headers['x-access-token'];
-    const { user_id } = req.params;
+    //const { user_id } = req.params;
     const { introduce } = req.body;
     try {
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`,[email, password]);
-        if (!user)
-            throw { status: 404, message: 'User not found' }
-        if (user.id != user_id)
-            throw { status: 401, message: 'Authentication failed' }
-        await pool.query(`UPDATE users SET introduce = ? WHERE id = ?`,[introduce, user.id]);
+        const user_id = await cert(req);
+        await pool.query(`UPDATE users SET introduce = ? WHERE id = ?`,[introduce, user_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
     }
 })
-
+//FIX ME: me 로 이동 가능성
 router.post('/:user_id/profile', async (req, res, next) => {
-    const { user_id } = req.params;
-    const token = req.headers['x-access-token'];
+    //const { user_id } = req.params;
     try {
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`,[email, password]);
-        if (user.id != user_id)
-            throw { status: 401, message: "Authentication failed" }
+        const user_id = await cert(req);
         const storage = multer.diskStorage({
             destination: (req, file, cb) => {
                 cb(null, `uploads/`)
@@ -93,15 +85,11 @@ router.post('/:user_id/profile', async (req, res, next) => {
         next(err);
     }
 })
-
+//FIX ME: me 로 이동 가능성
 router.delete('/:user_id/profile', async (req, res, next) => {
-    const { user_id } = req.params;
-    const token = req.headers['x-access-token'];
+    //const { user_id } = req.params;
     try {
-        const { email, password } = jwt.decode(token);
-        const [[user]] = await pool.query(`SELECT id FROM users WHERE email = ? AND password = ?`,[email, password]);
-        if (user.id != user_id) 
-            throw { status: 401, message: "Authentication failed" }
+        const user_id = await cert(req);
         const filename = jwt.encode({
             user_id: user_id,
             object: 'profile'
