@@ -2,8 +2,8 @@
 
 ## Account related
 
-* [Login](documents/auth/login.md) : `POST /auth/login`
-* [Register](documents/auth/register.md) : `POST /auth/register`
+* [Login](documents/auth/login.json) : `POST /auth/login`
+* [Register](documents/auth/register.json) : `POST /auth/register`
 
 ## User related
 
@@ -56,10 +56,10 @@
 
 ## Admin related
 
-* [View all questions](documents/admin/questions/read.md) : `GET /admin/questions`
-* [Create questions](documents/admin/questions/create.md) : `POST /admin/questions`
-* [Reply questions](documents/admin/questions/reply.md) : `POST /admin/questions/:question_id/reply`
-* [Push notification(Not implemented)](documents/admin/push/create.md) : `POST /admin/push`
-* [Write notice](documents/admin/notice/create.md) : `POST /admin/notices`
-* [Get all notice](documents/admin/notice/read.md) : `GET /admin/notices`
-* [Delete notice](documents/admin/notice/delete.md) : `DELETE /admin/notices/:notice_id`
+* [View all questions](documents/admin/questions/read.json) : `GET /admin/questions`
+* [Create questions](documents/admin/questions/create.json) : `POST /admin/questions`
+* [Reply questions](documents/admin/questions/reply/create.json) : `POST /admin/questions/:question_id/reply`
+* [Push notification](documents/admin/push/create.json) : `POST /admin/push`
+* [Write notice](documents/admin/notice/create.json) : `POST /admin/notices`
+* [Get all notice](documents/admin/notice/read.json) : `GET /admin/notices`
+* [Delete notice](documents/admin/notice/delete.json) : `DELETE /admin/notices/:notice_id`

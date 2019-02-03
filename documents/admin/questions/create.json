@@ -1,0 +1,18 @@
+{
+    "title": "Write questions",
+    "endpoint": "/admin/questions",
+    "method": "post",
+    "request": {
+        "body": {
+            "title": "Title of question",
+            "email": "Email to reply",
+            "value": "Context of notice"
+        }
+    },
+    "response": [
+        {
+            "status": 204,
+            "data": null
+        }
+    ]
+}
