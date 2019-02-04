@@ -3,11 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Game Create | GamePicker</title>
+    <title>GameDetail | GamePicker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="screen" href="/public/css/global.css" />
     <link rel="stylesheet" type="text/css" media="screen" href="/public/css/gameDetail.css" />
     <script src="/public/js/nav.js"></script>
+    <script src="/public/js/games/create.js"></script>
 </head>
 <body>
     <section id = 'main'>
@@ -28,7 +29,13 @@
 
         <article id='age_rate'>
             <h1>이용등급</h1>
-            <input type="text" placeholder="">
+            <select>
+                <option value="심의등급없음">심의등급없음</option>
+                <option value="전체이용가" selected>전체이용가</option>
+                <option value="12세이용가">12세이용가</option>
+                <option value="15세이용가">15세이용가</option>
+                <option value="청소년이용불가">청소년이용불가</option>
+            </select>
         </article>
 
         <article id='summary'>
@@ -54,24 +61,33 @@
             </div>
         </article>
 
-        <article id='tags'>
-            <h1>태그</h1>
-            <div class="container">
-                <ul></ul>
-            </div>
-        </article>
-
         <article id='platforms'>
             <h1>플랫폼</h1>
-            <div class="container">
-                <ul></ul>
-            </div>
+        </article>
+
+        <article id='features'>
+            <h1>특성</h1>
+            <table class="select">
+                <thead>
+                    <tr>
+                        <th>특성</th>
+                        <th>평가안됨</th>
+                        <th>1점</th>
+                        <th>2점</th>
+                        <th>3점</th>
+                        <th>4점</th>
+                        <th>5점</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
         </article>
 
         <section>
-            <input type="button" value="추가하기" id='create'>
+            <input type="button" value="수정" id='game-update'>
         </section>
     </section>
-    <script src="/public/js/games/create.js"></script>
 </body>
 </html>

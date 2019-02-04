@@ -8,6 +8,14 @@ router.get('/', (req, res) => {
     })
 })
 
+router.get('/test', (req, res) => {
+    const os = require('os');
+    const host = os.hostname();
+    console.log(host);
+    
+    res.redirect('../games')
+})
+
 router.get('/login', (req, res) => {
     res.render('../views/login.html')
 })
@@ -17,7 +25,7 @@ router.get('/games', (req, res) => {
 })
 
 router.get('/games/create', (req, res) => {
-    res.render('../views/games/create')
+    res.render('../views/games/create.html')
 })
 
 router.get('/games/:id', (req, res) => {
