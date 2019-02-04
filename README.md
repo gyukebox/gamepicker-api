@@ -51,6 +51,8 @@
 * [Disrecommend post](documents/posts/disrecommends/create.json) : `POST /posts/:post_id/disrecommend`
 * [Cancel recommend post](documents/posts/recommends/delete.json) : `DELETE /posts/:post_id/recommend`
 * [Cancel disrecommend post](documents/posts/disrecommends/delete.json) : `DELETE /posts/:post_id/disrecommend`
+* [Check recommend](documents/posts/recommends/read.json) : `GET /posts/:post_id/recommend`
+* [Check disrecommend](documents/posts/disrecommends/read.json) : `GET /posts/:post_id/recommend`
 * [View comments](documents/posts/comments/read.md) : `GET /posts/:post_id/comments`
 * [Write comments](documents/posts/comments/create.md) : `POST /posts/:post_id/comments`
 * [Update comments](documents/posts/comments/update.md) : `UPDATE /posts/:post_id/comments/:comment_id`
