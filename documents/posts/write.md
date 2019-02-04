@@ -2,7 +2,7 @@
 
 **Method** : `POST`
 
-**URL** : `/posts/:post_id`
+**URL** : `/posts`
 
 **Auth required** : `True`
 

@@ -143,7 +143,18 @@ router.post('/:post_id/recommend', async (req, res, next) => {
         }
         next(err);
     }
-})
+});
+
+router.delete('/:post_id/recommend', async (req, res, next) => {
+    const { post_id } = req.params;
+    try {
+        const user_id = await cert(req);
+        await pool.query(`DELETE FROM post_recommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }   
+});
 
 router.post('/:post_id/disrecommend', async (req, res, next) => {
     const { post_id } = req.params;
@@ -160,7 +171,18 @@ router.post('/:post_id/disrecommend', async (req, res, next) => {
         }
         next(err);
     }
-})
+});
+
+router.delete('/:post_id/disrecommend', async (req, res, next) => {
+    const { post_id } = req.params;
+    try {
+        const user_id = await cert(req);
+        await pool.query(`DELETE FROM post_disrecommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }   
+});
 
 router.get('/:post_id/comments', async (req, res, next) => {
     const { post_id } = req.params;
