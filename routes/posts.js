@@ -128,6 +128,18 @@ router.delete('/:post_id', async (req, res, next) => {
     }
 })
 
+router.get('/:post_id/recommend', async (req, res, next) => {
+    const { post_id } = req.params;
+    try {
+        const user_id = await cert(req);
+        const [rows] = await pool.query(`SELECT 1 FROM post_recommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
+        const recommend = !!rows.length;
+        res.status(200).json({ recommend });
+    } catch (err) {
+        next(err);
+    }
+});
+
 router.post('/:post_id/recommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
@@ -154,6 +166,18 @@ router.delete('/:post_id/recommend', async (req, res, next) => {
     } catch (err) {
         next(err);
     }   
+});
+
+router.get('/:post_id/disrecommend', async (req, res, next) => {
+    const { post_id } = req.params;
+    try {
+        const user_id = await cert(req);
+        const [rows] = await pool.query(`SELECT 1 FROM post_disrecommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
+        const disrecommend = !!rows.length;
+        res.status(200).json({ disrecommend });
+    } catch (err) {
+        next(err);
+    }
 });
 
 router.post('/:post_id/disrecommend', async (req, res, next) => {
