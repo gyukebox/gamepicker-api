@@ -1,5 +1,8 @@
+const headers = new Headers();
+headers.append('authorization', 'w6mgLXNHbPgewJtRESxh');
+
 const getPlatforms = () => new Promise((resolve, reject) => {
-    fetch(`/platforms`)
+    fetch(`/platforms`, { headers })
     .then(res => res.json())
     .then(json => {
         const container = document.querySelector('#platforms');

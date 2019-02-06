@@ -3,12 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.querySelector('input#email').value;
         const password = document.querySelector('input#password').value;
 
-
+        const headers = new Headers();
+        headers.append('content-type', 'application/json');
+        headers.append('authorization', 'w6mgLXNHbPgewJtRESxh');
         fetch('/auth/login?admin=1', {
             method: 'POST',
-            headers: {
-                'content-type': 'application/json'
-            },
+            headers,
             body: JSON.stringify({
                 email: email,
                 password: password,

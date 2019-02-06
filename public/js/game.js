@@ -1,6 +1,11 @@
-fetch(`/games`)
+const headers = new Headers();
+headers.append('authorization', 'w6mgLXNHbPgewJtRESxh');
+
+fetch(`/games`, { headers })
 .then(res => res.json())
 .then(json => {
+    console.log(json);
+    
     json.games.forEach(game => {
         addGames(game);
     })

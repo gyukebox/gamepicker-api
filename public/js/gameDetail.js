@@ -1,6 +1,9 @@
+const headers = new Headers();
+headers.append('authorization', 'w6mgLXNHbPgewJtRESxh');
+
 const getGame = () => new Promise((resolve, reject) => {
     const gameId = window.location.pathname.split('/')[3];
-    fetch(`/games/${gameId}`)
+    fetch(`/games/${gameId}`, { headers })
     .then(res => {
         if (res.ok) {
             return res.json()
@@ -18,7 +21,7 @@ const getGame = () => new Promise((resolve, reject) => {
 })
 
 const getPlatforms = () => new Promise((resolve, reject) => {
-    fetch(`/platforms`)
+    fetch(`/platforms`, { headers })
     .then(res => res.json())
     .then(json => {
         const container = document.querySelector('#platforms');
@@ -41,11 +44,8 @@ const getPlatforms = () => new Promise((resolve, reject) => {
 
 const getUserFeatures = () => new Promise((resolve, reject) => {
     const game_id = window.location.pathname.split('/')[3];
-    fetch(`/games/${game_id}/features`, {
-        headers: {
-            'x-access-token': sessionStorage.getItem('token')
-        }
-    }).then(res => {
+    headers.append('x-access-token', sessionStorage.getItem('token'))
+    fetch(`/games/${game_id}/features`, { headers }).then(res => {
         if (!res.ok)
             throw res;
         return res.json();
@@ -152,7 +152,8 @@ document.addEventListener('DOMContentLoaded',() => {
         const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'x-access-token': sessionStorage.getItem('token')
+            'x-access-token': sessionStorage.getItem('token'),
+            'authorization': 'w6mgLXNHbPgewJtRESxh'
         }        
         const result = {
             title: document.querySelector('#title input').value,
