@@ -16,8 +16,8 @@
 * [Register profile photo](documents/users/profile/create.md) : `POST /users/:user_id/profile`
 * [Delete profile photo](documents/users/profile/delete.md) : `DELETE /users/:user_id/profile`
 * [Recommend games](documents/users/recommend.md) : `GET /users/:user_id/recommend`
-* [Push notification agree](documents/users/push/agree.md) : `POST /users/:user_id/agree`
-* [Push notification disagree](documents/users/push/disagree.md) : `DELETE /users/:user_id/agree`
+* [Push notification agree](documents/users/push/agree.md) : `POST /users/:user_id/push`
+* [Push notification disagree](documents/users/push/disagree.md) : `DELETE /users/:user_id/push`
 
 ## Game related
 
