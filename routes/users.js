@@ -35,9 +35,11 @@ router.get('/:user_id', async (req, res, next) => {
         if (!user)
             throw { status: 404, message: 'User not found' }
         const filename = jwt.encode({
-            user_id: user_id,
+            user_id: Number(user_id),
             object: 'profile'
         });
+        console.log(filename);
+        
         user.profile = fs.existsSync(`uploads/${filename}.jpg`)?`api.gamepicker.co.kr/uploads/${filename}.jpg`:null;
         res.status(200).json({ user });  
     } catch (err) {
@@ -58,43 +60,32 @@ router.put('/:user_id', async (req, res, next) => {
     }
 })
 //FIX ME: me 로 이동 가능성
-router.post('/:user_id/profile', async (req, res, next) => {
-    //const { user_id } = req.params;
-    try {
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/')
+    },
+    filename: async (req, file, cb) => {
         const user_id = await cert(req);
-        const storage = multer.diskStorage({
-            destination: (req, file, cb) => {
-                cb(null, `uploads/`)
-            },
-            filename: (req, file, cb) => {
-                const filename = jwt.encode({
-                    user_id: user_id,
-                    object: 'profile'
-                })
-                cb(null, filename + '.jpg');
-            }
-        });
-
-        const up = multer({ storage: storage }).single('file');
-        up(req, res, err => {
-            if (err)
-                throw err;
-            res.status(204).json();
+        const filename = jwt.encode({
+            user_id,
+            object: 'profile'
         })
-    } catch (err) {
-        next(err);
+        cb(null, filename + '.jpg')
     }
+})
+const upload = multer({ storage });
+router.post('/:user_id/profile', upload.single('profile'), async (req, res, next) => {
+    res.status(204).json();
 })
 //FIX ME: me 로 이동 가능성
 router.delete('/:user_id/profile', async (req, res, next) => {
-    //const { user_id } = req.params;
     try {
         const user_id = await cert(req);
         const filename = jwt.encode({
-            user_id: user_id,
+            user_id,
             object: 'profile'
         })
-        fs.unlinkSync(`./uploads/${filename}.jpg`);
+        fs.unlinkSync(`uploads/${filename}.jpg`);
         res.status(204).json();
     } catch (err) {
         next(err);
