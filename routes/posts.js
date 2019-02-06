@@ -48,9 +48,7 @@ router.get('/:post_id', async (req, res, next) => {
         users.name, users.id as user_id,  
         games.title AS game_title, games.id AS game_id,
         (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) AS recommends,
-        (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) AS disrecommends,
-        FALSE AS recommended,
-        FALSE AS disreommended
+        (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) AS disrecommends
     FROM
         posts
         LEFT JOIN users ON users.id = posts.user_id
@@ -62,16 +60,14 @@ router.get('/:post_id', async (req, res, next) => {
         await pool.query(`UPDATE posts SET views = views+1 WHERE id = ?`, [post_id]);
         if (!post)
             throw { status: 404, message: 'Post not found' }
+        post.recommended = false;
+        post.disrecommended = false;
         if (token) {
             const user_id = await cert(req);
             const [recommend] = await pool.query(`SELECT * FROM post_recommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
-            if (recommend.length > 0) {
-                post.reommended = 1;
-            }
+            post.recommended = !!recommend.length;
             const [disrecommend] = await pool.query(`SELECT * FROM post_disrecommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
-            if (disrecommend.length > 0) {
-                post.disreommended = 1;
-            }
+            post.disrecommended = !!disrecommend.length;
         }
         res.status(200).json({ post })
     } catch (err) {
