@@ -1,0 +1,37 @@
+{
+    "title": "Register profile picture",
+    "endpoint": "/users/:user_id/profile",
+    "method": "post",
+    "request": {
+        "headers": {
+            "x-access-token": "Token from '/auth/login'"
+        },
+        "file": {
+            "profile": "image file"
+        }
+    },
+    "response": [
+        {
+            "status": 204,
+            "data": null
+        },
+        {
+            "status": 400,
+            "data": {
+                "message": "'x-access-token' is required."
+            }
+        },
+        {
+            "status": 400,
+            "data": {
+                "message": "'x-access-token' is included, but can not be decoded."
+            }
+        },
+        {
+            "status": 404,
+            "data": {
+                "message": "Can not find user matching token. It may be an old token."
+            }
+        }
+    ]
+}

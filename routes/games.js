@@ -398,4 +398,14 @@ router.put('/:game_id/comment', async (req, res, next) => {
     }
 });
 
+router.get(`/:game_id/comment`, async (req, res, next) => {
+    const { game_id } = req.params;
+    try {
+        const [comments] = await pool.query(`SELECT comment, user_id, name AS user_name FROM game_comments LEFT JOIN users ON users.id = game_comments.user_id WHERE game_id = ?`, [game_id]);
+        res.status(200).json({comments});
+    } catch (err) {
+        next(err);
+    }
+})
+
 module.exports = router;
