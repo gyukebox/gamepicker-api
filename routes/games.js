@@ -26,6 +26,13 @@ router.get('/', async (req, res, next) => {
         sql += ` WHERE EXISTS (SELECT 1 FROM game_platforms WHERE game_id = games.id AND platform_id = ?)`;
         option.push(platform_id);
     }
+    
+    if (req.headers['x-access-token'] && req.query.sort === "rated") {
+        const user_id = await cert.user(req);
+        sql += platform_id?` AND`:` WHERE`
+        sql += ` NOT EXISTS (SELECT 1 FROM game_features WHERE game_id = games.id AND user_id = ?)`;
+        option.push(user_id);
+    }
 
     switch (sort) {
         case "random":

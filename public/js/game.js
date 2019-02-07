@@ -1,7 +1,11 @@
 const headers = new Headers();
 headers.append('authorization', 'w6mgLXNHbPgewJtRESxh');
 
-fetch(`/games`, { headers })
+const token = sessionStorage.getItem('token');
+if (token)
+    headers.append('x-access-token', token);
+
+fetch(`/games?sort=rated`, { headers })
 .then(res => res.json())
 .then(json => {
     console.log(json);
