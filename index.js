@@ -32,6 +32,7 @@ app.engine('html', require('ejs').renderFile);
 app.use('/public', express.static(__dirname + '/public'))
 app.use('/uploads', express.static(__dirname + '/uploads'))
 app.use('/manage', manage);
+app.use('/auth', auth);
 app.use(async (req, res, next) => {
     const auth_token = req.headers['authorization'];
     try {
@@ -54,7 +55,6 @@ app.use('/users', users);
 app.use('/posts', posts);
 app.use('/tags', tags);
 app.use('/platforms', platforms);
-app.use('/auth', auth);
 app.use('/admin', admin);
 app.use('*', (req, res, next) => {
     res.status(404).send('Page Not Found');
