@@ -75,7 +75,10 @@ const storage = multer.diskStorage({
 })
 const upload = multer({ storage });
 router.post('/:user_id/profile', upload.single('profile'), async (req, res, next) => {
-    res.status(204).json();
+    if (!req.file)
+        res.status(400).send('File not found');
+    else
+        res.status(204).json();
 })
 //FIX ME: me 로 이동 가능성
 router.delete('/:user_id/profile', async (req, res, next) => {
