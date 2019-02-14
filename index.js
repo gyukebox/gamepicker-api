@@ -47,7 +47,11 @@ app.use(async (req, res, next) => {
         next(err);
     }
 })
-app.use(logger(':date :method :url :status :res[content-length] - :response-time ms'));
+logger.token('date', function() {
+    const date = new Date();
+    return date.toLocaleString();
+});
+app.use(logger(':date :method :url :status - :response-time ms'));
 const port = process.env.PORT || 80;
 
 app.use('/games', games);
@@ -60,8 +64,9 @@ app.use('*', (req, res, next) => {
     res.status(404).send('Page Not Found');
 })
 app.use((err, req, res, next) => {    
+    const date = new Date();
     if (!err.status)
-        console.error(err);
+        console.error(date.toLocaleString(), err.message);
     const message = err.message;
     res.status(err.status || 500).json({ message });
 })

@@ -52,33 +52,20 @@ router.post('/register', async (req, res, next) => {
             else        resolve({hash: hash, salt: salt});
         })
     })
-    const sendMail = (token) => new Promise((resolve, reject) => {
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: mail_config.user,
-                pass: mail_config.pass
-            }
-        })
-        const mailOptions = {
-            from: mail_config.user,
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: mail_config
+    });
+    try {
+        const {salt, hash} = await encrypt(password);
+        const token = jwt.encode({ email: email, password: hash });
+        await pool.query('INSERT INTO users(name, email, password, birthday, gender, salt) VALUES (?, ?, ?, ?, ?, ?)', [name, email, hash, birthday, gender, salt]);
+        await transporter.sendMail({
+            from: "게임피커 인증팀",
             to: email,
             subject: 'GamePicker 인증',
             html: `<p>Test</p><a href='http://api.gamepicker.co.kr/auth/activate?token=${token}'>인증하기</a>`
-        }
-        transporter.sendMail(mailOptions, (err, info) => {
-            if (err)
-                reject(err)
-            else
-                resolve();
-            transporter.close();
-        })
-    })
-    try {
-        const {salt, hash} = await encrypt(password);
-        const token = jwt.encode({ email: email, password: hash })
-        await pool.query('INSERT INTO users(name, email, password, birthday, gender, salt) VALUES (?, ?, ?, ?, ?, ?)', [name, email, hash, birthday, gender, salt]);
-        await sendMail(token);
+        });
         res.status(204).json();
     } catch (err) {
         next(err);
