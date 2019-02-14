@@ -69,7 +69,7 @@ app.use('*', (req, res, next) => {
 app.use((err, req, res, next) => {    
     const date = moment().tz('Asia/Seoul').format('MMM DD YYYY, hh:mm:ss');
     if (!err.status)
-        console.error(date, err.message);
+        console.error(date, err);
     const message = err.message;
     res.status(err.status || 500).json({ message });
 })

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('../model/jwt');
+const fs = require('fs');
 const cert = require('../controller/certification')().user;
 
 router.get('/', async (req, res, next) => {
@@ -31,8 +32,7 @@ router.put('/', async (req, res, next) => {
     }
 });
 
-const upload = require('../controller/upload');
-router.post('/profile', upload.single('profile'), async (req, res, next) => {
+router.post('/profile', require('../controller/upload').single('profile'), async (req, res, next) => {
     if (!req.file)
         res.status(400).send('File not found');
     else
@@ -59,7 +59,7 @@ router.put('/password', async (req, res, next) => {
     try {
         const user_id = await cert(req);
         const {salt, hash} = await encrypt(password);
-        await pool.query('UPDATE users SET salt = ?, password = ? WHERE user_id = ?', [hash, salt, user_id]);
+        await pool.query('UPDATE users SET salt = ?, password = ? WHERE id = ?', [salt, hash, user_id]);
         res.status(204).json();
     } catch (err) {
         next(err);

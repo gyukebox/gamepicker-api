@@ -1,4 +1,6 @@
 const multer = require('multer');
+const cert = require('../controller/certification')().user;
+const jwt = require('../model/jwt')
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
