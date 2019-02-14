@@ -68,7 +68,7 @@ router.post('/register', async (req, res, next) => {
         }
         transporter.sendMail(mailOptions, (err, info) => {
             if (err)
-                reject({ code: 500, message: "Failed to send authentication mail. Please contact the developer" })
+                reject(err)
             else
                 resolve();
             transporter.close();
