@@ -38,8 +38,6 @@ router.get('/:user_id', async (req, res, next) => {
             user_id: Number(user_id),
             object: 'profile'
         });
-        console.log(filename);
-        
         user.profile = fs.existsSync(`uploads/${filename}.jpg`)?`api.gamepicker.co.kr/uploads/${filename}.jpg`:null;
         res.status(200).json({ user });  
     } catch (err) {
