@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
 const fs = require('fs');
 const jwt = require('../model/jwt');
-const cert = require('../controller/certification')().user;
 
 router.get('/', async (req, res, next) => {
     const { name, email } = req.query;    
@@ -44,54 +42,6 @@ router.get('/:user_id', async (req, res, next) => {
         next(err);
     }
 });
-
-//FIX ME: me 로 이동 가능성
-router.put('/:user_id', async (req, res, next) => {
-    //const { user_id } = req.params;
-    const { introduce } = req.body;
-    try {
-        const user_id = await cert(req);
-        await pool.query(`UPDATE users SET introduce = ? WHERE id = ?`,[introduce, user_id]);
-        res.status(204).json();
-    } catch (err) {
-        next(err);
-    }
-})
-//FIX ME: me 로 이동 가능성
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/')
-    },
-    filename: async (req, file, cb) => {
-        const user_id = await cert(req);
-        const filename = jwt.encode({
-            user_id,
-            object: 'profile'
-        })
-        cb(null, filename + '.jpg')
-    }
-})
-const upload = multer({ storage });
-router.post('/:user_id/profile', upload.single('profile'), async (req, res, next) => {
-    if (!req.file)
-        res.status(400).send('File not found');
-    else
-        res.status(204).json();
-})
-//FIX ME: me 로 이동 가능성
-router.delete('/:user_id/profile', async (req, res, next) => {
-    try {
-        const user_id = await cert(req);
-        const filename = jwt.encode({
-            user_id,
-            object: 'profile'
-        })
-        fs.unlinkSync(`uploads/${filename}.jpg`);
-        res.status(204).json();
-    } catch (err) {
-        next(err);
-    }
-})
 
 router.get('/:user_id/posts', async (req, res, next) => {    
     const { user_id } = req.params;
@@ -146,33 +96,6 @@ router.get('/:user_id/posts/comments', async (req, res, next) => {
     try {
         const [comments] = await pool.query(sql, option);
         res.status(200).json({ comments });
-    } catch (err) {
-        next(err);
-    }
-})
-
-router.get('/:user_id/reviews', async (req, res, next) => {
-    const { user_id } = req.params;
-    const { limit, offset, game_id } = req.query;
-    const option = [user_id];
-    let sql = 'SELECT id, game_id, value, score FROM game_reviews WHERE user_id = ?';
-    if (game_id) {
-        sql += ` AND game_id = ?`
-        option.push(game_id)
-    }
-
-    if (limit) {
-        sql += ' LIMIT ?'
-        option.push(Number(limit));
-        if (offset) {
-            sql += ' OFFSET ?';
-            option.push(Number(offset));
-        }
-    }
-
-    try {
-        const [reviews] = await pool.query(sql, option);
-        res.status(200).json({ reviews });
     } catch (err) {
         next(err);
     }
