@@ -67,3 +67,11 @@
 * [Write notice](documents/admin/notice/create.json) : `POST /admin/notices`
 * [Get all notice](documents/admin/notice/read.json) : `GET /admin/notices`
 * [Delete notice](documents/admin/notice/delete.json) : `DELETE /admin/notices/:notice_id`
+
+## Me related
+
+* [Get my information](documents/me/read.json) : `GET /me`
+* [Update my information](documents/me/update.json) : `PUT /me`
+* [Create my profile image](documents/me/profile/create.json) : `POST /me/profile`
+* [Delete my profile image](documents/me/profile/delete.json) : `DELETE /me/profile`
+* [Reset my password](documents/me/password/update.json) : `PUT /me/password`
