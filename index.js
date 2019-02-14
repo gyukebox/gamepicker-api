@@ -62,7 +62,8 @@ app.use('*', (req, res, next) => {
 app.use((err, req, res, next) => {    
     if (!err.status)
         console.error(err);
-    res.status(err.status || 500).send(err.message)
+    const message = err.message;
+    res.status(err.status || 500).json({ message });
 })
 
 app.listen(port);
