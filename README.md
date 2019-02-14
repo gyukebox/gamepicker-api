@@ -7,7 +7,7 @@
 
 ## User related
 
-* [View all users](documents/users/all.md) : `GET /users`
+* [View all users](documents/users/all.json) : `GET /users`
 * [View info](documents/users/read.md) : `GET /users/:user_id`
 * [View created posts](documents/users/posts.md) : `GET /users/:user_id/posts`
 * [View created comments](documents/users/comments.md) : `GET /users/:user_id/posts`
