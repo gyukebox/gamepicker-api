@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
 const logger = require('morgan');
+const moment = require('moment-timezone');
 
 const games = require('./routes/games');
 const users = require('./routes/users');
@@ -48,8 +49,8 @@ app.use(async (req, res, next) => {
     }
 })
 logger.token('date', function() {
-    const date = new Date();
-    return date.toLocaleString();
+    const date = moment().tz('Asia/Seoul').format('MMM DD YYYY, hh:mm:ss');
+    return date;
 });
 app.use(logger(':date :method :url :status - :response-time ms'));
 const port = process.env.PORT || 80;
@@ -64,9 +65,9 @@ app.use('*', (req, res, next) => {
     res.status(404).send('Page Not Found');
 })
 app.use((err, req, res, next) => {    
-    const date = new Date();
+    const date = moment().tz('Asia/Seoul').format('MMM DD YYYY, hh:mm:ss');
     if (!err.status)
-        console.error(date.toLocaleString(), err.message);
+        console.error(date, err.message);
     const message = err.message;
     res.status(err.status || 500).json({ message });
 })
