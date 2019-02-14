@@ -26,10 +26,6 @@
 * [Write game](documents/games/create.md) : `POST /games`
 * [Update game](documents/games/update.md) : `PUT /games/:game_id`
 * [Delete game](documents/games/delete.md) : `DELETE /games/:game_id`
-* [Write review](documents/games/reviews/create.md) : `POST /games/:game_id/reviews`
-* [View review](documents/games/reviews/read.md) : `GET /games/:game_id/reviews`
-* [Update review](documents/games/reviews/update.md) : `PUT /games/:game_id/reviews/:review_id`
-* [Delete review](documents/games/reviews/delete.md) : `DELETE /games/:game_id/reviews/:review_id`
 * [Favorites game](documents/games/favor/create.md) : `POST /games/:game_id/favor`
 * [Check favorite](documents/games/favor/read.md) : `GET /games/:game_id/favor`
 * [Delete favorte](documents/games/favor/delete.md) : `DELETE /games/:game_id/favor`
