@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('../model/jwt');
-const nodemailer = require('nodemailer');
-const mail_config = require('../config/mail');
 const cert = require('../controller/certification')().user;
 
 router.get('/', async (req, res, next) => {
@@ -61,7 +59,7 @@ router.put('/password', async (req, res, next) => {
     try {
         const user_id = await cert(req);
         const {salt, hash} = await encrypt(password);
-        await pool.query('UPDATE users SET salt = ?, hash = ? WHERE user_id = ?', [hash, salt, user_id]);
+        await pool.query('UPDATE users SET salt = ?, password = ? WHERE user_id = ?', [hash, salt, user_id]);
         res.status(204).json();
     } catch (err) {
         next(err);

@@ -86,4 +86,27 @@ router.get('/activate', async (req, res, next) => {
     }
 })
 
+router.post('/forgot', async (req, res, next) => {
+    const { email } = req.body;
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: mail_config
+    });
+    try {
+        const [[user]] = await pool.query(`SELECT email, password FROM users WHERE email = ?`, [email]);
+        if (!user)
+            throw { status: 404, message: 'User not found' }
+        const token = jwt.encode(user);
+        await transporter.sendMail({
+            from: "Gamepicker" + mail_config.user,
+            to: email,
+            subject: 'GamePicker 비밀번호 재설정',
+            html: `<p>Test</p><a href='http://www.gamepicker.co.kr/auth/password?token=${token}'>비밀번호 재설정 하기</a>`
+        });
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+})
+
 module.exports = router;

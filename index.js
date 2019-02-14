@@ -13,6 +13,7 @@ const platforms = require('./routes/platforms');
 const auth = require('./routes/auth');
 const manage = require('./routes/manage');
 const admin = require('./routes/admin');
+const me = require('./routes/me');
 
 const app = express();
 
@@ -61,6 +62,7 @@ app.use('/posts', posts);
 app.use('/tags', tags);
 app.use('/platforms', platforms);
 app.use('/admin', admin);
+app.use('/me', me);
 app.use('*', (req, res, next) => {
     res.status(404).send('Page Not Found');
 })
