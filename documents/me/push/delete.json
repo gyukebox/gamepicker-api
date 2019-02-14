@@ -1,0 +1,16 @@
+{
+    "title": "Push notification disagree",
+    "endpoint": "/me/push",
+    "method": "delete",
+    "request": {
+        "headers": {
+            "x-access-token": "Token from '/auth/login'"
+        }
+    },
+    "response": [
+        {
+            "status": 204,
+            "data": null
+        }
+    ]
+}

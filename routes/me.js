@@ -66,4 +66,25 @@ router.put('/password', async (req, res, next) => {
     }
 });
 
+router.post('/push', async (req, res, next) => {
+    const { os_type, reg_id } = req.body;
+    try {
+        const user_id = cert(req);
+        await pool.query(`UPDATE users SET os_type = ?, reg_id = ? WHERE id = ?`,[os_type, reg_id, user_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.delete('/push', async (req, res, next) => {
+    try {
+        const user_id = cert(req);
+        await pool.query(`UPDATE users SET reg_id = ? WHERE id = ?`, [null, user_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;

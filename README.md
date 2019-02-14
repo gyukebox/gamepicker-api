@@ -9,15 +9,9 @@
 
 * [View all users](documents/users/all.md) : `GET /users`
 * [View info](documents/users/read.md) : `GET /users/:user_id`
-* [Update info](documents/users/update.md) : `PUT /users/:user_id`
 * [View created posts](documents/users/posts.md) : `GET /users/:user_id/posts`
 * [View created comments](documents/users/comments.md) : `GET /users/:user_id/posts`
-* [View created reviews](documents/users/reviews.md) : `GET /users/:user_id/reviews`
-* [Register profile photo](documents/users/profile/create.md) : `POST /users/:user_id/profile`
-* [Delete profile photo](documents/users/profile/delete.md) : `DELETE /users/:user_id/profile`
 * [Recommend games](documents/users/recommend.md) : `GET /users/:user_id/recommend`
-* [Push notification agree](documents/users/push/agree.md) : `POST /users/:user_id/push`
-* [Push notification disagree](documents/users/push/disagree.md) : `DELETE /users/:user_id/push`
 
 ## Game related
 
@@ -71,3 +65,5 @@
 * [Create my profile image](documents/me/profile/create.json) : `POST /me/profile`
 * [Delete my profile image](documents/me/profile/delete.json) : `DELETE /me/profile`
 * [Reset my password](documents/me/password/update.json) : `PUT /me/password`
+* [Push notification agree](documents/me/push/create.json) : `POST /me/push`
+* [Push notification disagree](documents/me/push/delete.json) : `DELETE /me/push`
