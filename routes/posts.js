@@ -298,7 +298,7 @@ router.delete('/:post_id/comments/:comment_id', async (req, res, next) => {
 router.post('/:post_id/comments/:comment_id/recommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
-        const user_id = await cert.user(req);
+        const user_id = await cert(req);
         await pool.query(`INSERT INTO post_comment_recommends (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
         res.status(204).json();
     } catch (err) {
@@ -309,7 +309,7 @@ router.post('/:post_id/comments/:comment_id/recommends', async (req, res, next) 
 router.delete('/:post_id/comments/:comment_id/recommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
-        const user_id = await cert.user(req);
+        const user_id = await cert(req);
         await pool.query(`DELETE FROM post_comment_recommends WHERE user_id = ? AND comment_id = ?`, [user_id, comment_id]);
         res.status(204).json();
     } catch (err) {
@@ -320,7 +320,7 @@ router.delete('/:post_id/comments/:comment_id/recommends', async (req, res, next
 router.post('/:post_od/comments/:comment_id/disrecommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
-        const user_id = await cert.user(req);
+        const user_id = await cert(req);
         await pool.query(`INSERT INTO post_comment_disrecommends (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
         res.status(204).json();
     } catch (err) {
@@ -331,7 +331,7 @@ router.post('/:post_od/comments/:comment_id/disrecommends', async (req, res, nex
 router.delete('/:post_id/comments/:comment_id/disrecommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
-        const user_id = await cert.user(req);
+        const user_id = await cert(req);
         await pool.query(`DELETE FROM post_comment_disrecommends WHERE user_id = ? AND comment_id = ?`, [user_id, comment_id]);
         res.status(204).json();
     } catch (err) {
