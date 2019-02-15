@@ -31,8 +31,12 @@
 * [Register affiliate games](documents/games/affiliate.md) : `POST /games/:game_id/affiliate`
 * [Rate the game](documents/games/score/create.json) : `PUT /games/:game_id/score`
 * [Get the score of the game I rated](documents/games/score/read.json) : `GET /games/:game_id/score`
-* [Get the comment of the game I took](documents/games/score/read.json) : `GET /games/:game_id/comment`
-* [Comment the game](documents/games/comment/create.json) : `PUT /games/:game_id/comment`
+* [Get the comment of the game I took](documents/games/comments/read.json) : `GET /games/:game_id/comment`
+* [Comment the game](documents/games/comments/create.json) : `PUT /games/:game_id/comment`
+* [Recommends game comments](documents/games/comments/recommends/create.json) : `POST /games/:game_id/comments/:comment_id/recommends`
+* [Cancle recommends game comments](documents/games/comments/recommends/delete.json) : `DELETE /games/:game_id/comments/:comment_id/recommends`
+* [Disecommends game comments](documents/games/comments/disrecommends/create.json) : `POST /games/:game_id/comments/:comment_id/disrecommends`
+* [Cancle disrecommends game comments](documents/games/comments/disrecommends/delete.json) : `DELETE /games/:game_id/comments/:comment_id/disrecommends`
 
 ## Post related 
 

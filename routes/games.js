@@ -302,7 +302,7 @@ router.put('/:game_id/score', async (req, res, next) => {
     }
 });
 
-router.put('/:game_id/comment', async (req, res, next) => {
+router.put('/:game_id/comments', async (req, res, next) => {
     const { game_id } = req.params;
     const { comment } = req.body;
     try {
@@ -319,7 +319,7 @@ router.put('/:game_id/comment', async (req, res, next) => {
     }
 });
 
-router.get(`/:game_id/comment`, async (req, res, next) => {
+router.get(`/:game_id/comments`, async (req, res, next) => {
     const { game_id } = req.params;
     try {
         const [comments] = await pool.query(`SELECT comment, user_id, name AS user_name FROM game_comments LEFT JOIN users ON users.id = game_comments.user_id WHERE game_id = ?`, [game_id]);
@@ -327,6 +327,50 @@ router.get(`/:game_id/comment`, async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-})
+});
+
+router.post('/:game_id/comments/:comment_id/recommends', async (req, res, next) => {
+    const { game_id, comment_id } = req.params;
+    try {
+        const user_id = await cert.user(req);
+        await pool.query(`INSERT INTO game_comment_recommends (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.delete('/:game_id/comments/:comment_id/recommends', async (req, res, next) => {
+    const { game_id, comment_id } = req.params;
+    try {
+        const user_id = await cert.user(req);
+        await pool.query(`DELETE FROM game_comment_recommends WHERE user_id = ? AND comment_id = ?`, [user_id, comment_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/:game_id/comments/:comment_id/disrecommends', async (req, res, next) => {
+    const { game_id, comment_id } = req.params;
+    try {
+        const user_id = await cert.user(req);
+        await pool.query(`INSERT INTO game_comment_disrecommends (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.delete('/:game_id/comments/:comment_id/disrecommends', async (req, res, next) => {
+    const { game_id, comment_id } = req.params;
+    try {
+        const user_id = await cert.user(req);
+        await pool.query(`DELETE FROM game_comment_disrecommends WHERE user_id = ? AND comment_id = ?`, [user_id, comment_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
 
 module.exports = router;
