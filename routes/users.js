@@ -145,18 +145,36 @@ router.get('/:user_id/games/recommend', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-})
+});
 
 router.get('/:user_id/games/favor', async (req, res, next) => {
     const { user_id } = req.params;
-    
     try {
-        const [rows] = await pool.query(`SELECT game_id FROM favor WHERE user_id = ?`,[user_id]);
-        const favor = rows.map(obj => obj.game_id);
-        res.status(200).json({ favor });
+        const [favors] = await pool.query(`SELECT title, game_id FROM favor LEFT JOIN games ON games.id = favor.game_id WHERE user_id = ?`,[user_id]);
+        res.status(200).json({ favors });
     } catch (err) {
         next(err);
     }
-})
+});
+
+router.get('/:user_id/games/score', async (req, res, next) => {
+    const { user_id } = req.params;
+    try {
+        const [scores] = await pool.query(`SELECT score, title, game_id FROM game_score LEFT JOIN games ON games.id = game_score.game_id WHERE user_id = ?`, [user_id]);
+        res.status(200).json({ scores });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get('/:user_id/games/comments', async (req, res, next) => {
+    const { user_id } = req.params;
+    try {
+        const [comments] = await pool.query(`SELECT comment, title, game_id FROM game_comments LEFT JOIN games ON games.id = game_comments.game_id WHERE user_id = ?`, [user_id]);
+        res.status(200).json({ comments });
+    } catch (err) {
+        next(err);
+    }
+});
 
 module.exports = router;
