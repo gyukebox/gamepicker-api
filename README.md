@@ -55,6 +55,10 @@
 * [Write comments](documents/posts/comments/create.md) : `POST /posts/:post_id/comments`
 * [Update comments](documents/posts/comments/update.md) : `UPDATE /posts/:post_id/comments/:comment_id`
 * [Delete comments](documents/posts/comments/delete.md) : `DELETE /posts/:post_id/comments/:comment_id`
+* [Recommends game comments](documents/posts/comments/recommends/create.json) : `POST /posts/:post_id/comments/:comment_id/recommends`
+* [Cancle recommends game comments](documents/posts/comments/recommends/delete.json) : `DELETE /posts/:post_id/comments/:comment_id/recommends`
+* [Disecommends game comments](documents/posts/comments/disrecommends/create.json) : `POST /posts/:post_id/comments/:comment_id/disrecommends`
+* [Cancle disrecommends game comments](documents/posts/comments/disrecommends/delete.json) : `DELETE /posts/:post_id/comments/:comment_id/disrecommends`
 
 ## Admin related
 
