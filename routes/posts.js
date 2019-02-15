@@ -210,7 +210,7 @@ router.get('/:post_id/comments', async (req, res, next) => {
 
     let sql = `
     SELECT 
-        p.id, p.value, p.updated_at, p.user_id,
+        p.id, p.value, p.created_at, p.user_id,
         (SELECT name FROM users WHERE id = p.user_id) AS name, 
         (SELECT COUNT(*) FROM post_comment_recommends WHERE comment_id = p.id) AS recommends,
         (SELECT COUNT(*) FROM post_comment_disrecommends WHERE comment_id = p.id) AS disrecommends, 
@@ -219,7 +219,7 @@ router.get('/:post_id/comments', async (req, res, next) => {
                 "id",c.id, 
                 "value",c.value, 
                 "user_id",c.user_id,
-                "updated_at",c.updated_at,
+                "created_at",c.created_at,
                 "name",(SELECT name FROM users WHERE id = c.user_id),
                 "recommends", (SELECT COUNT(*) FROM post_comment_recommends WHERE comment_id = c.id),
                 "disrecommends", (SELECT COUNT(*) FROM post_comment_disrecommends WHERE comment_id = c.id)
