@@ -14,7 +14,7 @@
 * [Recommend games](documents/users/recommend.md) : `GET /users/:user_id/recommend`
 * [Get user's game score](documents/users/games/score/read.json) : `GET /users/:user_id/games/score`
 * [Get user's game comments](documents/users/games/comments/read.json) : `GET /users/:user_id/games/comments`
-* [Get user's game score](documents/users/games/favor/read.json) : `GET /users/:user_id/games/favor`
+* [Get user's favor games](documents/users/games/favor/read.json) : `GET /users/:user_id/games/favor`
 
 
 ## Game related
