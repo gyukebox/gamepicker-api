@@ -6,7 +6,7 @@ router.get('/', async (req, res, next) => {
     const { limit, offset, game_id } = req.query;
     let sql = `
     SELECT
-        posts.id, posts.title, views, value, posts.updated_at,
+        posts.id, posts.title, views, value, posts.created_at,
         users.name, users.id as user_id,  
         games.title AS game_title, games.id AS game_id,
         (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) as recommends,
@@ -21,7 +21,7 @@ router.get('/', async (req, res, next) => {
         sql += ` WHERE game_id = ?`
         option.push(Number(game_id));
     }
-    sql += ` GROUP BY posts.id ORDER BY posts.updated_at DESC`
+    sql += ` GROUP BY posts.id ORDER BY posts.created_at DESC`
     if (limit) {
         sql += ' LIMIT ?';
         option.push(Number(limit));            
@@ -44,7 +44,7 @@ router.get('/:post_id', async (req, res, next) => {
     const token = req.headers['x-access-token'];
     const sql = `
     SELECT
-        posts.id, posts.title, views, value, posts.updated_at,
+        posts.id, posts.title, views, value, posts.created_at,
         users.name, users.id as user_id,  
         games.title AS game_title, games.id AS game_id,
         (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) AS recommends,
@@ -210,7 +210,7 @@ router.get('/:post_id/comments', async (req, res, next) => {
 
     let sql = `
     SELECT 
-        p.id, p.value, p.updated_at, p.user_id,
+        p.id, p.value, p.created_at, p.user_id,
         (SELECT name FROM users WHERE id = p.user_id) AS name, 
         (SELECT COUNT(*) FROM post_comment_recommends WHERE comment_id = p.id) AS recommends,
         (SELECT COUNT(*) FROM post_comment_disrecommends WHERE comment_id = p.id) AS disrecommends, 
@@ -219,7 +219,7 @@ router.get('/:post_id/comments', async (req, res, next) => {
                 "id",c.id, 
                 "value",c.value, 
                 "user_id",c.user_id,
-                "updated_at",c.updated_at,
+                "created_at",c.created_at,
                 "name",(SELECT name FROM users WHERE id = c.user_id),
                 "recommends", (SELECT COUNT(*) FROM post_comment_recommends WHERE comment_id = c.id),
                 "disrecommends", (SELECT COUNT(*) FROM post_comment_disrecommends WHERE comment_id = c.id)
@@ -295,4 +295,47 @@ router.delete('/:post_id/comments/:comment_id', async (req, res, next) => {
     }
 })
 
+router.post('/:post_id/comments/:comment_id/recommends', async (req, res, next) => {
+    const { post_id, comment_id } = req.params;
+    try {
+        const user_id = await cert(req);
+        await pool.query(`INSERT INTO post_comment_recommends (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.delete('/:post_id/comments/:comment_id/recommends', async (req, res, next) => {
+    const { post_id, comment_id } = req.params;
+    try {
+        const user_id = await cert(req);
+        await pool.query(`DELETE FROM post_comment_recommends WHERE user_id = ? AND comment_id = ?`, [user_id, comment_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/:post_od/comments/:comment_id/disrecommends', async (req, res, next) => {
+    const { post_id, comment_id } = req.params;
+    try {
+        const user_id = await cert(req);
+        await pool.query(`INSERT INTO post_comment_disrecommends (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.delete('/:post_id/comments/:comment_id/disrecommends', async (req, res, next) => {
+    const { post_id, comment_id } = req.params;
+    try {
+        const user_id = await cert(req);
+        await pool.query(`DELETE FROM post_comment_disrecommends WHERE user_id = ? AND comment_id = ?`, [user_id, comment_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
 module.exports = router;

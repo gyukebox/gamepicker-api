@@ -12,6 +12,10 @@
 * [View created posts](documents/users/posts.md) : `GET /users/:user_id/posts`
 * [View created comments](documents/users/comments.md) : `GET /users/:user_id/posts`
 * [Recommend games](documents/users/recommend.md) : `GET /users/:user_id/recommend`
+* [Get user's game score](documents/users/games/score/read.json) : `GET /users/:user_id/games/score`
+* [Get user's game comments](documents/users/games/comments/read.json) : `GET /users/:user_id/games/comments`
+* [Get user's game score](documents/users/games/favor/read.json) : `GET /users/:user_id/games/favor`
+
 
 ## Game related
 
@@ -27,8 +31,12 @@
 * [Register affiliate games](documents/games/affiliate.md) : `POST /games/:game_id/affiliate`
 * [Rate the game](documents/games/score/create.json) : `PUT /games/:game_id/score`
 * [Get the score of the game I rated](documents/games/score/read.json) : `GET /games/:game_id/score`
-* [Get the comment of the game I took](documents/games/score/read.json) : `GET /games/:game_id/comment`
-* [Comment the game](documents/games/comment/create.json) : `PUT /games/:game_id/comment`
+* [Get the comment of the game I took](documents/games/comments/read.json) : `GET /games/:game_id/comment`
+* [Comment the game](documents/games/comments/create.json) : `PUT /games/:game_id/comment`
+* [Recommends game comments](documents/games/comments/recommends/create.json) : `POST /games/:game_id/comments/:comment_id/recommends`
+* [Cancle recommends game comments](documents/games/comments/recommends/delete.json) : `DELETE /games/:game_id/comments/:comment_id/recommends`
+* [Disecommends game comments](documents/games/comments/disrecommends/create.json) : `POST /games/:game_id/comments/:comment_id/disrecommends`
+* [Cancle disrecommends game comments](documents/games/comments/disrecommends/delete.json) : `DELETE /games/:game_id/comments/:comment_id/disrecommends`
 
 ## Post related 
 
@@ -47,6 +55,10 @@
 * [Write comments](documents/posts/comments/create.md) : `POST /posts/:post_id/comments`
 * [Update comments](documents/posts/comments/update.md) : `UPDATE /posts/:post_id/comments/:comment_id`
 * [Delete comments](documents/posts/comments/delete.md) : `DELETE /posts/:post_id/comments/:comment_id`
+* [Recommends game comments](documents/posts/comments/recommends/create.json) : `POST /posts/:post_id/comments/:comment_id/recommends`
+* [Cancle recommends game comments](documents/posts/comments/recommends/delete.json) : `DELETE /posts/:post_id/comments/:comment_id/recommends`
+* [Disecommends game comments](documents/posts/comments/disrecommends/create.json) : `POST /posts/:post_id/comments/:comment_id/disrecommends`
+* [Cancle disrecommends game comments](documents/posts/comments/disrecommends/delete.json) : `DELETE /posts/:post_id/comments/:comment_id/disrecommends`
 
 ## Admin related
 
