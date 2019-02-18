@@ -150,7 +150,7 @@ router.get('/:user_id/games/recommend', async (req, res, next) => {
 router.get('/:user_id/games/favor', async (req, res, next) => {
     const { user_id } = req.params;
     try {
-        const [favors] = await pool.query(`SELECT title, game_id FROM favor LEFT JOIN games ON games.id = favor.game_id WHERE user_id = ?`,[user_id]);
+        const [favors] = await pool.query(`SELECT title, id AS game_id, link AS game_image FROM favor LEFT JOIN games ON games.id = favor.game_id LEFT JOIN game_images ON game_images.game_id = games.id WHERE user_id = ?`,[user_id]);
         res.status(200).json({ favors });
     } catch (err) {
         next(err);
@@ -160,7 +160,7 @@ router.get('/:user_id/games/favor', async (req, res, next) => {
 router.get('/:user_id/games/score', async (req, res, next) => {
     const { user_id } = req.params;
     try {
-        const [scores] = await pool.query(`SELECT score, title, game_id FROM game_score LEFT JOIN games ON games.id = game_score.game_id WHERE user_id = ?`, [user_id]);
+        const [scores] = await pool.query(`SELECT score, title, id AS game_id, link AS game_image FROM game_score LEFT JOIN games ON games.id = game_score.game_id LEFT JOIN game_images ON game_images.game_id = games.id WHERE user_id = ?`, [user_id]);
         res.status(200).json({ scores });
     } catch (err) {
         next(err);
