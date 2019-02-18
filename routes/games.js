@@ -98,6 +98,13 @@ router.get('/:game_id', async (req, res, next) => {
     const option = [game_id];
     try {
         const [[game]] = await pool.query(sql, option);
+        if (req.headers['x-access-token']) {
+            const user_id = await cert.user(req);
+            const [[favor]] = await pool.query(`SELECT 1 FROM favor WHERE user_id = ?`, [user_id]);
+            const [[row]] = await pool.query(`SELECT score FROM game_score WHERE user_id = ?`, [user_id]);
+            game.favor = !!favor;
+            game.my_score = row?row.score:null;
+        }
         if (!game)
             throw { status: 404, message: 'Game not found' }
         res.status(200).json({ game })
