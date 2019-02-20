@@ -262,7 +262,7 @@ router.post('/:post_id/comments', async (req, res, next) => {
     try {
         const user_id = await cert(req);
         await pool.query(`INSERT INTO post_comments (user_id, post_id, value, parent_id) VALUES (?, ?, ?, ?)`,[user_id, post_id, value, parent_id]);
-        const post_user_reg_id = await pool.query(`SELECT reg_id FROM posts LEFT JOIN users ON users.id = posts.user_id WHERE post_id = ?`, [post_id]);
+        const post_user_reg_id = await pool.query(`SELECT reg_id FROM posts LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?`, [post_id]);
         const push = require('../controller/notification');
         await push(post_user_reg_id, '댓글 알림 테스트', '아아아 마이크테스트');
         res.status(204).json();
