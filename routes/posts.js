@@ -265,7 +265,9 @@ router.post('/:post_id/comments', async (req, res, next) => {
         const [[write_user]] = await pool.query(`SELECT name FROM users WHERE id = ?`, [user_id]);
         const [[user]] = await pool.query(`SELECT reg_id FROM posts LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?`, [post_id]);
         const push = require('../controller/notification');
-        if (user.reg_id) {
+        console.log(user.reg_id);
+        
+        if (user.reg_id != null) {
             await push(user.reg_id, {
                 body: write_user.name + '님이 회원님의 게시물에 댓글을 남겻습니다.'
             },{
