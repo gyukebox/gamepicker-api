@@ -266,6 +266,8 @@ router.post('/:post_id/comments', async (req, res, next) => {
         const [[user]] = await pool.query(`SELECT reg_id FROM posts LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?`, [post_id]);
         const push = require('../controller/notification');
         console.log(user.reg_id);
+        const bool = user.reg_id !== null;
+        console.log(bool);
         
         if (user.reg_id != null) {
             await push(user.reg_id, {
