@@ -26,7 +26,7 @@ router.get('/', async (req, res, next) => {
         sql += ` WHERE post_category.value = ?`;
         option.push(category);
         if (category === 'games' && game_id) {
-            sql += `category_id = 1 AND game_id = ?`;
+            sql += ` AND game_id = ?`;
             option.push(Number(game_id));
         }
     }
