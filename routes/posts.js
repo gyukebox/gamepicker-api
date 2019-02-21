@@ -3,7 +3,7 @@ const router = express.Router();
 const cert = require('../controller/certification')().user;
 
 router.get('/', async (req, res, next) => {
-    const { limit, offset, game_id } = req.query;
+    const { limit, offset, game_id, category } = req.query;
     let sql = `
     SELECT
         posts.id, posts.title, views, value, posts.created_at,
@@ -20,6 +20,17 @@ router.get('/', async (req, res, next) => {
     if (game_id) {
         sql += ` WHERE game_id = ?`
         option.push(Number(game_id));
+    }
+    if (category) {
+        sql += ` WHERE `;
+        if (category === 'games') {
+            sql += `category_id = 1 AND game_id = ?`;
+            option.push(Number(game_id));
+        } else if (category === 'free') {
+            sql += `category_id = 2`
+        } else if (category === 'anonymous') {
+            sql += `category_id = 3`
+        }
     }
     sql += ` GROUP BY posts.id ORDER BY posts.created_at DESC`
     if (limit) {
@@ -76,13 +87,14 @@ router.get('/:post_id', async (req, res, next) => {
 })
 
 router.post('/', async (req, res, next) => {
-    const { title, value, game_id } = req.body;
+    const { title, value, game_id, category_id } = req.body;
     try {
         const user_id = await cert(req);
-        if (game_id > 0)
-            await pool.query(`INSERT INTO posts (user_id, title, value, game_id) VALUES (?, ?, ?, ?)`,[user_id, title, value, game_id]);
-        else //임시로 자유게시판 game_id를 null 처리함
-            await pool.query(`INSERT INTO posts (user_id, title, value) VALUES (?, ?, ?)`,[user_id, title, value]);
+        if (category_id === 1) {    // games
+            await pool.query(`INSERT INTO posts (user_id, title, value, game_id, category_id) VALUES (?, ?, ?, ?, ?)`,[user_id, title, value, game_id, category_id]);
+        } else {    //free(2), anonymous(3)
+            await pool.query(`INSERT INTO posts (user_id, title, value, category_id) VALUES (?, ?, ?, ?)`,[user_id, title, value, category_id]);
+        }
         res.status(204).json();
     } catch (err) {
         next(err);
