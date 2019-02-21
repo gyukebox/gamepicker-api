@@ -79,7 +79,10 @@ router.post('/', async (req, res, next) => {
     const { title, value, game_id } = req.body;
     try {
         const user_id = await cert(req);
-        await pool.query(`INSERT INTO posts (user_id, title, value, game_id) VALUES (?, ?, ?, ?)`,[user_id, title, value, game_id]);
+        if (game_id > 0)
+            await pool.query(`INSERT INTO posts (user_id, title, value, game_id) VALUES (?, ?, ?, ?)`,[user_id, title, value, game_id]);
+        else //임시로 자유게시판 game_id를 null 처리함
+            await pool.query(`INSERT INTO posts (user_id, title, value) VALUES (?, ?, ?)`,[user_id, title, value]);
         res.status(204).json();
     } catch (err) {
         next(err);
