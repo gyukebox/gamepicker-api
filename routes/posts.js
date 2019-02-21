@@ -87,13 +87,13 @@ router.get('/:post_id', async (req, res, next) => {
 })
 
 router.post('/', async (req, res, next) => {
-    const { title, value, game_id, category_id } = req.body;
+    const { title, value, game_id, category } = req.body;
     try {
         const user_id = await cert(req);
-        if (category_id === 1) {    // games
-            await pool.query(`INSERT INTO posts (user_id, title, value, game_id, category_id) VALUES (?, ?, ?, ?, ?)`,[user_id, title, value, game_id, category_id]);
+        if (category === 'games') {    // games
+            await pool.query(`INSERT INTO posts (user_id, title, value, game_id, category_id) VALUES (?, ?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[user_id, title, value, game_id, category]);
         } else {    //free(2), anonymous(3)
-            await pool.query(`INSERT INTO posts (user_id, title, value, category_id) VALUES (?, ?, ?, ?)`,[user_id, title, value, category_id]);
+            await pool.query(`INSERT INTO posts (user_id, title, value, category_id) VALUES (?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[user_id, title, value, category]);
         }
         res.status(204).json();
     } catch (err) {
