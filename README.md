@@ -77,5 +77,6 @@
 * [Create my profile image](documents/me/profile/create.json) : `POST /me/profile`
 * [Delete my profile image](documents/me/profile/delete.json) : `DELETE /me/profile`
 * [Reset my password](documents/me/password/update.json) : `PUT /me/password`
+* [Check push notification agree](documents/me/push/read.json) : `GET /me/push`
 * [Push notification agree](documents/me/push/create.json) : `POST /me/push`
 * [Push notification disagree](documents/me/push/delete.json) : `DELETE /me/push`

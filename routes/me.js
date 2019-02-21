@@ -66,6 +66,17 @@ router.put('/password', async (req, res, next) => {
     }
 });
 
+router.get('/push', async (req, res, next) => {
+    try {
+        const user_id = await cert(req);
+        const [[user]] = await pool.query(`SELECT reg_id FROM users WHERE id = ?`, [user_id]);
+        const agree = !!user.reg_id;
+        res.status(200).json({ agree });
+    } catch (err) {
+        next(err);
+    }
+})
+
 router.post('/push', async (req, res, next) => {
     const { os_type, reg_id } = req.body;
     try {
