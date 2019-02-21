@@ -16,9 +16,9 @@
     "value": "Value of post",
     "game_id": "Game of post(optional)",
     "category_id": {
-        1: "games",
-        2: "free",
-        3: "anonymous"
+        "games": "games",
+        "free": "free",
+        "anonymous": "anonymous"
     }
 }
 ```
