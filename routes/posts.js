@@ -6,7 +6,7 @@ router.get('/', async (req, res, next) => {
     const { limit, offset, game_id, category } = req.query;
     let sql = `
     SELECT
-        posts.id, posts.title, views, value, posts.created_at,
+        posts.id, posts.title, views, posts.value, posts.created_at,
         users.name, users.id as user_id,  
         games.title AS game_title, games.id AS game_id,
         (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) as recommends,
@@ -15,21 +15,19 @@ router.get('/', async (req, res, next) => {
     FROM
         posts
         LEFT JOIN users ON users.id = posts.user_id
-        LEFT JOIN games ON games.id = posts.game_id`
+        LEFT JOIN games ON games.id = posts.game_id
+        LEFT JOIN post_category ON post_category.id = posts.category_id`
     const option = [];
     if (game_id) {
         sql += ` WHERE game_id = ?`
         option.push(Number(game_id));
     }
     if (category) {
-        sql += ` WHERE `;
-        if (category === 'games') {
+        sql += ` WHERE post_category.value = ?`;
+        option.push(category);
+        if (category === 'games' && game_id) {
             sql += `category_id = 1 AND game_id = ?`;
             option.push(Number(game_id));
-        } else if (category === 'free') {
-            sql += `category_id = 2`
-        } else if (category === 'anonymous') {
-            sql += `category_id = 3`
         }
     }
     sql += ` GROUP BY posts.id ORDER BY posts.created_at DESC`
