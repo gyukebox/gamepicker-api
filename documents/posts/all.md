@@ -11,7 +11,12 @@
 Query {
     limit : Limit the number of data,
     offset : Set start index, required 'limit',
-    game_id : Get posts matching 'game_id'
+    game_id : Get posts matching 'game_id',
+    "category": {
+        "games": "Games posts",
+        "free": "Free posts",
+        "anonymous": "Anonymous posts"
+    }
 }
 ```
 

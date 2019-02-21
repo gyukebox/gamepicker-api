@@ -8,10 +8,18 @@
 
 **Data constraints** 
 ```
-Body {
-    title: Title of post,
-    value: Value of post,
-    game_id: Game of post(optional)
+"header": {
+    "x-access-token": "Token from '/auth/login'"
+},
+"body": {
+    "title": "Title of post",
+    "value": "Value of post",
+    "game_id": "Game of post(optional)",
+    "category_id": {
+        1: "games",
+        2: "free",
+        3: "anonymous"
+    }
 }
 ```
 
