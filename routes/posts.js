@@ -281,7 +281,7 @@ router.post('/:post_id/comments', async (req, res, next) => {
         if (parent_id) {
             const [[write_user]] = await pool.query(`SELECT name FROM users WHERE id = ?`, [user_id]);
             const [[user]] = await pool.query(`SELECT reg_id FROM post_comments LEFT JOIN users ON users.id = post_comments.user_id WHERE post_comments.id = ?`, [parent_id]);
-            if (user.reg_id !== 'null') {
+            if (user.reg_id) {
                 await push(user.reg_id, {
                     body: write_user.name + '님이 회원님의 댓글에 답글을 남겻습니다.'
                 },{
@@ -292,7 +292,7 @@ router.post('/:post_id/comments', async (req, res, next) => {
         } else {
             const [[write_user]] = await pool.query(`SELECT name FROM users WHERE id = ?`, [user_id]);
             const [[user]] = await pool.query(`SELECT reg_id FROM posts LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?`, [post_id]);
-            if (user.reg_id !== 'null') {
+            if (user.reg_id) {
                 await push(user.reg_id, {
                     body: write_user.name + '님이 회원님의 게시물에 댓글을 남겻습니다.'
                 },{
