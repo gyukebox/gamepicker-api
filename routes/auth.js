@@ -101,12 +101,12 @@ router.post('/forgot', async (req, res, next) => {
             from: "Gamepicker" + mail_config.user,
             to: email,
             subject: 'GamePicker 비밀번호 재설정',
-            html: `<p>Test</p><a href='http://www.gamepicker.co.kr/auth/password?token=${token}'>비밀번호 재설정 하기</a>`
+            html: `<p>Test</p><a href='http://www.gamepicker.co.kr/gamepicker/resetpw.php?token=${token}'>비밀번호 재설정 하기</a>`
         });
         res.status(204).json();
     } catch (err) {
         next(err);
     }
-})
+});
 
 module.exports = router;

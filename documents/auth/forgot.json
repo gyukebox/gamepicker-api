@@ -1,0 +1,16 @@
+{
+    "title": "Forgot password",
+    "endpoint": "/auth/forgot",
+    "method": "post",
+    "request": {
+        "body": {
+            "email": "Valid email address"
+        }
+    },
+    "response": [
+        {
+            "status": 204,
+            "data": null
+        }
+    ]
+}

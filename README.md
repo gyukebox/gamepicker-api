@@ -4,6 +4,7 @@
 
 * [Login](documents/auth/login.json) : `POST /auth/login`
 * [Register](documents/auth/register.json) : `POST /auth/register`
+* [Forgot password](documents/auth/forgot.json) : `POST /auth/forgot`
 
 ## User related
 
