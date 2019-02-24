@@ -18,10 +18,6 @@ router.get('/', async (req, res, next) => {
         LEFT JOIN games ON games.id = posts.game_id
         LEFT JOIN post_category ON post_category.id = posts.category_id`
     const option = [];
-    if (game_id) {
-        sql += ` WHERE game_id = ?`
-        option.push(Number(game_id));
-    }
     if (category) {
         sql += ` WHERE post_category.value = ?`;
         option.push(category);
