@@ -49,8 +49,9 @@ router.get('/:user_id/posts', async (req, res, next) => {
     const option = [user_id];
     let sql = `
     SELECT
-        posts.id, posts.title, views, value, posts.created_at,
-        users.name, users.id as user_id,  
+        posts.id, posts.title, views, posts.value, posts.created_at,
+        users.name, users.id as user_id,
+        post_category.value AS category,
         games.title AS game_title, games.id AS game_id,
         (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) as recommends,
         (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) as disrecommends,
@@ -59,6 +60,7 @@ router.get('/:user_id/posts', async (req, res, next) => {
         posts
         LEFT JOIN users ON users.id = posts.user_id
         LEFT JOIN games ON games.id = posts.game_id
+        LEFT JOIN post_category ON post_category.id = posts.category_id
     WHERE posts.user_id = ?`;
 
     if (limit) {
