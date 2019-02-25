@@ -16,6 +16,10 @@
 * [Get user's game score](documents/users/games/score/read.json) : `GET /users/:user_id/games/score`
 * [Get user's game comments](documents/users/games/comments/read.json) : `GET /users/:user_id/games/comments`
 * [Get user's favor games](documents/users/games/favor/read.json) : `GET /users/:user_id/games/favor`
+* [Get list of post comments recommended by the user](documents/users/posts/comments/recommends/read.json) : `GET /users/:user_id/posts/comments/recommends`
+* [Get list of post comments disrecommended by the user](documents/users/posts/comments/disrecommends/read.json) : `GET /users/:user_id/posts/comments/disrecommends`
+* [Get list of game comments recommended by the user](documents/users/games/comments/recommends/read.json) : `GET /users/:user_id/games/comments/recommends`
+* [Get list of game comments disrecommended by the user](documents/users/games/comments/disrecommends/read.json) : `GET /users/:user_id/games/comments/disrecommends`
 
 
 ## Game related

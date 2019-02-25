@@ -179,4 +179,44 @@ router.get('/:user_id/games/comments', async (req, res, next) => {
     }
 });
 
+router.get('/:user_id/posts/comments/recommends', async (req, res, next) => {
+    const { user_id } = req.params;
+    try {
+        const [comments] = await pool.query(`SELECT comment_id AS id FROM post_comment_recommends WHERE user_id = ?`, [user_id]);
+        res.status(200).json({ comments }); 
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get('/:user_id/posts/comments/disrecommends', async (req, res, next) => {
+    const { user_id } = req.params;
+    try {
+        const [comments] = await pool.query(`SELECT comment_id AS id FROM post_comment_disrecommends WHERE user_id = ?`, [user_id]);
+        res.status(200).json({ comments }); 
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get('/:user_id/games/comments/recommends', async (req, res, next) => {
+    const { user_id } = req.params;
+    try {
+        const [comments] = await pool.query(`SELECT comment_id AS id FROM game_comment_recommends WHERE user_id = ?`, [user_id]);
+        res.status(200).json({ comments });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get('/:user_id/games/comments/disrecommends', async (req, res, next) => {
+    const { user_id } = req.params;
+    try {
+        const [comments] = await pool.query(`SELECT comment_id AS id FROM game_comment_disrecommends WHERE user_id = ?`, [user_id]);
+        res.status(200).json({ comments });
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;
