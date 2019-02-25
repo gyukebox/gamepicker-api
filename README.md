@@ -10,7 +10,7 @@
 
 * [View all users](documents/users/all.json) : `GET /users`
 * [View info](documents/users/read.md) : `GET /users/:user_id`
-* [View created posts](documents/users/posts.md) : `GET /users/:user_id/posts`
+* [View created posts](documents/users/posts/read/json) : `GET /users/:user_id/posts`
 * [View created comments](documents/users/comments.md) : `GET /users/:user_id/posts`
 * [Recommend games](documents/users/recommend.md) : `GET /users/:user_id/recommend`
 * [Get user's game score](documents/users/games/score/read.json) : `GET /users/:user_id/games/score`
