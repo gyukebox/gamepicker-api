@@ -13,9 +13,14 @@ router.post('/questions', async (req, res, next) => {
 })
 
 router.get('/questions', async (req, res, next) => {
+    const { sort } = req.query;
     try {
-        const [questions] = await pool.query(`SELECT id, title, email, value FROM questions WHERE reply IS NULL`);
-        res.status(200).json({ questions })
+        if (sort === 'answered') {
+            const [questions] = await pool.query(`SELECT SELECT id, title, email, value, reply FROM questions`)
+        } else {
+            const [questions] = await pool.query(`SELECT id, title, email, value FROM questions WHERE reply IS NULL`);
+        }
+        res.status(200).json({ questions });
     } catch (err) {
         next(err);
     }
