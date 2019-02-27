@@ -60,7 +60,7 @@ router.post('/register', async (req, res, next) => {
     try {
         const {salt, hash} = await encrypt(password);
         const token = jwt.encode({ email: email, password: hash });
-        if (auth === "gmail") {
+        if (auth === "google") {
             await pool.query('INSERT INTO users(name, email, password, birthday, gender, salt, active) VALUES (?, ?, ?, ?, ?, ?, 1)', [name, email, hash, birthday, gender, salt]);
         } else {
             await pool.query('INSERT INTO users(name, email, password, birthday, gender, salt) VALUES (?, ?, ?, ?, ?, ?)', [name, email, hash, birthday, gender, salt]);
