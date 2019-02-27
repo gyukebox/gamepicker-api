@@ -6,9 +6,8 @@ router.get('/', async (req, res, next) => {
     const { limit, offset, game_id, category } = req.query;
     let sql = `
     SELECT
-        posts.id, posts.title, views, posts.value, posts.created_at,
+        posts.id, posts.title, views, posts.created_at,
         users.name, users.id as user_id,  
-        games.title AS game_title, games.id AS game_id,
         (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) as recommends,
         (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) as disrecommends,
         (SELECT COUNT(1) FROM post_comments WHERE post_id = posts.id) as comment_count
