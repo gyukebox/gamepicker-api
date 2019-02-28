@@ -48,15 +48,17 @@ router.get('/:post_id', async (req, res, next) => {
     const token = req.headers['x-access-token'];
     const sql = `
     SELECT
-        posts.id, posts.title, views, value, posts.created_at,
+        posts.id, posts.title, views, posts.value, posts.created_at,
         users.name, users.id as user_id,  
         games.title AS game_title, games.id AS game_id,
+        post_category.value AS category,
         (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) AS recommends,
         (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) AS disrecommends
     FROM
         posts
         LEFT JOIN users ON users.id = posts.user_id
         LEFT JOIN games ON games.id = posts.game_id
+        LEFT JOIN post_category ON post_category.id = posts.category_id
     WHERE posts.id = ?`
 
     try {
