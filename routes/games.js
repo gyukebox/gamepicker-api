@@ -15,7 +15,6 @@ router.get('/', async (req, res, next) => {
             created_at,
             (SELECT JSON_ARRAYAGG(link) FROM game_images WHERE game_id = games.id) AS images,
             (SELECT JSON_ARRAYAGG(link) FROM game_videos WHERE game_id = games.id) AS videos,
-            (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_id = games.id) AS tags,
             (SELECT JSON_ARRAYAGG(value) FROM game_platforms LEFT JOIN platforms ON platforms.id = game_platforms.platform_id WHERE game_id = games.id) AS platforms,
             (SELECT AVG(score) FROM game_score WHERE game_id = games.id) AS score,
             (SELECT COUNT(score) FROM game_score WHERE game_id = games.id) AS score_count
@@ -71,7 +70,6 @@ router.get('/:game_id', async (req, res, next) => {
             age_rate,
             (SELECT JSON_ARRAYAGG(link) FROM game_images WHERE game_id = games.id) AS images,
             (SELECT JSON_ARRAYAGG(link) FROM game_videos WHERE game_id = games.id) AS videos,
-            (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_id = games.id) AS tags,
             (SELECT JSON_ARRAYAGG(value) FROM game_platforms LEFT JOIN platforms ON platforms.id = game_platforms.platform_id WHERE game_id = games.id) AS platforms,
             (SELECT AVG(score) FROM game_score WHERE game_id = games.id) AS score,
             (SELECT COUNT(score) FROM game_score WHERE game_id = games.id) AS score_count,
@@ -115,11 +113,10 @@ router.get('/:game_id', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
     const { title, developer, publisher, summary, age_rate } = req.body;
-    let { images, videos, tags, platforms } = req.body;
+    let { images, videos, platforms } = req.body;
     
     images = JSON.parse(images);
     videos = JSON.parse(videos);
-    tags = JSON.parse(tags);
     platforms = JSON.parse(platforms);
 
     try {
@@ -127,7 +124,6 @@ router.post('/', async (req, res, next) => {
         const [{insertId}] = await pool.query(`INSERT INTO games (title, developer, publisher, summary, age_rate) VALUES (?, ?, ?, ?, ?)`,[title, developer, publisher, summary, age_rate]);
         await pool.query(`INSERT INTO game_images (game_id, link) VALUES ${images.map(image => `(${insertId}, ?)`).toString()}`, images);
         await pool.query(`INSERT INTO game_videos (game_id, link) VALUES ${videos.map(video => `(${insertId}, ?)`).toString()}`, videos);
-        await pool.query(`INSERT INTO game_tags (game_id, tag_id) VALUES ${tags.map(tag => `(${insertId}, ?)`).toString()}`, tags);
         await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${insertId}, ?)`).toString()}`, platforms);
         res.status(204).json();
     } catch (err) {
