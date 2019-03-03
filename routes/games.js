@@ -115,16 +115,16 @@ router.post('/', async (req, res, next) => {
     const { title, developer, publisher, summary, age_rate } = req.body;
     let { images, videos, platforms } = req.body;
     
-    images = JSON.parse(images);
-    videos = JSON.parse(videos);
-    platforms = JSON.parse(platforms);
-
     try {
         await cert.admin(req);
         const [{insertId}] = await pool.query(`INSERT INTO games (title, developer, publisher, summary, age_rate) VALUES (?, ?, ?, ?, ?)`,[title, developer, publisher, summary, age_rate]);
-        await pool.query(`INSERT INTO game_images (game_id, link) VALUES ${images.map(image => `(${insertId}, ?)`).toString()}`, images);
-        await pool.query(`INSERT INTO game_videos (game_id, link) VALUES ${videos.map(video => `(${insertId}, ?)`).toString()}`, videos);
-        await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${insertId}, ?)`).toString()}`, platforms);
+        console.log(insertId);
+        if (images.length > 0)
+            await pool.query(`INSERT INTO game_images (game_id, link) VALUES ${images.map(image => `(${insertId}, ?)`).toString()}`, images);
+        if (videos.length > 0)
+            await pool.query(`INSERT INTO game_videos (game_id, link) VALUES ${videos.map(video => `(${insertId}, ?)`).toString()}`, videos);
+        if (platforms.length > 0)
+            await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${insertId}, ?)`).toString()}`, platforms);
         res.status(204).json();
     } catch (err) {
         next(err);
