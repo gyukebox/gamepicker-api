@@ -186,9 +186,12 @@ router.put('/:game_id', async (req, res, next) => {
         await pool.query(`DELETE FROM game_videos WHERE game_id = ?`,[game_id]);
         await pool.query(`DELETE FROM game_platforms WHERE game_id = ?`,[game_id]);
 
-        await pool.query(`INSERT INTO game_images (game_id, link) VALUES ${images.map(image => `(${game_id}, ?)`).toString()}`, images);
-        await pool.query(`INSERT INTO game_videos (game_id, link) VALUES ${videos.map(video => `(${game_id}, ?)`).toString()}`, videos);
-        await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${game_id}, ?)`).toString()}`, platforms);
+        if (images.length > 0)
+            await pool.query(`INSERT INTO game_images (game_id, link) VALUES ${images.map(image => `(${game_id}, ?)`).toString()}`, images);
+        if (videos.length > 0)
+            await pool.query(`INSERT INTO game_videos (game_id, link) VALUES ${videos.map(video => `(${game_id}, ?)`).toString()}`, videos);
+        if (platforms.length > 0)
+            await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${game_id}, ?)`).toString()}`, platforms);
 
         await pool.query(`COMMIT`);
         res.status(204).json();
