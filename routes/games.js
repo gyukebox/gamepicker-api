@@ -134,7 +134,7 @@ router.post('/', async (req, res, next) => {
         if (videos.length > 0)
             await pool.query(`INSERT INTO game_videos (game_id, link) VALUES ${videos.map(video => `(${insertId}, ?)`).toString()}`, videos);
         if (platforms.length > 0)
-            await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${insertId}, ?)`).toString()}`, platforms);
+            await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${insertId}, (SELECT id FROM platforms WHERE value = ?))`).toString()}`, platforms);
         res.status(204).json();
     } catch (err) {
         next(err);
@@ -201,7 +201,7 @@ router.put('/:game_id', async (req, res, next) => {
         if (videos.length > 0)
             await pool.query(`INSERT INTO game_videos (game_id, link) VALUES ${videos.map(video => `(${game_id}, ?)`).toString()}`, videos);
         if (platforms.length > 0)
-            await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${game_id}, ?)`).toString()}`, platforms);
+            await pool.query(`INSERT INTO game_platforms (game_id, platform_id) VALUES ${platforms.map(platform => `(${game_id}, (SELECT id FROM platforms WHERE value = ?))`).toString()}`, platforms);
 
         await pool.query(`COMMIT`);
         res.status(204).json();
