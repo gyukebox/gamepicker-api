@@ -51,6 +51,12 @@ router.get('/', async (req, res, next) => {
     }
     try {
         const [games] = await pool.query(sql, option);
+        games.forEach(game => {
+            if (!game.images)
+                game.images = [];
+            if (!game.videos)
+                game.videos = [];
+        })
         res.status(200).json({ games })
     } catch (err) {
         next(err);
@@ -103,6 +109,10 @@ router.get('/:game_id', async (req, res, next) => {
             game.favor = !!favor;
             game.my_score = row?row.score:null;
         }
+        if (!game.images)
+            game.images = [];
+        if (!game.videos)
+            game.videos = [];
         if (!game)
             throw { status: 404, message: 'Game not found' }
         res.status(200).json({ game })
