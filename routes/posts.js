@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const cert = require('../controller/certification')().user;
+const cert = require('../controller/certification')();
 
 router.get('/', async (req, res, next) => {
     const { limit, offset, game_id, category } = req.query;
@@ -69,7 +69,7 @@ router.get('/:post_id', async (req, res, next) => {
         post.recommended = false;
         post.disrecommended = false;
         if (token) {
-            const user_id = await cert(req);
+            const user_id = await cert.user(req);
             const [recommend] = await pool.query(`SELECT * FROM post_recommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
             post.recommended = !!recommend.length;
             const [disrecommend] = await pool.query(`SELECT * FROM post_disrecommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
@@ -84,9 +84,12 @@ router.get('/:post_id', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
     const { title, value, game_id, category } = req.body;
     try {
-        const user_id = await cert(req);
-        if (category === 'games') {    // games
+        const user_id = await cert.user(req);
+        if (category === 'games') {    // games(1)
             await pool.query(`INSERT INTO posts (user_id, title, value, game_id, category_id) VALUES (?, ?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[user_id, title, value, game_id, category]);
+        } else if (category === 'news') {   //news(4)
+            const admin_id = await cert.admin(req);
+            await pool.query(`INSERT INTO posts (user_id, title, value, category_id) VALUES (?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[admin_id, title, value, category])
         } else {    //free(2), anonymous(3)
             await pool.query(`INSERT INTO posts (user_id, title, value, category_id) VALUES (?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[user_id, title, value, category]);
         }
@@ -114,7 +117,7 @@ router.put('/:post_id', async (req, res, next) => {
     try {
         if (SET_string === "")
             throw { status: 400, message: "Either title or value is required" }
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         option.push(post_id, user_id);
         await pool.query(`UPDATE posts SET ${SET_string} WHERE id = ? AND user_id = ?`,option);
         res.status(204).json();
@@ -126,7 +129,7 @@ router.put('/:post_id', async (req, res, next) => {
 router.delete('/:post_id', async (req, res, next) => {
     const { post_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         await pool.query(`DELETE FROM posts WHERE user_id = ? AND id = ?`,[user_id, post_id]);
         res.status(204).json();
     } catch (err) {
@@ -137,7 +140,7 @@ router.delete('/:post_id', async (req, res, next) => {
 router.get('/:post_id/recommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         const [rows] = await pool.query(`SELECT 1 FROM post_recommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
         const recommend = !!rows.length;
         res.status(200).json({ recommend });
@@ -149,7 +152,7 @@ router.get('/:post_id/recommend', async (req, res, next) => {
 router.post('/:post_id/recommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         const [rows] = await pool.query(`INSERT INTO post_recommends (user_id, post_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM post_recommends WHERE user_id = ? AND post_id = ?)`,[user_id, post_id, user_id, post_id]);
         if (rows.affectedRows === 0)                            //recommend twice
             throw { status: 400, message: 'Already recommended post' }
@@ -166,7 +169,7 @@ router.post('/:post_id/recommend', async (req, res, next) => {
 router.delete('/:post_id/recommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         await pool.query(`DELETE FROM post_recommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
         res.status(204).json();
     } catch (err) {
@@ -177,7 +180,7 @@ router.delete('/:post_id/recommend', async (req, res, next) => {
 router.get('/:post_id/disrecommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         const [rows] = await pool.query(`SELECT 1 FROM post_disrecommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
         const disrecommend = !!rows.length;
         res.status(200).json({ disrecommend });
@@ -189,7 +192,7 @@ router.get('/:post_id/disrecommend', async (req, res, next) => {
 router.post('/:post_id/disrecommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         const [rows] = await pool.query(`INSERT INTO post_disrecommends (user_id, post_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM post_disrecommends WHERE user_id = ? AND post_id = ?)`,[user_id, post_id, user_id, post_id]);
         if (rows.affectedRows === 0)                            //recommend twice
             throw { status: 400, message: 'Already recommended post' }
@@ -206,7 +209,7 @@ router.post('/:post_id/disrecommend', async (req, res, next) => {
 router.delete('/:post_id/disrecommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         await pool.query(`DELETE FROM post_disrecommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
         res.status(204).json();
     } catch (err) {
@@ -270,7 +273,7 @@ router.post('/:post_id/comments', async (req, res, next) => {
     const { post_id } = req.params;
     const { value, parent_id } = req.body;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         await pool.query(`INSERT INTO post_comments (user_id, post_id, value, parent_id) VALUES (?, ?, ?, ?)`,[user_id, post_id, value, parent_id]);
         const push = require('../controller/notification');
         if (parent_id) {
@@ -305,7 +308,7 @@ router.put('/:post_id/comments/:comment_id', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     const { value } = req.body;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         const [rows] = await pool.query(`UPDATE post_comments SET value = ? WHERE post_id = ? AND id = ? AND user_id = ?`,[value, post_id, comment_id, user_id]);
         if (rows.affectedRows === 0)
             throw { status: 404, message: 'Comment not found' }
@@ -318,7 +321,7 @@ router.put('/:post_id/comments/:comment_id', async (req, res, next) => {
 router.delete('/:post_id/comments/:comment_id', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user.user(req);
         const [rows] = await pool.query(`DELETE FROM post_comments WHERE user_id = ? AND post_id = ? AND id = ?`,[user_id, post_id, comment_id]);
         if (rows.affectedRows === 0)
             throw { status: 404, message: 'Comment not found' }
@@ -331,7 +334,7 @@ router.delete('/:post_id/comments/:comment_id', async (req, res, next) => {
 router.post('/:post_id/comments/:comment_id/recommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         await pool.query(`INSERT INTO post_comment_recommends (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
         res.status(204).json();
     } catch (err) {
@@ -342,7 +345,7 @@ router.post('/:post_id/comments/:comment_id/recommends', async (req, res, next) 
 router.delete('/:post_id/comments/:comment_id/recommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         await pool.query(`DELETE FROM post_comment_recommends WHERE user_id = ? AND comment_id = ?`, [user_id, comment_id]);
         res.status(204).json();
     } catch (err) {
@@ -353,7 +356,7 @@ router.delete('/:post_id/comments/:comment_id/recommends', async (req, res, next
 router.post('/:post_od/comments/:comment_id/disrecommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         await pool.query(`INSERT INTO post_comment_disrecommends (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
         res.status(204).json();
     } catch (err) {
@@ -364,7 +367,7 @@ router.post('/:post_od/comments/:comment_id/disrecommends', async (req, res, nex
 router.delete('/:post_id/comments/:comment_id/disrecommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
-        const user_id = await cert(req);
+        const user_id = await cert.user(req);
         await pool.query(`DELETE FROM post_comment_disrecommends WHERE user_id = ? AND comment_id = ?`, [user_id, comment_id]);
         res.status(204).json();
     } catch (err) {
