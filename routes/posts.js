@@ -87,7 +87,7 @@ router.post('/', async (req, res, next) => {
         const user_id = await cert.user(req);
         if (category === 'games') {    // games(1)
             await pool.query(`INSERT INTO posts (user_id, title, value, game_id, category_id) VALUES (?, ?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[user_id, title, value, game_id, category]);
-        } else if (category === 'news') {   //news(4)
+        } else if (category === 'news' || category === 'event') {
             const admin_id = await cert.admin(req);
             await pool.query(`INSERT INTO posts (user_id, title, value, category_id) VALUES (?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[admin_id, title, value, category])
         } else {    //free(2), anonymous(3)
