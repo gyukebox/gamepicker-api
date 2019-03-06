@@ -49,7 +49,7 @@ router.get('/:user_id/posts', async (req, res, next) => {
     const option = [user_id];
     let sql = `
     SELECT
-        posts.id, posts.title, views, posts.value, posts.created_at,
+        posts.id, posts.title, views, posts.created_at,
         users.name, users.id as user_id,
         post_category.value AS category,
         games.title AS game_title, games.id AS game_id,
