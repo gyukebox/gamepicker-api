@@ -145,8 +145,8 @@ router.get('/:game_id/features', async (req, res, next) => {
     const { game_id } = req.params;
     try {
         const user_id = await cert.user(req);
-        const [[feature]] = await pool.query(`SELECT 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user_id]);
-        res.status(200).json({ feature });
+        const [[features]] = await pool.query(`SELECT 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user_id]);
+        res.status(200).json({ features });
     } catch (err) {
         next(err);
     }
