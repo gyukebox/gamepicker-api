@@ -103,7 +103,7 @@ router.get('/games/features', async (req, res, next) => {
     try {
         const user_id = await cert(req);
         const games = pool.query(`SELECT game_id FROM game_features WHERE user_id = ?`, [null, user_id]);
-        res.status(200),json({ games });
+        res.status(200).json({ games });
     } catch (err) {
         next(err);
     }
