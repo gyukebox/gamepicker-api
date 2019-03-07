@@ -10,7 +10,6 @@ const users = require('./routes/users');
 const posts = require('./routes/posts');
 const platforms = require('./routes/platforms');
 const auth = require('./routes/auth');
-const manage = require('./routes/manage');
 const admin = require('./routes/admin');
 const me = require('./routes/me');
 
@@ -30,9 +29,7 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.engine('html', require('ejs').renderFile);
 
-app.use('/public', express.static(__dirname + '/public'))
 app.use('/uploads', express.static(__dirname + '/uploads'))
-app.use('/manage', manage);
 app.use('/auth', auth);
 app.use(async (req, res, next) => {
     const auth_token = req.headers['authorization'];
