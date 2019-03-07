@@ -171,17 +171,6 @@ router.post('/:game_id/features', async (req, res, next) => {
     }
 });
 
-router.delete('/:game_id/features', async (req, res, next) => {
-    const { game_id } = req.params;
-    try {
-        const user_id = await cert.user(req);
-        await pool.query(`DELETE FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user_id]);
-        res.status(204).json();
-    } catch (err) {
-        next(err);
-    }
-})
-
 router.put('/:game_id', async (req, res, next) => {
     const { game_id } = req.params;
     const { title, developer, publisher, summary, age_rate } = req.body;
@@ -215,85 +204,34 @@ router.delete('/:game_id', async (req, res, next) => {
     const { game_id } = req.params;
     try {
         await cert.admin(req);
-        const [rows] = await pool.query(`DELETE FROM games WHERE id = ?`, [game_id])
-        if (rows.affectedRows === 0)
-            throw { status: 410, message: "이미 삭제된 게임입니다" }
+        await pool.query(`DELETE FROM games WHERE id = ?`, [game_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
     }
 })
 
-router.post('/:game_id/favor', async (req, res, next) => {
+router.post('/:game_id/follow', async (req, res, next) => {
     const { game_id } = req.params;
-    //toggle 이 가능하면 그쪽으로 변경
     try {
         const user_id = await cert.user(req);
-        const [rows] = await pool.query(`INSERT INTO favor (user_id, game_id) SELECT ?, ? FROM dual  WHERE NOT EXISTS ( SELECT * FROM favor WHERE user_id = ? AND game_id = ? )`, [user_id, game_id, user_id, game_id]);
-        if (rows.affectedRows === 0)
-            throw { status:400, message: 'Already favorite this game' }
+        await pool.query(`INSERT INTO favor (user_id, game_id) VALUES (?, ?)`, [user_id, game_id]);
         res.status(204).json();
     } catch (err) {
-        next(err);
+        if (err.errno === 1062) {
+            next({status: 409, message: "Already follow this game"});
+        } else {
+            next(err);
+        }
     }
 })
 
-router.get('/:game_id/favor', async (req, res, next) => {
+router.delete('/:game_id/follow', async (req, res, next) => {
     const { game_id } = req.params;
     try {
         const user_id = await cert.user(req);
-        const [rows] = await pool.query(`SELECT COUNT(1) as cnt FROM favor WHERE user_id = ? AND game_id = ?`,[user_id, game_id]);
-        res.status(200).json({
-            favor: rows[0].cnt?true:false
-        })
-    } catch (err) {
-        next(err);
-    }
-})
-
-router.delete('/:game_id/favor', async (req, res, next) => {
-    const { game_id } = req.params;
-    try {
-        const user_id = await cert.user(req);
-        const [rows] = await pool.query(`DELETE FROM favor WHERE user_id = ? AND game_id = ?`,[user_id, game_id]);
-        if (rows.affectedRows === 0)
-            throw { status: 410, message: 'You are not favorite this game'}
+        await pool.query(`DELETE FROM favor WHERE user_id = ? AND game_id = ?`,[user_id, game_id]);
         res.status(204).json();
-    } catch (err) {
-        next(err);
-    }
-})
-
-//admin 으로 이동?
-router.post('/:game_id/advertising', async (req, res, next) => {
-    const { game_id } = req.params;
-    try {
-        await cert.admin(req);
-        await pool.query(`INSERT INTO advertising_games (game_id) VALUES (?)`, [game_id]);
-        res.status(204).json();
-    } catch (err) {
-        next(err);
-    }
-});
-
-router.post('/:game_id/affiliate', async (req, res, next) => {
-    const { game_id } = req.params;
-    try {
-        await cert.admin(req);
-        await pool.query(`INSERT INTO affiliate_games (game_id) VALUES (?)`, [game_id]);
-        res.status(204).json();
-    } catch (err) {
-        next(err);
-    }
-});
-
-router.get('/:game_id/score', async (req, res, next) => {
-    const { game_id } = req.params;
-    try {
-        const user_id = await cert.user(req);
-        const [[result]] = await pool.query(`SELECT score FROM game_score WHERE user_id = ? AND game_id = ?`, [user_id, game_id]);        
-        const score = result?result.score:null
-        res.status(200).json({ score });
     } catch (err) {
         next(err);
     }
@@ -318,16 +256,16 @@ router.put('/:game_id/score', async (req, res, next) => {
     }
 });
 
-router.put('/:game_id/comments', async (req, res, next) => {
+router.post('/:game_id/comments', async (req, res, next) => {
     const { game_id } = req.params;
-    const { comment } = req.body;
+    const { value } = req.body;
     try {
         const user_id = await cert.user(req);
         const [rows] = await pool.query(`SELECT 1 FROM game_comments WHERE user_id = ? AND game_id = ?`, [user_id, game_id]);
         if (rows.length > 0) {
-            await pool.query(`UPDATE game_comments SET comment = ? WHERE user_id = ? AND game_id = ?`, [comment, user_id, game_id]);
+            await pool.query(`UPDATE game_comments SET value = ? WHERE user_id = ? AND game_id = ?`, [value, user_id, game_id]);
         } else {
-            await pool.query(`INSERT INTO game_comments (user_id, game_id, comment) VALUES (?, ?, ?)`, [user_id, game_id, comment]);
+            await pool.query(`INSERT INTO game_comments (user_id, game_id, value) VALUES (?, ?, ?)`, [user_id, game_id, value]);
         } 
         res.status(204).json();
     } catch (err) {
@@ -338,8 +276,27 @@ router.put('/:game_id/comments', async (req, res, next) => {
 router.get(`/:game_id/comments`, async (req, res, next) => {
     const { game_id } = req.params;
     try {
-        const [comments] = await pool.query(`SELECT comment, user_id, name AS user_name FROM game_comments LEFT JOIN users ON users.id = game_comments.user_id WHERE game_id = ?`, [game_id]);
+        const [comments] = await pool.query(`SELECT 
+            value, game_comments.user_id, name AS user_name, created_at, game_comments.updated_at,
+            COUNT(game_comment_recommends.user_id) AS recommends,
+            COUNT(game_comment_disrecommends.user_id) AS disrecommends
+        FROM game_comments 
+            LEFT JOIN users ON users.id = game_comments.user_id 
+            LEFT JOIN game_comment_recommends ON game_comment_recommends.comment_id = game_comments.id
+            LEFT JOIN game_comment_disrecommends ON game_comment_disrecommends.comment_id = game_comments.id
+        WHERE game_id = ?
+        GROUP BY game_comments.id`, [game_id]);
         res.status(200).json({comments});
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.delete(`/:game_id/comments/:comment_id`, async (req, res, next) => {
+    const { game_id, comment_id } = req.params;
+    try {
+        await pool.query(`DELETE FROM game_comments WHERE game_id = ? AND id = ?`, [game_id, comment_id]);
+        res.status(204).json();
     } catch (err) {
         next(err);
     }
@@ -352,7 +309,13 @@ router.post('/:game_id/comments/:comment_id/recommends', async (req, res, next) 
         await pool.query(`INSERT INTO game_comment_recommends (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
         res.status(204).json();
     } catch (err) {
-        next(err);
+        if (err.errno === 1452) {
+            next({status: 404, message: "Comment not found"});
+        } else if (err.errno === 1062) {
+            next({status: 409, message: "Already recommended this comment"});
+        } else {
+            next(err);
+        }
     }
 });
 
@@ -374,7 +337,13 @@ router.post('/:game_id/comments/:comment_id/disrecommends', async (req, res, nex
         await pool.query(`INSERT INTO game_comment_disrecommends (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
         res.status(204).json();
     } catch (err) {
-        next(err);
+        if (err.errno === 1452) {
+            next({status: 404, message: "Comment not found"});
+        } else if (err.errno === 1062) {
+            next({status: 409, message: "Already recommended this comment"});
+        } else {
+            next(err);
+        }
     }
 });
 
