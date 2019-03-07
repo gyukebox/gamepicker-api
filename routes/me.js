@@ -102,7 +102,9 @@ router.delete('/push', async (req, res, next) => {
 router.get('/games/features', async (req, res, next) => {
     try {
         const user_id = await cert(req);
-        const games = pool.query(`SELECT game_id AS id FROM game_features WHERE user_id = ?`, [user_id]);
+        const [[games]] = await pool.query(`SELECT game_id AS id FROM game_features WHERE user_id = ?`, [user_id]);
+        console.log(games);
+        
         res.status(200).json({ games });
     } catch (err) {
         next(err);
