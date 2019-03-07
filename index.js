@@ -35,7 +35,11 @@ app.use(async (req, res, next) => {
     const auth_token = req.headers['authorization'];
     try {
         if (!auth_token) {
-            throw { status: 400, message: "Authorization token required" };
+            if (req.path === '/') {
+                res.redirect('https://ansrl0107.gitbook.io/gamepicker-api');
+            } else {
+                throw { status: 400, message: "Authorization token required" };
+            }
         }
         const [rows] = await pool.query(`SELECT 1 FROM authorization WHERE token = ?`, [auth_token]);
         if (rows.length === 0)
