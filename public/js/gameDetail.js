@@ -167,6 +167,7 @@ document.addEventListener('DOMContentLoaded',() => {
         }
         try {
             let res;
+            /*
             res = await fetch(`/games/${game_id}`, {
                 headers: headers,
                 method: 'PUT',
@@ -174,6 +175,7 @@ document.addEventListener('DOMContentLoaded',() => {
             });
             if (!res.ok)
                 throw res;
+            */
             res = await fetch(`/games/${game_id}/features`, {
                 headers, headers,
                 method: 'POST',
