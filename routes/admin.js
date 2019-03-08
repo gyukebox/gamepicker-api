@@ -77,8 +77,6 @@ router.delete('/notices/:notice_id', async (req, res, next) => {
     try {
         await cert(req);
         const [rows] = await pool.query(`DELETE FROM notices WHERE id = ?`[notice_id]);
-        if (rows.affectedRows === 0)
-            throw { status: 410, message: '이미 삭제된 공지입니다'}
         res.status(204).json();
     } catch (err) {
         next(err);
