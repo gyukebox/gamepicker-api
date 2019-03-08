@@ -220,6 +220,8 @@ router.post('/:game_id/follow', async (req, res, next) => {
     } catch (err) {
         if (err.errno === 1062) {
             next({status: 409, message: "Already follow this game"});
+        } else if (err.errno === 1452) {
+            next({status: 404, message: "Game not found"});
         } else {
             next(err);
         }
