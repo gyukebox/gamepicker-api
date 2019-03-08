@@ -130,7 +130,7 @@ router.get('/:user_id/games/score', async (req, res, next) => {
 router.get('/:user_id/games/comments', async (req, res, next) => {
     const { user_id } = req.params;
     try {
-        const [comments] = await pool.query(`SELECT comment, title, game_id FROM game_comments LEFT JOIN games ON games.id = game_comments.game_id WHERE user_id = ?`, [user_id]);
+        const [comments] = await pool.query(`SELECT id, value, game_id, FROM game_comments WHERE user_id = ?`, [user_id]);
         res.status(200).json({ comments });
     } catch (err) {
         next(err);
