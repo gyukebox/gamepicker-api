@@ -50,7 +50,7 @@ router.get('/:user_id/posts', async (req, res, next) => {
     let sql = `
     SELECT
         posts.id, posts.title, views, posts.created_at,
-        users.name, users.id as user_id,
+        users.name AS user_name, users.id as user_id,
         post_category.value AS category,
         games.title AS game_title, games.id AS game_id,
         (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) as recommends,
@@ -103,57 +103,15 @@ router.get('/:user_id/posts/comments', async (req, res, next) => {
     }
 })
 
-router.get('/:user_id/games/rating', async (req, res, next) => {
+router.get('/:user_id/games/follows', async (req, res, next) => {
     const { user_id } = req.params;
-    const sql = `
-        SELECT 
-            game_reviews.game_id, AVG(score) AS score, 
-            (SELECT JSON_ARRAYAGG(value) FROM game_tags LEFT JOIN tags ON tags.id = game_tags.tag_id WHERE game_tags.game_id = game_reviews.game_id) AS tags,
-            (SELECT JSON_ARRAYAGG(value) FROM game_platforms LEFT JOIN platforms ON platforms.id = game_platforms.platform_id WHERE game_platforms.game_id = game_reviews.game_id) AS platforms 
-        FROM game_reviews 
-        WHERE game_reviews.user_id = ?
-        GROUP BY game_reviews.game_id
-        `
-    
     try {
-        const [data] = await pool.query(sql,[user_id]);
-        res.status(200).json({ data });
-    } catch (err) {
-        next(err);
-    }
-})
-
-router.get('/:user_id/games/recommend', async (req, res, next) => {
-    const { tags, limit } = req.query;
-    const count = JSON.parse(tags).length;
-    const tmp = '(' + tags.substring(1,tags.length-1) + ')'
-
-    let sql = `
-    SELECT id, title 
-    FROM games 
-    WHERE id IN (
-        SELECT game_id 
-        FROM (SELECT game_id, COUNT(game_id) AS count FROM game_tags WHERE tag_id IN ${tmp} GROUP BY game_id) AS tmp 
-        WHERE count = ?
-    )`;
-    const option = [count];
-    if (limit) {
-        sql += ` LIMIT ?`;
-        option.push(Number(limit));
-    }
-    try {
-        const [games] = pool.query(sql, option);
+        const [games] = await pool.query(`SELECT title, id AS game_id,
+        (SELECT JSON_ARRAYAGG(link) FROM game_images WHERE game_id = games.id) AS images,
+        FROM favor 
+            LEFT JOIN games ON games.id = favor.game_id 
+        WHERE user_id = ?`,[user_id]);
         res.status(200).json({ games });
-    } catch (err) {
-        next(err);
-    }
-});
-
-router.get('/:user_id/games/favor', async (req, res, next) => {
-    const { user_id } = req.params;
-    try {
-        const [favors] = await pool.query(`SELECT title, id AS game_id, link AS game_image FROM favor LEFT JOIN games ON games.id = favor.game_id LEFT JOIN game_images ON game_images.game_id = games.id WHERE user_id = ?`,[user_id]);
-        res.status(200).json({ favors });
     } catch (err) {
         next(err);
     }
