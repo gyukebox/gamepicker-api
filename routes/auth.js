@@ -27,7 +27,7 @@ router.post('/login', async (req, res, next) => {
         if (admin) {
             const [[admin]] = await pool.query(`SELECT user_id FROM admin WHERE user_id = ?`,[user.id]);
             if (!admin) 
-                throw { status: 401, message: 'Admin not found' }
+                throw { status: 403, message: 'Admin not found' }
         }
         await pool.query(`UPDATE users SET updated_at = NOW() WHERE id = ?`,[user.id])
         res.status(200).json({
