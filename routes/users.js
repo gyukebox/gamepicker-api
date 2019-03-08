@@ -106,7 +106,7 @@ router.get('/:user_id/posts/comments', async (req, res, next) => {
 router.get('/:user_id/games/follow', async (req, res, next) => {
     const { user_id } = req.params;
     try {
-        const [games] = await pool.query(`SELECT title, id AS game_id,
+        const [games] = await pool.query(`SELECT title, id,
         (SELECT JSON_ARRAYAGG(link) FROM game_images WHERE game_images.game_id = favor.game_id) AS images
         FROM favor 
             LEFT JOIN games ON games.id = favor.game_id 
