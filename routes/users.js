@@ -103,7 +103,7 @@ router.get('/:user_id/posts/comments', async (req, res, next) => {
     }
 })
 
-router.get('/:user_id/games/follows', async (req, res, next) => {
+router.get('/:user_id/games/follow', async (req, res, next) => {
     const { user_id } = req.params;
     try {
         const [games] = await pool.query(`SELECT title, id AS game_id,
