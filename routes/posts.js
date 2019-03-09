@@ -8,6 +8,7 @@ router.get('/', async (req, res, next) => {
     SELECT
         posts.id, posts.title, views, posts.created_at,
         users.name, users.id as user_id,  
+        post_category.value AS category,
         (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) as recommends,
         (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) as disrecommends,
         (SELECT COUNT(1) FROM post_comments WHERE post_id = posts.id) as comment_count
@@ -87,10 +88,10 @@ router.post('/', async (req, res, next) => {
         const user_id = await cert.user(req);
         if (category === 'games') {    // games(1)
             await pool.query(`INSERT INTO posts (user_id, title, value, game_id, category_id) VALUES (?, ?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[user_id, title, value, game_id, category]);
-        } else if (category === 'news' || category === 'event') {
+        } else if (category === 'news' || category === 'event' || category === 'news') {
             const admin_id = await cert.admin(req);
             await pool.query(`INSERT INTO posts (user_id, title, value, category_id) VALUES (?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[admin_id, title, value, category])
-        } else {    //free(2), anonymous(3)
+        } else {    //free(2), anonymous(3), wiki(6)
             await pool.query(`INSERT INTO posts (user_id, title, value, category_id) VALUES (?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[user_id, title, value, category]);
         }
         res.status(204).json();
