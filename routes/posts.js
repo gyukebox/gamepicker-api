@@ -27,7 +27,7 @@ router.get('/', async (req, res, next) => {
             option.push(Number(game_id));
         }
     } else {
-        sql += ` WHERE post_category.value IN ('free', 'games', 'anonymous)`;
+        sql += ` WHERE post_category.value IN ('free', 'games', 'anonymous')`;
     }
     sql += ` GROUP BY posts.id ORDER BY posts.created_at DESC`
     if (limit) {
