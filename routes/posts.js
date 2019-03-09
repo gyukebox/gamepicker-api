@@ -39,7 +39,12 @@ router.get('/', async (req, res, next) => {
 
     try {
         const [posts] = await pool.query(sql, option);
-        res.status(200).json({ posts });
+        let game_title = null;
+        if (game_id && category === 'games') {
+            const [[tmp]] = await pool.query(`SELECT title FROM games WHERE id = ?`, [game_id]);
+            game_title = tmp.title;
+        }
+        res.status(200).json({ posts, game_title });
     } catch (err) {
         next(err);
     }
