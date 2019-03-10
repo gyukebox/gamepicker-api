@@ -330,7 +330,7 @@ router.put('/:post_id/comments/:comment_id', async (req, res, next) => {
 router.delete('/:post_id/comments/:comment_id', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
-        const user_id = await cert.user.user(req);
+        const user_id = await cert.user(req);
         const [rows] = await pool.query(`DELETE FROM post_comments WHERE user_id = ? AND post_id = ? AND id = ?`,[user_id, post_id, comment_id]);
         if (rows.affectedRows === 0)
             throw { status: 404, message: 'Comment not found' }
