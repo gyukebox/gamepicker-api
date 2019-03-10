@@ -104,8 +104,8 @@ router.get('/:game_id', async (req, res, next) => {
         const [[game]] = await pool.query(sql, option);
         if (req.headers['x-access-token']) {
             const user_id = await cert.user(req);
-            const [[favor]] = await pool.query(`SELECT 1 FROM favor WHERE user_id = ?`, [user_id]);
-            const [[row]] = await pool.query(`SELECT score FROM game_score WHERE user_id = ?`, [user_id]);
+            const [[favor]] = await pool.query(`SELECT 1 FROM favor WHERE user_id = ? AND game_id = ?`, [user_id, game_id]);
+            const [[row]] = await pool.query(`SELECT score FROM game_score WHERE user_id = ? AND game_id = ?`, [user_id, game_id]);
             game.favor = !!favor;
             game.my_score = row?row.score:null;
         }
