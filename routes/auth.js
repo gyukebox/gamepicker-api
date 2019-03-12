@@ -11,13 +11,13 @@ const hasher = pbkdf2Password();
  * @apiName Login
  * @apiGroup Auth
  * 
- * @apiSuccess {String} id The ID of this user
+ * @apiSuccess {String} user_id The ID of this user
  * @apiSuccess {String} token Token of this user 
  * @apiSuccess {Boolean} admin The value to check if this user is an administrator
- * @apiSuccessExample Success-response:
+ * @apiSuccessExample SUCCESS:
  *      HTTP/1.1 200 OK
  *      {
- *          "id": 23,
+ *          "user_id": 23,
  *          "token": "rgewoubngkjgsdbfkhgb"
  *          "admin": true
  *      }
@@ -63,7 +63,8 @@ router.post('/login', async (req, res, next) => {
             throw { status: 400, message: "Incorrect password" }
         if (!user.active)
             throw { status: 401, message: 'Mail authentication required' }
-        
+        const [[admin]] = await pool.query(`SELECT user_id FROM admin WHERE user_id = ?`,[user.id]);
+
         if (admin) {
             const [[admin]] = await pool.query(`SELECT user_id FROM admin WHERE user_id = ?`,[user.id]);
             if (!admin) 
@@ -72,10 +73,8 @@ router.post('/login', async (req, res, next) => {
         await pool.query(`UPDATE users SET updated_at = NOW() WHERE id = ?`,[user.id])
         res.status(200).json({
             user_id: user.id,
-            token: jwt.encode({
-                email: email,
-                password: hash
-            })
+            token: jwt.encode({ email: email, password: hash }),
+            admin: !!admin
         })
     } catch (err) {
         next(err);
