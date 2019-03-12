@@ -43,7 +43,7 @@ router.post('/questions/:question_id/reply', async (req, res, next) => {
 
 router.get('/notices', async (req, res, next) => {
     const { limit, offset } = req.query;
-    let sql = `SELECT id, title, value, created_at FROM notices`;
+    let sql = `SELECT id, title, created_at FROM notices`;
     const option = [];
     if (limit) {
         sql += ` LIMIT ?`;
@@ -59,7 +59,18 @@ router.get('/notices', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-})
+});
+
+router.get('/notices/:notice_id', async (req, res, next) => {
+    const { notice_id } = req.params;
+    try {
+        await cert(req);
+        const [notices] = await pool.query(`SELECT id, title, value, created_at FROM notices WHERE id = ?`, [notice_id]);
+        res.status(200).json({ notices });
+    } catch (err) {
+        next(err);
+    }
+});
 
 router.post('/notices', async (req, res, next) => {
     const { title, value } = req.body;
