@@ -113,6 +113,8 @@ router.get('/:game_id', async (req, res, next) => {
             game.images = [];
         if (!game.videos)
             game.videos = [];
+        if (!game.platforms)
+            game.platforms = [];
         if (!game)
             throw { status: 404, message: 'Game not found' }
         res.status(200).json({ game })
