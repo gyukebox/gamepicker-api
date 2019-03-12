@@ -1,11 +1,39 @@
 /**
  * @apiDefine HEADERS_AUTHENTICATION
  * @apiHeader {String} Authorization Authentication token
+ * @apiError AUTHENTICATION_FAILED Invalid authentication token
+ * @apiError AUTHENTICATION_REQUIRED Authentication token is required
+ * @apiErrorExample AUTHENTICATION_FAILED:
+ *      HTTP/1.1 401 Unauthorized
+ *      {
+ *          "code": "AUTHENTICATION_FAILED",
+ *          "message": "Invalid authentication token"
+ *      }
+ * @apiErrorExample AUTHENTICATION_REQUIRED:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "code": "AUTHENTICATION_REQUIRED",
+ *          "message": "Authentication token is required"
+ *      }
  */
 
 /**
  * @apiDefine HEADERS_AUTHORIZATION
  * @apiHeader {String} x-access-token Authorization token
+ * @apiError AUTHORIZATION_FAILED Invalid authorization token
+ * @apiError AUTHORIZATION_REQUIRED Authorization token is required
+ * @apiErrorExample AUTHORIZATION_FAILED:
+ *      HTTP/1.1 401 Unauthorized
+ *      {
+ *          "code": "AUTHORIZATION_FAILED",
+ *          "message": "Not enough or too many segments"
+ *      }
+ * @apiErrorExample AUTHORIZATION_REQUIRED:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "code": "AUTHORIZATION_REQUIRED",
+ *          "message": "Authorization token is required"
+ *      }
  */
 
 /**
@@ -71,3 +99,4 @@
  * @apiDefine QUERY_OFFSET
  * @apiParam {Number} query.offset Decide the start index of items returned
  */
+

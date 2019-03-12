@@ -36,11 +36,11 @@ app.use(async (req, res, next) => {
     const auth_token = req.headers['authorization'];
     try {
         if (!auth_token) {
-            throw { status: 400, message: "Authorization token required" };
+            throw { status: 400, code: "AUTHENTICATION_REQUIRED", message: "Authentication token required" };
         }
         const [rows] = await pool.query(`SELECT 1 FROM authorization WHERE token = ?`, [auth_token]);
         if (rows.length === 0)
-            throw { status: 401, message: 'Authorization failed'};
+            throw { status: 401, code: "AUTHENTICATION_FAILED", message: 'Invalid authentication token'};
         next();
     } catch (err) {
         next(err);

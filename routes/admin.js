@@ -55,6 +55,7 @@ router.post('/questions', async (req, res, next) => {
                 }
  *          ]
  *      }
+ * 
  */
 router.get('/questions', async (req, res, next) => {
     const { sort } = req.query;
@@ -85,6 +86,7 @@ router.get('/questions', async (req, res, next) => {
  * @apiParam {String} body.reply Answer of the question
  * 
  * @apiUse SUCCESS_EMPTY
+ * 
  */ 
 router.post('/questions/:question_id/reply', async (req, res, next) => {
     const { question_id } = req.params;
@@ -122,7 +124,7 @@ router.post('/questions/:question_id/reply', async (req, res, next) => {
                 {
                     "id": 1,
                     "title": "Important notice",
-                    "created_at": "2019-03-09T13:52:38.000Z"
+                    "created_at": "2019-03-09 13:52:38"
                 }
             ]
  *      }
@@ -147,17 +149,58 @@ router.get('/notices', async (req, res, next) => {
     }
 });
 
+/**
+ * @api {get} /admin/notices/:notice-id Get notice
+ * @apiName GetNotice
+ * @apiGroup Admin
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} query
+ * @apiUse QUERY_LIMIT
+ * @apiUse QUERY_OFFSET
+ * 
+ * @apiSuccess {Json} notice
+ * @apiSuccess {Number} id The ID of the notice
+ * @apiSuccess {String} title Title of the notice
+ * @apiSuccess {String} value Content of the notice
+ * @apiSuccess {DateTime} created_at The time this notice was added
+ * @apiSuccessExample Success:
+ *      HTTP/1.1 200 OK
+ *      {
+            "notice": {
+                "id": 1,
+                "title": "Important notice",
+                "value": "Fake data",
+                "created_at": "2019-03-09 13:52:38"
+            }
+        }
+ * 
+ */
 router.get('/notices/:notice_id', async (req, res, next) => {
     const { notice_id } = req.params;
     try {
-        await cert(req);
-        const [notices] = await pool.query(`SELECT id, title, value, created_at FROM notices WHERE id = ?`, [notice_id]);
-        res.status(200).json({ notices });
+        const [[notice]] = await pool.query(`SELECT id, title, value, created_at FROM notices WHERE id = ?`, [notice_id]);
+        res.status(200).json({ notice });
     } catch (err) {
         next(err);
     }
 });
 
+/**
+ * @api {post} /admin/notices Add notice
+ * @apiName CreateNotice
+ * @apiGroup Admin
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} body
+ * @apiParam {String} title Title of the notice
+ * @apiParam {String} value Content of the notice
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.post('/notices', async (req, res, next) => {
     const { title, value } = req.body;
     try {
@@ -167,19 +210,44 @@ router.post('/notices', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-})
+});
 
+/**
+ * @api {delete} /admin/notices/:notice-id Delete notice
+ * @apiName DeleteNotice
+ * @apiGroup Admin
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.notice-id The ID of the notice
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.delete('/notices/:notice_id', async (req, res, next) => {
     const { notice_id } = req.params;
     try {
         await cert(req);
-        const [rows] = await pool.query(`DELETE FROM notices WHERE id = ?`[notice_id]);
+        await pool.query(`DELETE FROM notices WHERE id = ?`[notice_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
     }
-})
+});
 
+/**
+ * @api {post} /admin/push Send push notification
+ * @apiName SendPushNotification
+ * @apiGroup Admin
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} body
+ * 
+ * @apiDeprecated Consider specific conditions.
+ */
 router.post('/push', async (req, res, next) => {
     const { age, gender, lastLogin, reserve } = req.body;
     const { title, content } = req.body;
