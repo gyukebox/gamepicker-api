@@ -6,6 +6,45 @@ const mail_config = require('../config/mail');
 const pbkdf2Password = require('pbkdf2-password');
 const hasher = pbkdf2Password(); 
 
+/**
+ * @api {post} /auth/login Login
+ * @apiName Login
+ * @apiGroup Auth
+ * 
+ * @apiSuccess {String} id The ID of this user
+ * @apiSuccess {String} token Token of this user 
+ * @apiSuccess {Boolean} admin The value to check if this user is an administrator
+ * @apiSuccessExample Success-response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "id": 23,
+ *          "token": "rgewoubngkjgsdbfkhgb"
+ *          "admin": true
+ *      }
+ * 
+ * @apiError USER_NOT_FOUND Can not find a user with email
+ * @apiError INCORRECT_PASSWORD Can not find a user with email and password
+ * @apiError MAIL_AUTHENTICATION_FAILED This account is not activated by email authentication
+ * 
+ * @apiErrorExample INCORRECT_PASSWORD:
+ *      HTTP/1.1 401 Unauthorized
+ *      {
+ *          "code": "INCORRECT_PASSWORD",
+ *          "message": "Can not find a user with email and password"
+ *      }
+ * @apiErrorExample MAIL_AUTHENTICATION_FAILED:
+ *      HTTP/1.1 401 Unauthorized
+ *      {
+ *          "code": "MAIL_AUTHENTICATION_FAILED",
+ *          "message": "This account is not activated by email authentication"
+ *      }
+ * @apiErrorExample USER_NOT_FOUND:
+ *      HTTP/1.1 404 Not Found
+ *      {
+ *          "code": "USER_NOT_FOUND",
+ *          "message": "Can not find a user with email"
+ *      }
+ */
 router.post('/login', async (req, res, next) => {
     const { email, password } = req.body;
     const { admin } = req.query;
@@ -24,6 +63,7 @@ router.post('/login', async (req, res, next) => {
             throw { status: 400, message: "Incorrect password" }
         if (!user.active)
             throw { status: 401, message: 'Mail authentication required' }
+        
         if (admin) {
             const [[admin]] = await pool.query(`SELECT user_id FROM admin WHERE user_id = ?`,[user.id]);
             if (!admin) 

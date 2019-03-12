@@ -18,6 +18,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(bodyParser.json({ limit: '50mb' }));
+app.use('/', express.static('apidoc'));
 app.get('/favicon.ico', (req, res) => {
     res.sendFile(__dirname + '/public/images/favicon.ico')
 })
@@ -35,11 +36,7 @@ app.use(async (req, res, next) => {
     const auth_token = req.headers['authorization'];
     try {
         if (!auth_token) {
-            if (req.path === '/') {
-                res.redirect('https://ansrl0107.gitbook.io/gamepicker-api');
-            } else {
-                throw { status: 400, message: "Authorization token required" };
-            }
+            throw { status: 400, message: "Authorization token required" };
         }
         const [rows] = await pool.query(`SELECT 1 FROM authorization WHERE token = ?`, [auth_token]);
         if (rows.length === 0)

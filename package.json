@@ -25,5 +25,9 @@
     "node-schedule": "^1.3.1",
     "nodemailer": "^4.7.0",
     "pbkdf2-password": "^1.2.1"
+  },
+  "apidoc": {
+    "title": "Gamepicker API Documents",
+    "url" : "https://api.gamepicker.co.kr"
   }
 }
