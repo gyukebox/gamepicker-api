@@ -2,6 +2,43 @@ const express = require('express');
 const router = express.Router();
 const cert = require('../controller/certification')();
 
+/**
+ * 
+ * @apiSuccess {Json[]} games
+ * @apiSuccess {Json} game
+ * @apiSuccess {Number} game.id The ID of the game
+ * @apiSuccess {String} game.title Title of the game
+ * @apiSuccess {String} game.developer Developer of the game
+ * @apiSuccess {String} game.publisher Publisher of the game
+ * @apiSuccess {DateTime} game.created_at The time the game was added
+ * @apiSuccess {String[]} game.images Array of image links
+ * @apiSuccess {String[]} game.videos Array of video links
+ * @apiSuccess {String[]} game.platforms Array of platforms
+ * @apiSuccess {Number} game.score Average score of the game
+ * @apiSuccess {Number} game.score_count Number of user rate the game
+ * @apiSuccessExample Success:
+ *      HTTP/1.1 200 OK
+ *      {
+            "games": [
+                {
+                    "id": 1,
+                    "title": "Super Smash Bros. Melee",
+                    "developer": "HAL Laboratory",
+                    "publisher": "Nintendo",
+                    "created_at": "2019-03-03 14:01:27",
+                    "images": [
+                        "https://i.kym-cdn.com/entries/icons/original/000/026/290/maxresdefault.jpg"
+                    ],
+                    "videos": [],
+                    "platforms": [
+                        "Nintendo GameCube"
+                    ],
+                    "score": 3.84,
+                    "score_count": 16
+                }
+            ]
+        }
+ */
 router.get('/', async (req, res, next) => {
     const { limit, offset, platform_id } = req.query;
     const { sort } = req.query;

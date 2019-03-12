@@ -134,3 +134,40 @@ module.exports = router;
  * @apiParam {Number} query.offset Decide the start index of items returned
  */
 
+/**
+ * @apiDefine SUCCESS_GAME_COMMENTS_SIMPLE
+ * @apiSuccess {Json[]} comments
+ * @apiSuccess {Json} comment
+ * @apiSuccess {Number} comment.id The ID of the comment
+ * @apiSuccess {String} comment.value Content of the comment
+ * @apiSuccessExample Success:
+ *      HTTP/1.1 200 OK
+ *      {
+            "comments": [
+                {
+                    "id": 81,
+                    "game_id": 43
+                    "value": "This game is awesome!"
+                }
+            ]
+        }
+ */
+
+/**
+ * @apiDefine SUCCESS_POST_COMMENTS_SIMPLE
+ * @apiSuccess {Json[]} comments
+ * @apiSuccess {Json} comment
+ * @apiSuccess {Number} comment.id The ID of the comment
+ * @apiSuccess {String} comment.value Content of the comment
+ * @apiSuccessExample Success:
+ *      HTTP/1.1 200 OK
+ *      {
+            "comments": [
+                {
+                    "id": 81,
+                    "post_id": 23
+                    "value": "I like this post"
+                }
+            ]
+        }
+ */

@@ -846,7 +846,7 @@ define({ "api": [
       }
     },
     "deprecated": {
-      "content": "temp"
+      "content": "Consider specific conditions."
     },
     "version": "0.0.0",
     "filename": "routes/admin.js",
@@ -1151,6 +1151,1347 @@ define({ "api": [
         {
           "title": "SUCCESS:",
           "content": "HTTP/1.1 204 No Content\n{\n    \n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Json[]",
+            "optional": false,
+            "field": "games",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Json",
+            "optional": false,
+            "field": "game",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "game.id",
+            "description": "<p>The ID of the game</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "game.title",
+            "description": "<p>Title of the game</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "game.developer",
+            "description": "<p>Developer of the game</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "game.publisher",
+            "description": "<p>Publisher of the game</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "DateTime",
+            "optional": false,
+            "field": "game.created_at",
+            "description": "<p>The time the game was added</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "game.images",
+            "description": "<p>Array of image links</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "game.videos",
+            "description": "<p>Array of video links</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "game.platforms",
+            "description": "<p>Array of platforms</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "game.score",
+            "description": "<p>Average score of the game</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "game.score_count",
+            "description": "<p>Number of user rate the game</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"games\": [\n           {\n               \"id\": 1,\n               \"title\": \"Super Smash Bros. Melee\",\n               \"developer\": \"HAL Laboratory\",\n               \"publisher\": \"Nintendo\",\n               \"created_at\": \"2019-03-03 14:01:27\",\n               \"images\": [\n                   \"https://i.kym-cdn.com/entries/icons/original/000/026/290/maxresdefault.jpg\"\n               ],\n               \"videos\": [],\n               \"platforms\": [\n                   \"Nintendo GameCube\"\n               ],\n               \"score\": 3.84,\n               \"score_count\": 16\n           }\n       ]\n   }",
+          "type": "json"
+        }
+      ]
+    },
+    "type": "",
+    "url": "",
+    "version": "0.0.0",
+    "filename": "routes/games.js",
+    "group": "C__develop_GamePickerAPI_routes_games_js",
+    "groupTitle": "C__develop_GamePickerAPI_routes_games_js",
+    "name": ""
+  },
+  {
+    "type": "get",
+    "url": "/users/:user-id/games/comments/disrecommends",
+    "title": "Get game comments user has disrecommended",
+    "name": "GetGameCommentsUserDisrecommended",
+    "group": "Users",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "params",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "params.user-id",
+            "description": "<p>The ID of the user</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/users.js",
+    "groupTitle": "Users",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_FAILED",
+            "description": "<p>Invalid authentication token</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_REQUIRED",
+            "description": "<p>Authentication token is required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Json[]",
+            "optional": false,
+            "field": "comments",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Json",
+            "optional": false,
+            "field": "comment",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "comment.id",
+            "description": "<p>The ID of the comment</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "comment.value",
+            "description": "<p>Content of the comment</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"comments\": [\n           {\n               \"id\": 81,\n               \"game_id\": 43\n               \"value\": \"This game is awesome!\"\n           }\n       ]\n   }",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/users/:user-id/games/comments/recommends",
+    "title": "Get game comments user has recommended",
+    "name": "GetGameCommentsUserRecommended",
+    "group": "Users",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "params",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "params.user-id",
+            "description": "<p>The ID of the user</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/users.js",
+    "groupTitle": "Users",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_FAILED",
+            "description": "<p>Invalid authentication token</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_REQUIRED",
+            "description": "<p>Authentication token is required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Json[]",
+            "optional": false,
+            "field": "comments",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Json",
+            "optional": false,
+            "field": "comment",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "comment.id",
+            "description": "<p>The ID of the comment</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "comment.value",
+            "description": "<p>Content of the comment</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"comments\": [\n           {\n               \"id\": 81,\n               \"game_id\": 43\n               \"value\": \"This game is awesome!\"\n           }\n       ]\n   }",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/users/:user-id/games/score",
+    "title": "Get game scores user rate",
+    "name": "GetGameScoreUserRate",
+    "group": "Users",
+    "deprecated": {
+      "content": "Considering change structure of API"
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "params",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "params.user-id",
+            "description": "<p>The ID of the user</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Json[]",
+            "optional": false,
+            "field": "games",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Json",
+            "optional": false,
+            "field": "game",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "game.id",
+            "description": "<p>The ID of the game</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "HTTP/1.1 OK\n{\n       \"games\": [\n           {\n               \"id\": 1,\n           }\n       ]\n   }",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/users.js",
+    "groupTitle": "Users",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_FAILED",
+            "description": "<p>Invalid authentication token</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_REQUIRED",
+            "description": "<p>Authentication token is required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/users/:user-id/games/follow",
+    "title": "Get games user follow",
+    "name": "GetGamesUserFollow",
+    "group": "Users",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "params",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "params.user-id",
+            "description": "<p>The ID of the user</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Json[]",
+            "optional": false,
+            "field": "games",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Json",
+            "optional": false,
+            "field": "game",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "game.id",
+            "description": "<p>The ID of the game</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "game.title",
+            "description": "<p>Title of the game</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String[]",
+            "optional": false,
+            "field": "game.images",
+            "description": "<p>Array of image links</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"games\": [\n           {\n               \"title\": \"Super Smash Bros. Melee\",\n               \"id\": 1,\n               \"images\": [\n                   \"https://i.kym-cdn.com/entries/icons/original/000/026/290/maxresdefault.jpg\"\n               ]\n           }\n       ]\n   }",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/users.js",
+    "groupTitle": "Users",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_FAILED",
+            "description": "<p>Invalid authentication token</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_REQUIRED",
+            "description": "<p>Authentication token is required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/users/:user-id/posts/comments/disrecommends",
+    "title": "Get post comments user has disrecommended",
+    "name": "GetPostCommentsUserDisrecommended",
+    "group": "Users",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "params",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "params.user-id",
+            "description": "<p>The ID of the user</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "query",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "query.limit",
+            "description": "<p>Limit the number of items returned</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "query.offset",
+            "description": "<p>Decide the start index of items returned</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/users.js",
+    "groupTitle": "Users",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_FAILED",
+            "description": "<p>Invalid authentication token</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_REQUIRED",
+            "description": "<p>Authentication token is required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/users/:user-id/posts/comments/recommends",
+    "title": "Get post comments user has recommended",
+    "name": "GetPostCommentsUserRecommended",
+    "group": "Users",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "params",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "params.user-id",
+            "description": "<p>The ID of the user</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "query",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "query.limit",
+            "description": "<p>Limit the number of items returned</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "query.offset",
+            "description": "<p>Decide the start index of items returned</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/users.js",
+    "groupTitle": "Users",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_FAILED",
+            "description": "<p>Invalid authentication token</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_REQUIRED",
+            "description": "<p>Authentication token is required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/users/:user-id",
+    "title": "Get user",
+    "name": "GetUser",
+    "group": "Users",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "params",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "user-id",
+            "description": "<p>The ID of the user</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Json",
+            "optional": false,
+            "field": "user",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "user.name",
+            "description": "<p>Name of the user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "user.email",
+            "description": "<p>Email of the user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "user.birthday",
+            "description": "<p>Birthday of the user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "user.introduce",
+            "description": "<p>Introduce of the user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "user.points",
+            "description": "<p>Points of the user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "user.gender",
+            "description": "<p>Gender of the user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "user.profile",
+            "description": "<p>Image link that provide user's profile picture</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"user\": {\n           \"name\": \"smk0107\",\n           \"email\": \"ansrl0107@gmail.com\",\n           \"birthday\": \"1998-01-07\",\n           \"introduce\": null,\n           \"gender\": \"M\",\n           \"points\": 0,\n           \"profile\": null\n       }\n   }",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/users.js",
+    "groupTitle": "Users",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_FAILED",
+            "description": "<p>Invalid authentication token</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_REQUIRED",
+            "description": "<p>Authentication token is required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/users/:user-id/games/comments",
+    "title": "Get comments user created at games",
+    "name": "GetUserGameComments",
+    "group": "Users",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "params",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "params.user-id",
+            "description": "<p>The ID of the user</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/users.js",
+    "groupTitle": "Users",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_FAILED",
+            "description": "<p>Invalid authentication token</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_REQUIRED",
+            "description": "<p>Authentication token is required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Json[]",
+            "optional": false,
+            "field": "comments",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Json",
+            "optional": false,
+            "field": "comment",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "comment.id",
+            "description": "<p>The ID of the comment</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "comment.value",
+            "description": "<p>Content of the comment</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"comments\": [\n           {\n               \"id\": 81,\n               \"game_id\": 43\n               \"value\": \"This game is awesome!\"\n           }\n       ]\n   }",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/users/:user-id/posts",
+    "title": "Get posts user created",
+    "name": "GetUserPosts",
+    "group": "Users",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "params",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "user-id",
+            "description": "<p>The ID of the user</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "query",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "query.limit",
+            "description": "<p>Limit the number of items returned</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "query.offset",
+            "description": "<p>Decide the start index of items returned</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Json[]",
+            "optional": false,
+            "field": "posts",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Json",
+            "optional": false,
+            "field": "post",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "post.id",
+            "description": "<p>The ID of the post</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "post.title",
+            "description": "<p>Title of the post</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "post.views",
+            "description": "<p>Views of the post</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "DateTime",
+            "optional": false,
+            "field": "post.created_at",
+            "description": "<p>The time the post was added</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "post.category",
+            "description": "<p>Category of the post</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "posts.recommends",
+            "description": "<p>Recommends count of the post</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "posts.disrecommends",
+            "description": "<p>Disrecommends count of the post</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "posts.comment_count",
+            "description": "<p>Comment count of the post</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "posts.game_title",
+            "description": "<p>Game title related the post</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "posts.game_id",
+            "description": "<p>Game ID related the post</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "HTTP/1.1 200 OK\n{\n       \"posts\": [\n           {\n               \"id\": 67,\n               \"title\": \"event test\",\n               \"views\": 3,\n               \"created_at\": \"2019-03-09 09:51:07\",\n               \"category\": \"event\",\n               \"game_title\": null,\n               \"game_id\": null,\n               \"recommends\": 0,\n               \"disrecommends\": 0,\n               \"comment_count\": 0\n           }\n       ]\n   }",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/users.js",
+    "groupTitle": "Users",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_FAILED",
+            "description": "<p>Invalid authentication token</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_REQUIRED",
+            "description": "<p>Authentication token is required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/users",
+    "title": "Get users",
+    "name": "GetUsers",
+    "group": "Users",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "query",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "query.name",
+            "description": "<p>Returns the user corresponding to the name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "query.email",
+            "description": "<p>Returns the user corresponding to the email</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Json[]",
+            "optional": false,
+            "field": "users",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "id",
+            "description": "<p>The ID of the user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Email of the user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of the user</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "HTTP/1.1 200 OK\n   {\n       \"users\": [\n           {\n               \"id\": 2,\n               \"email\": \"ansrl0107@gmail.com\",\n               \"name\": \"smk0107\"\n           }\n       ]\n   }",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/users.js",
+    "groupTitle": "Users",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_FAILED",
+            "description": "<p>Invalid authentication token</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "AUTHENTICATION_REQUIRED",
+            "description": "<p>Authentication token is required</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "AUTHENTICATION_FAILED:",
+          "content": "HTTP/1.1 401 Unauthorized\n{\n    \"code\": \"AUTHENTICATION_FAILED\",\n    \"message\": \"Invalid authentication token\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "AUTHENTICATION_REQUIRED:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n    \"code\": \"AUTHENTICATION_REQUIRED\",\n    \"message\": \"Authentication token is required\"\n}",
           "type": "json"
         }
       ]
