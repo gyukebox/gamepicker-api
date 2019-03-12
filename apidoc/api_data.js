@@ -1,10 +1,201 @@
 define({ "api": [
   {
     "type": "post",
+    "url": "/admin/questions",
+    "title": "Ask to admin",
+    "name": "CreateQuestions",
+    "group": "Admin",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "body",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.title",
+            "description": "<p>Title of the question</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.email",
+            "description": "<p>An email to get a response</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.value",
+            "description": "<p>Content of the question</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/admin.js",
+    "groupTitle": "Admin",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "SUCCESS:",
+          "content": "HTTP/1.1 204 No Content\n{\n    \n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/admin/questions",
+    "title": "Get questions from users",
+    "name": "GetQuestions",
+    "group": "Admin",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "query",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "query.sort",
+            "description": "<p>Sorting options (answered)</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Json[]",
+            "optional": false,
+            "field": "questions",
+            "description": ""
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "id",
+            "description": "<p>The ID of the question</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of the question</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Email of the user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "value",
+            "description": "<p>Content of the question</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "reply",
+            "description": "<p>Answer of the question</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"questions\": [\n           {\n               \"id\": 1,\n               \"title\": \"How to get authentication token?\",\n               \"email\": \"ansrl0107@gmail.com\",\n               \"value\": \"I want to use Gamepicker API\",\n               \"reply\": null\n           },\n    ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/admin.js",
+    "groupTitle": "Admin",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Authentication token</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "post",
     "url": "/auth/login",
     "title": "Login",
     "name": "Login",
     "group": "Auth",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "body",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.email",
+            "description": "<p>Email of the user</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.password",
+            "description": "<p>Password of the user</p>"
+          }
+        ]
+      }
+    },
     "success": {
       "fields": {
         "Success 200": [
@@ -12,7 +203,7 @@ define({ "api": [
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "id",
+            "field": "user_id",
             "description": "<p>The ID of this user</p>"
           },
           {
@@ -33,8 +224,8 @@ define({ "api": [
       },
       "examples": [
         {
-          "title": "Success-response:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"id\": 23,\n    \"token\": \"rgewoubngkjgsdbfkhgb\"\n    \"admin\": true\n}",
+          "title": "SUCCESS:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"user_id\": 23,\n    \"token\": \"rgewoubngkjgsdbfkhgb\"\n    \"admin\": true\n}",
           "type": "json"
         }
       ]
@@ -85,25 +276,123 @@ define({ "api": [
     "groupTitle": "Auth"
   },
   {
-    "header": {
+    "type": "post",
+    "url": "/auth/register",
+    "title": "Register",
+    "name": "Register",
+    "group": "Auth",
+    "parameter": {
       "fields": {
-        "Header": [
+        "Parameter": [
           {
-            "group": "Header",
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "query",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "x-access-token",
+            "field": "query.auth",
+            "description": "<p>Type of social login</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "body",
             "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.name",
+            "description": "<p>Name of the user</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.email",
+            "description": "<p>Email of the user</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.password",
+            "description": "<p>Password of the user</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.birthday",
+            "description": "<p>Birthday of the user</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.Gender",
+            "description": "<p>of the user</p>"
           }
         ]
       }
     },
-    "type": "",
-    "url": "",
     "version": "0.0.0",
-    "filename": "routes/apiDoc.js",
-    "group": "C__develop_GamePickerAPI_routes_apiDoc_js",
-    "groupTitle": "C__develop_GamePickerAPI_routes_apiDoc_js",
-    "name": ""
+    "filename": "routes/auth.js",
+    "groupTitle": "Auth",
+    "success": {
+      "examples": [
+        {
+          "title": "SUCCESS:",
+          "content": "HTTP/1.1 204 No Content\n{\n    \n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "post",
+    "url": "/auth/forgot",
+    "title": "Reset password",
+    "name": "ResetPassword",
+    "group": "Auth",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": false,
+            "field": "body",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "body.email",
+            "description": "<p>Email of the user</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/auth.js",
+    "groupTitle": "Auth",
+    "success": {
+      "examples": [
+        {
+          "title": "SUCCESS:",
+          "content": "HTTP/1.1 204 No Content\n{\n    \n}",
+          "type": "json"
+        }
+      ]
+    }
   }
 ] });

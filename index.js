@@ -67,7 +67,8 @@ app.use((err, req, res, next) => {
     if (!err.status)
         console.error(date, err);
     const message = err.message;
-    res.status(err.status || 500).json({ message });
+    const code = err.code?err.code:"UNDEFINED_ERROR";
+    res.status(err.status || 500).json({ code, message });
 })
 
 app.listen(port);

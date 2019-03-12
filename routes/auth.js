@@ -11,6 +11,10 @@ const hasher = pbkdf2Password();
  * @apiName Login
  * @apiGroup Auth
  * 
+ * @apiParam {Object} body
+ * @apiParam {String} body.email Email of the user
+ * @apiParam {String} body.password Password of the user
+ * 
  * @apiSuccess {String} user_id The ID of this user
  * @apiSuccess {String} token Token of this user 
  * @apiSuccess {Boolean} admin The value to check if this user is an administrator
@@ -47,7 +51,6 @@ const hasher = pbkdf2Password();
  */
 router.post('/login', async (req, res, next) => {
     const { email, password } = req.body;
-    const { admin } = req.query;
     const getHash = (salt, password) => new Promise((resolve, reject) => {
         hasher({ password: password, salt: salt }, (err, pass, salt, hash) => {
             if (err)    reject(err);
@@ -82,6 +85,22 @@ router.post('/login', async (req, res, next) => {
 
 })
 
+/**
+ * @api {post} /auth/register Register
+ * @apiName Register
+ * @apiGroup Auth
+ * 
+ * @apiParam {Object} query
+ * @apiParam {String} query.auth Type of social login 
+ * @apiParam {Object} body 
+ * @apiParam {String} body.name Name of the user
+ * @apiParam {String} body.email Email of the user
+ * @apiParam {String} body.password Password of the user
+ * @apiParam {String} body.birthday Birthday of the user
+ * @apiParam {String} body.Gender of the user
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.post('/register', async (req, res, next) => {
     const { name, email, password, birthday, gender } = req.body;
     const { auth } = req.query;
@@ -130,6 +149,16 @@ router.get('/activate', async (req, res, next) => {
     }
 })
 
+/**
+ * @api {post} /auth/forgot Reset password
+ * @apiName ResetPassword
+ * @apiGroup Auth
+ * 
+ * @apiParam {Object} body
+ * @apiParam {String} body.email Email of the user
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.post('/forgot', async (req, res, next) => {
     const { email } = req.body;
     const transporter = nodemailer.createTransport({

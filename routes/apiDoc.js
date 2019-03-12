@@ -1,11 +1,11 @@
 /**
- * @apiDefine HEADERS_AUTHORIZATION
- * @apiHeader {String} Authorization Authorization token
+ * @apiDefine HEADERS_AUTHENTICATION
+ * @apiHeader {String} Authorization Authentication token
  */
 
 /**
- * @apiDefone HEADERS_X-ACCESS-TOKEN
- * @apiHeader {String} x-access-token 
+ * @apiDefine HEADERS_AUTHORIZATION
+ * @apiHeader {String} x-access-token Authorization token
  */
 
 /**
@@ -51,4 +51,23 @@
  *      {
  *          "message": "Post not found"
  *      }
+ */
+
+ /**
+  * @apiDefine SUCCESS_EMPTY
+  * @apiSuccessExample SUCCESS:
+ *      HTTP/1.1 204 No Content
+ *      {
+ *          
+ *      }
+  */
+
+/**
+ * @apiDefine QUERY_LIMIT
+ * @apiParam {Number} query.limit Limit the number of items returned
+ */
+
+/**
+ * @apiDefine QUERY_OFFSET
+ * @apiParam {Number} query.offset Decide the start index of items returned
  */
