@@ -43,7 +43,7 @@ router.post('/questions/:question_id/reply', async (req, res, next) => {
 
 router.get('/notices', async (req, res, next) => {
     const { limit, offset } = req.query;
-    let sql = `SELECT id, title, created_at FROM notices`;
+    let sql = `SELECT id, title, created_at FROM notices ORDER BY created_at DESC`;
     const option = [];
     if (limit) {
         sql += ` LIMIT ?`;

@@ -61,7 +61,8 @@ router.get('/:user_id/posts', async (req, res, next) => {
         LEFT JOIN users ON users.id = posts.user_id
         LEFT JOIN games ON games.id = posts.game_id
         LEFT JOIN post_category ON post_category.id = posts.category_id
-    WHERE posts.user_id = ?`;
+    WHERE posts.user_id = ?
+    ORDER BY posts.created_at DESC`;
 
     if (limit) {
         sql += ' LIMIT ?'
