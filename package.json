@@ -1,13 +1,12 @@
 {
-  "name": "gamepickerapi_v2",
+  "name": "gamepicker-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.js"
   },
-  "author": "",
+  "author": "ansrl0107",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
@@ -27,6 +26,7 @@
     "pbkdf2-password": "^1.2.1"
   },
   "apidoc": {
+    "name": "Gamepicker API",
     "title": "Gamepicker API Documents",
     "url" : "https://api.gamepicker.co.kr"
   }

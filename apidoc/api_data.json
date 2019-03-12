@@ -83,5 +83,27 @@
     "version": "0.0.0",
     "filename": "routes/auth.js",
     "groupTitle": "Auth"
+  },
+  {
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "type": "",
+    "url": "",
+    "version": "0.0.0",
+    "filename": "routes/apiDoc.js",
+    "group": "C__develop_GamePickerAPI_routes_apiDoc_js",
+    "groupTitle": "C__develop_GamePickerAPI_routes_apiDoc_js",
+    "name": ""
   }
 ]
