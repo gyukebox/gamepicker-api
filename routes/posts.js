@@ -17,39 +17,7 @@ const cert = require('../controller/certification')();
  * @apiParam {Number} query.game_id Get posts related with game_id
  * 
  * @apiSuccess {String} game_title Title of game related posts
- * @apiSuccess {Json[]} posts
- * @apiSuccess {Json} post
- * @apiSuccess {Number} post.id The ID of the post
- * @apiSuccess {String} post.title Title of the post
- * @apiSuccess {Number} post.views Views of the post
- * @apiSuccess {DateTime} post.created_at The time the post was added
- * @apiSuccess {Number} post.user_id The ID of the writer
- * @apiSuccess {String} post.name Name of the writer
- * @apiSuccess {String} post.category Category of the post
- * @apiSuccess {String} post.game_title Title of the game related post
- * @apiSuccess {Number} post.recommends Number of post recommends
- * @apiSuccess {Number} post.disrecommends Number of post disrecommends
- * @apiSuccess {Number} post.comment_count Number of post comments
- * @apiSuccessExample Success:
- *      HTTP/1.1 200 OK
- *      {
- *          "game_title": null,
-            "posts": [
-                {
-                    "id": 139,
-                    "title": "난 배스운영자다",
-                    "views": 1,
-                    "created_at": "2019-03-13 05:40:21",
-                    "name": "개발담당",
-                    "user_id": 12,
-                    "category": "free",
-                    "game_title": null,
-                    "recommends": 0,
-                    "disrecommends": 0,
-                    "comment_count": 0
-                }
-            ]
-        }
+ * @apiUse SUCCESS_POSTS
  * 
  */
 router.get('/', async (req, res, next) => {
