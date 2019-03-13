@@ -2,9 +2,59 @@ const express = require('express');
 const router = express.Router();
 const cert = require('../controller/certification')();
 
+/**
+ * @api {get} /posts Get posts
+ * @apiName GetPosts
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} query
+ * @apiUse QUERY_LIMIT
+ * @apiUse QUERY_OFFSET
+ * @apiParam {String} query.category Get posts related with category
+ * @apiParam {Number} query.game_id Get posts related with game_id
+ * 
+ * @apiSuccess {String} game_title Title of game related posts
+ * @apiSuccess {Json[]} posts
+ * @apiSuccess {Json} post
+ * @apiSuccess {Number} post.id The ID of the post
+ * @apiSuccess {String} post.title Title of the post
+ * @apiSuccess {Number} post.views Views of the post
+ * @apiSuccess {DateTime} post.created_at The time the post was added
+ * @apiSuccess {Number} post.user_id The ID of the writer
+ * @apiSuccess {String} post.name Name of the writer
+ * @apiSuccess {String} post.category Category of the post
+ * @apiSuccess {String} post.game_title Title of the game related post
+ * @apiSuccess {Number} post.recommends Number of post recommends
+ * @apiSuccess {Number} post.disrecommends Number of post disrecommends
+ * @apiSuccess {Number} post.comment_count Number of post comments
+ * @apiSuccessExample Success:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "game_title": null,
+            "posts": [
+                {
+                    "id": 139,
+                    "title": "난 배스운영자다",
+                    "views": 1,
+                    "created_at": "2019-03-13 05:40:21",
+                    "name": "개발담당",
+                    "user_id": 12,
+                    "category": "free",
+                    "game_title": null,
+                    "recommends": 0,
+                    "disrecommends": 0,
+                    "comment_count": 0
+                }
+            ]
+        }
+ * 
+ */
 router.get('/', async (req, res, next) => {
     const { limit, offset, game_id, category } = req.query;
-    let sql = `
+    let sql = `game_id 
     SELECT
         posts.id, posts.title, views, posts.created_at,
         users.name, users.id as user_id,  
@@ -52,6 +102,46 @@ router.get('/', async (req, res, next) => {
     }
 })
 
+/**
+ * @api {get} /posts Get post
+ * @apiName GetPost
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiSuccess {Json} post
+ * @apiSuccess {Number} post.id The ID of the post
+ * @apiSuccess {String} post.title Title of the post
+ * @apiSuccess {Number} post.views Views of the post
+ * @apiSuccess {DateTime} post.created_at The time the post was added
+ * @apiSuccess {Number} post.user_id The ID of the writer
+ * @apiSuccess {String} post.name Name of the writer
+ * @apiSuccess {String} post.category Category of the post
+ * @apiSuccess {String} post.game_title Title of the game related post
+ * @apiSuccess {Number} post.recommends Number of post recommends
+ * @apiSuccess {Number} post.disrecommends Number of post disrecommends
+ * @apiSuccess {Number} post.comment_count Number of post comments
+ * @apiSuccessExample Success:
+ *      HTTP/1.1 200 OK
+ *      {
+            "post": {
+                "id": 139,
+                "title": "난 배스운영자다",
+                "views": 1,
+                "created_at": "2019-03-13 05:40:21",
+                "value": "dsadsadsadsadas",
+                "name": "개발담당",
+                "user_id": 12,
+                "category": "free",
+                "game_title": null,
+                "recommends": 0,
+                "disrecommends": 0,
+                "comment_count": 0
+            }
+        }
+ * 
+ */
 router.get('/:post_id', async (req, res, next) => {
     const { post_id } = req.params;
     const token = req.headers['x-access-token'];
@@ -84,19 +174,35 @@ router.get('/:post_id', async (req, res, next) => {
             const [disrecommend] = await pool.query(`SELECT * FROM post_disrecommends WHERE user_id = ? AND post_id = ?`, [user_id, post_id]);
             post.disrecommended = !!disrecommend.length;
         }
-        res.status(200).json({ post })
+        res.status(200).json({ post });
     } catch (err) {
         next(err);
     }
-})
+});
 
+/**
+ * @api {post} /posts Add post
+ * @apiName AddPost
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} body
+ * @apiParam {String} body.title Title of the post
+ * @apiParam {String} body.value Content of the post
+ * @apiParam {Number} body.game_id The ID of the game related post (optional)
+ * @apiParam {String} body.category Category of the post (games, news, event, free, anonymous, wiki)
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.post('/', async (req, res, next) => {
     const { title, value, game_id, category } = req.body;
     try {
         const user_id = await cert.user(req);
         if (category === 'games') {    // games(1)
             await pool.query(`INSERT INTO posts (user_id, title, value, game_id, category_id) VALUES (?, ?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[user_id, title, value, game_id, category]);
-        } else if (category === 'news' || category === 'event' || category === 'news') {
+        } else if (category === 'news' || category === 'event') {
             const admin_id = await cert.admin(req);
             await pool.query(`INSERT INTO posts (user_id, title, value, category_id) VALUES (?, ?, ?, (SELECT id FROM post_category WHERE value = ?))`,[admin_id, title, value, category])
         } else {    //free(2), anonymous(3), wiki(6)
@@ -108,33 +214,46 @@ router.post('/', async (req, res, next) => {
     }
 })
 
-//제목, 내용중 내용만 변경하게 할까?
+/**
+ * @api {put} /posts/:post-id Update post
+ * @apiName UpdatePost
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * @apiParam {Object} body
+ * @apiParam {String} body.value Content of the post
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.put('/:post_id', async (req, res, next) => {
     const { post_id } = req.params;
-
-    let SET_string = "";
-        const option = [];
-    ['title', 'value'].forEach(key => {
-        const value = req.body[key];
-        if (value) {
-            SET_string += `${key} = ?,`
-            option.push(value);
-        }
-    })
-    SET_string = SET_string.substring(0,SET_string.length-1);
-
+    const { value } = req.body;
     try {
-        if (SET_string === "")
-            throw { status: 400, message: "Either title or value is required" }
         const user_id = await cert.user(req);
-        option.push(post_id, user_id);
-        await pool.query(`UPDATE posts SET ${SET_string} WHERE id = ? AND user_id = ?`,option);
+        await pool.query(`UPDATE posts SET value = ? WHERE id = ? AND user_id = ?`,[value, post_id, user_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
     }
-})
+});
 
+/**
+ * @api {delete} /posts/:post-id Delete post
+ * @apiName DeletePost
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.delete('/:post_id', async (req, res, next) => {
     const { post_id } = req.params;
     try {
@@ -144,8 +263,15 @@ router.delete('/:post_id', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-})
+});
 
+/**
+ * @api {get} /posts/:post-id/recommend Recommend post
+ * @apiName RecommendPost
+ * @apiGroup Posts
+ * 
+ * @apiDeprecated performance issue
+ */
 router.get('/:post_id/recommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
@@ -158,23 +284,59 @@ router.get('/:post_id/recommend', async (req, res, next) => {
     }
 });
 
+/**
+ * @api {post} /posts/:post-id/recommend Recommend post
+ * @apiName RecommendPost
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * 
+ * @apiUse SUCCESS_EMPTY 
+ * 
+ * @apiUse ERROR_POST_NOT_FOUND
+ * @apiError RECOMMEND_DUPLICATE Already recommend this post
+ * @apiErrorExample RECOMMEND_DUPLICATE:
+ *      HTTP/1.1 409 Conflict
+ *      {
+ *          code: "RECOMMEND_DUPLICATE",
+ *          "message": "Already recommend this post"
+ *      }
+ */
 router.post('/:post_id/recommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
         const user_id = await cert.user(req);
-        const [rows] = await pool.query(`INSERT INTO post_recommends (user_id, post_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM post_recommends WHERE user_id = ? AND post_id = ?)`,[user_id, post_id, user_id, post_id]);
-        if (rows.affectedRows === 0)                            //recommend twice
-            throw { status: 400, message: 'Already recommended post' }
+        await pool.query(`INSERT INTO post_recommends (user_id, post_id) VALUES (?, ?)`,[user_id, post_id]);
         res.status(204).json();
     } catch (err) {
-        if (err.errno === 1452) {  //not exists post_id
-            err = new Error('Post not found');
-            err.status = 404;
+        if (err.errno === 1062) {
+            next({status: 409, code:"RECOMMEND_DUPLICATE", message: "Already recommend this post"});
+        } else if (err.errno === 1452) {
+            next({status: 404, code: "POST_NOT_FOUND", message: "Post not found"});
+        } else {
+            next(err);
         }
-        next(err);
     }
 });
 
+/**
+ * @api {post} /posts/:post-id/recommend Cancle recommend post
+ * @apiName CancleRecommendPost
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * 
+ * @apiUse SUCCESS_EMPTY 
+ * 
+ */
 router.delete('/:post_id/recommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
@@ -186,6 +348,13 @@ router.delete('/:post_id/recommend', async (req, res, next) => {
     }   
 });
 
+/**
+ * @api {get} /posts/:post-id/disrecommend check post 
+ * @apiName RecommendPost
+ * @apiGroup Posts
+ * 
+ * @apiDeprecated performance issue
+ */
 router.get('/:post_id/disrecommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
@@ -198,23 +367,59 @@ router.get('/:post_id/disrecommend', async (req, res, next) => {
     }
 });
 
+/**
+ * @api {post} /posts/:post-id/disrecommend Disrecommend post
+ * @apiName RecommendPost
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * 
+ * @apiUse SUCCESS_EMPTY 
+ * 
+ * @apiUse ERROR_POST_NOT_FOUND
+ * @apiError DISRECOMMEND_DUPLICATE Already disrecommend this post
+ * @apiErrorExample DISRECOMMEND_DUPLICATE:
+ *      HTTP/1.1 409 Conflict
+ *      {
+ *          code: "DISRECOMMEND_DUPLICATE",
+ *          "message": "Already disrecommend this post"
+ *      }
+ */
 router.post('/:post_id/disrecommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
         const user_id = await cert.user(req);
-        const [rows] = await pool.query(`INSERT INTO post_disrecommends (user_id, post_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM post_disrecommends WHERE user_id = ? AND post_id = ?)`,[user_id, post_id, user_id, post_id]);
-        if (rows.affectedRows === 0)                            //recommend twice
-            throw { status: 400, message: 'Already recommended post' }
+        await pool.query(`INSERT INTO post_disrecommends (user_id, post_id) VALUES (?, ?)`,[user_id, post_id]);
         res.status(204).json();
     } catch (err) {
-        if (err.errno === 1452) {  //not exists post_id
-            err = new Error('Post not found');
-            err.status = 404;
+        if (err.errno === 1062) {
+            next({status: 409, code:"DISRECOMMEND_DUPLICATE", message: "Already disrecommend this post"});
+        } else if (err.errno === 1452) {
+            next({status: 404, code: "POST_NOT_FOUND", message: "Post not found"});
+        } else {
+            next(err);
         }
-        next(err);
     }
 });
 
+/**
+ * @api {post} /posts/:post-id/recommend Cancle disrecommend post
+ * @apiName CancleDisrecommendPost
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * 
+ * @apiUse SUCCESS_EMPTY 
+ * 
+ */
 router.delete('/:post_id/disrecommend', async (req, res, next) => {
     const { post_id } = req.params;
     try {
@@ -277,7 +482,20 @@ router.get('/:post_id/comments', async (req, res, next) => {
     }
 })
 
-
+/**
+ * @api {post} /posts/:post-id/comments Add post comment
+ * @apiName AddPostComment
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * @apiParam {Object} body
+ * @apiParam {String} body.value Content of the comment
+ * @apiParam {Number} body.parent_id=null Parent comment ID
+ */
 router.post('/:post_id/comments', async (req, res, next) => {
     const { post_id } = req.params;
     const { value, parent_id } = req.body;
@@ -311,22 +529,48 @@ router.post('/:post_id/comments', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-})
+});
 
+/**
+ * @api {put} /posts/:post-id/comments/:comment-id Update post comment
+ * @apiName UpdatePostComment
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * @apiParam {Object} body
+ * @apiParam {String} body.value Content of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_COMMENT_NOT_FOUND
+ */
 router.put('/:post_id/comments/:comment_id', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     const { value } = req.body;
     try {
         const user_id = await cert.user(req);
-        const [rows] = await pool.query(`UPDATE post_comments SET value = ? WHERE post_id = ? AND id = ? AND user_id = ?`,[value, post_id, comment_id, user_id]);
-        if (rows.affectedRows === 0)
-            throw { status: 404, message: 'Comment not found' }
+        await pool.query(`UPDATE post_comments SET value = ? WHERE post_id = ? AND id = ? AND user_id = ?`,[value, post_id, comment_id, user_id]);
         res.status(204).json();
     } catch (err) {
-        next(err);
+        if (err.errno === 1452) {
+            next({status: 404, code: "COMMENT_NOT_FOUND", message: "Comment not found"});
+        } else {
+            next(err);
+        }
     }
-})
+});
 
+/**
+ * @api {delete} /posts/:post-id/comments/:comment-id Delete post comment
+ * @apiName DeletePostComment
+ * @apiGroup Posts
+ * 
+ */
 router.delete('/:post_id/comments/:comment_id', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
