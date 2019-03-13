@@ -102,7 +102,13 @@ router.delete('/push', async (req, res, next) => {
 router.get('/games/features', async (req, res, next) => {
     try {
         const user_id = await cert(req);
-        const [games] = await pool.query(`SELECT game_id AS id FROM game_features WHERE user_id = ?`, [user_id]);
+        const [games] = await pool.query(`
+        SELECT 
+            game_id AS id,
+            게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽
+        FROM game_features 
+            LEFT JOIN games ON games.id = game_features.game_id
+        WHERE user_id = ?`, [user_id]);
         console.log(games);
         
         res.status(200).json({ games });

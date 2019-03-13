@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const jwt = require('../model/jwt');
+const cert = require('../controller/certification')().user;
 
 /**
  * @api {get} /users Get users
@@ -430,6 +431,97 @@ router.get('/:user_id/games/comments/disrecommends', async (req, res, next) => {
             LEFT JOIN game_comments ON game_comments.id = game_comment_disrecommends.comment_id 
         WHERE game_comment_disrecommends.user_id = ?`, [user_id]);
         res.status(200).json({ comments });
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {get} /users/:user-id/games/features Get game features score user rated
+ * @apiName GetUserFeaturesScore
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiSuccess {Json[]} games
+ * @apiSuccess {Json} game
+ * @apiSuccess {Number} game.id The ID of the game
+ * @apiSuccess {Json} game.features
+ * @apiSuccess {Number} features.게임성 "게임성" score of this game
+ * @apiSuccess {Number} features.조작성 "조작성" score of this game
+ * @apiSuccess {Number} features.난이도 "난이도" score of this game
+ * @apiSuccess {Number} features.스토리 "스토리" score of this game
+ * @apiSuccess {Number} features.몰입도 "몰입도" score of this game
+ * @apiSuccess {Number} features.BGM "BGM" score of this game
+ * @apiSuccess {Number} features.공포성 "공포성" score of this game
+ * @apiSuccess {Number} features.과금유도 "과금유도" score of this game
+ * @apiSuccess {Number} features.노가다성 "노가다성" score of this game
+ * @apiSuccess {Number} features.진입장벽 "진입장벽" score of this game
+ * @apiSuccess {Number} features.필요성능 "필요성능" score of this game
+ * @apiSuccess {Number} features.플레이타임 "플레이타임" score of this game
+ * @apiSuccess {Number} features.가격 "가격" score of this game
+ * @apiSuccess {Number} features.DLC "DLC" score of this game
+ * @apiSuccess {Number} features.버그 "버그" score of this game
+ * @apiSuccess {Number} features.그래픽 "그래픽" score of this game
+ * @apiSuccessExample Success:
+ *      HTTP/1.1 200 OK
+ *      {
+            "games": [
+                {
+                    "id": 1,
+                    "features": {
+                        "BGM": 3,
+                        "DLC": 2,
+                        "가격": 5,
+                        "버그": 4,
+                        "게임성": 1,
+                        "공포성": 1,
+                        "그래픽": 3,
+                        "난이도": 2,
+                        "몰입도": 4,
+                        "스토리": 2,
+                        "조작성": 1,
+                        "과금유도": 2,
+                        "노가다성": 5,
+                        "진입장벽": 1,
+                        "필요성능": 3,
+                        "플레이타임": 2
+                    }
+                }
+            ]
+        }
+ */
+router.get('/:user_id/games/features', async (req, res, next) => {
+    try {
+        const user_id = await cert(req);
+        if (user_id !== Number(req.params.user_id))
+            throw { status: 401, code: "AUTHORIZATION_FAILED", message: "Authorization token and user id do not match"}
+        const [games] = await pool.query(`
+        SELECT 
+            game_id AS id,
+            JSON_OBJECT(
+                '게임성', 게임성,
+                '조작성', 조작성,
+                '난이도', 난이도,
+                '스토리', 스토리,
+                '몰입도', 몰입도,
+                'BGM', BGM,
+                '공포성', 공포성,
+                '과금유도', 과금유도,
+                '노가다성', 노가다성,
+                '진입장벽', 진입장벽,
+                '필요성능', 필요성능,
+                '플레이타임', 플레이타임,
+                '가격', 가격,
+                'DLC', DLC,
+                '버그', 버그,
+                '그래픽', 그래픽
+            ) AS features
+        FROM game_features 
+            LEFT JOIN games ON games.id = game_features.game_id
+        WHERE user_id = ?`, [user_id]);
+        res.status(200).json({ games });
     } catch (err) {
         next(err);
     }

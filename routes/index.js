@@ -106,6 +106,16 @@ module.exports = router;
  */
 
 /**
+ * @apiDefine ERROR_COMMENT_NOT_FOUND
+ * @apiError ERROR_COMMENT_NOT_FOUND The ID of the Comment was not found
+ * @apiErrorExample Error-response:
+ *      HTTP/1.1 404 Not Found
+ *      {
+ *          "message": "Comment not found"
+ *      }
+ */
+
+/**
  * @apiDefine ERROR_POST_NOT_FOUND
  * @apiError POST_NOT_FOUND The ID of the Post was not found
  * @apiErrorExample Error-response:

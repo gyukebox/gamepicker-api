@@ -3,6 +3,18 @@ const router = express.Router();
 const cert = require('../controller/certification')();
 
 /**
+ * @api {get} /games Get games
+ * @apiName GetGames
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} query
+ * @apiUse QUERY_LIMIT
+ * @apiUse QUERY_OFFSET
+ * @apiParam {Number} platform_id Returns the game corresponding to the platform_id
+ * @apiParam {String} sort Sorting options (random)
  * 
  * @apiSuccess {Json[]} games
  * @apiSuccess {Json} game
@@ -62,14 +74,6 @@ router.get('/', async (req, res, next) => {
         sql += ` WHERE EXISTS (SELECT 1 FROM game_platforms WHERE game_id = games.id AND platform_id = ?)`;
         option.push(platform_id);
     }
-    
-    if (req.headers['x-access-token'] && req.query.sort === "rated") {
-        const user_id = await cert.user(req);
-        sql += platform_id?` AND`:` WHERE`
-        sql += ` NOT EXISTS (SELECT 1 FROM game_features WHERE game_id = games.id AND user_id = ?)`;
-        option.push(user_id);
-    }
-
     switch (sort) {
         case "random":
             sql += ` ORDER BY RAND()`
@@ -100,6 +104,55 @@ router.get('/', async (req, res, next) => {
     }
 });
 
+/**
+ * @api {get} /games/:game-id GetGame
+ * @apiName GetGame
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} game-id The ID of the game
+ * 
+ * @apiSuccess {Json[]} games
+ * @apiSuccess {Json} game
+ * @apiSuccess {Number} game.id The ID of the game
+ * @apiSuccess {String} game.title Title of the game
+ * @apiSuccess {String} game.developer Developer of the game
+ * @apiSuccess {String} game.publisher Publisher of the game
+ * @apiSuccess {String} game.summary Summary of the game
+ * @apiSuccess {String} game.age_rate Age rating of the game
+ * @apiSuccess {DateTime} game.created_at The time the game was added
+ * @apiSuccess {String[]} game.images Array of image links
+ * @apiSuccess {String[]} game.videos Array of video links
+ * @apiSuccess {String[]} game.platforms Array of platforms
+ * @apiSuccess {Number} game.score Average score of the game
+ * @apiSuccess {Number} game.score_count Number of user rate the game
+ *      HTTP/1.1 200 OK
+ *      {
+            "game": {
+                "id": 1,
+                "title": "Super Smash Bros. Melee",
+                "developer": "HAL Laboratory",
+                "publisher": "Nintendo",
+                "created_at": "2019-03-03 14:01:27",
+                "summary": "A classic and legendary Nintendo title, this game was the number one seller of all time for the Nintendo GameCube. To this day, this game still maintains a very strong competitive following.",
+                "age_rate": "전체이용가",
+                "images": [
+                    "https://i.kym-cdn.com/entries/icons/original/000/026/290/maxresdefault.jpg"
+                ],
+                "videos": [],
+                "platforms": [
+                    "Nintendo GameCube"
+                ],
+                "score": null,
+                "score_count": 0
+            }
+        }
+ *      
+ * @apiUse ERROR_GAME_NOT_FOUND
+ */
 router.get('/:game_id', async (req, res, next) => {
     const { game_id } = req.params;
     let sql = `
@@ -158,8 +211,28 @@ router.get('/:game_id', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-})
+});
 
+/**
+ * @api {post} /games Add games
+ * @apiName AddGAmes
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} body
+ * @apiParam {String} body.title Title of the game
+ * @apiParam {String} body.developer Developer of the game
+ * @apiParam {String} body.publisher Publisher of the game
+ * @apiParam {String} body.summary Summary of the game
+ * @apiParam {String} body.age_rate Age rate of the game
+ * @apiParam {String[]} body.images Array of the game image links
+ * @apiParam {String[]} body.videos Array of the game video links
+ * @apiParam {String[]} body.platforms Array of the game platforms
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.post('/', async (req, res, next) => {
     const { title, developer, publisher, summary, age_rate } = req.body;
     let { images, videos, platforms } = req.body;
@@ -180,17 +253,36 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.get('/:game_id/features', async (req, res, next) => {
-    const { game_id } = req.params;
-    try {
-        const user_id = await cert.user(req);
-        const [[features]] = await pool.query(`SELECT 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user_id]);
-        res.status(200).json({ features });
-    } catch (err) {
-        next(err);
-    }
-})
-
+/**
+ * @api {post} /games/:game-id/features Rate game features
+ * @apiName RateGameFeatures
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} body
+ * @apiParam {Number} body.게임성 "게임성" score of this game
+ * @apiParam {Number} body.조작성 "조작성" score of this game
+ * @apiParam {Number} body.난이도 "난이도" score of this game
+ * @apiParam {Number} body.스토리 "스토리" score of this game
+ * @apiParam {Number} body.몰입도 "몰입도" score of this game
+ * @apiParam {Number} body.BGM "BGM" score of this game
+ * @apiParam {Number} body.공포성 "공포성" score of this game
+ * @apiParam {Number} body.과금유도 "과금유도" score of this game
+ * @apiParam {Number} body.노가다성 "노가다성" score of this game
+ * @apiParam {Number} body.진입장벽 "진입장벽" score of this game
+ * @apiParam {Number} body.필요성능 "필요성능" score of this game
+ * @apiParam {Number} body.플레이타임 "플레이타임" score of this game
+ * @apiParam {Number} body.가격 "가격" score of this game
+ * @apiParam {Number} body.DLC "DLC" score of this game
+ * @apiParam {Number} body.버그 "버그" score of this game
+ * @apiParam {Number} body.그래픽 "그래픽" score of this game
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_GAME_NOT_FOUND
+ */
 router.post('/:game_id/features', async (req, res, next) => {
     const { game_id } = req.params;
     const { 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 } = req.body;
@@ -210,6 +302,27 @@ router.post('/:game_id/features', async (req, res, next) => {
     }
 });
 
+/**
+ * @api {put} /games/:game-id Update game information
+ * @apiName Update game information
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * @apiParam {Object} body
+ * @apiParam {String} body.title Title of the game
+ * @apiParam {String} body.developer Developer of the game
+ * @apiParam {String} body.publisher Publisher of the game
+ * @apiParam {String} body.summary Summary of the game
+ * @apiParam {String} body.age_rate Age rate of the game
+ * @apiParam {String[]} body.images Array of the game image links
+ * @apiParam {String[]} body.videos Array of the game video links
+ * @apiParam {String[]} body.platforms Array of the game platforms
+ * 
+ */
 router.put('/:game_id', async (req, res, next) => {
     const { game_id } = req.params;
     const { title, developer, publisher, summary, age_rate } = req.body;
@@ -237,8 +350,21 @@ router.put('/:game_id', async (req, res, next) => {
         await pool.query(`ROLLBACK`)
         next(err);
     }
-})
+});
 
+/**
+ * @api {delete} /games/:game-id Delete game information
+ * @apiName DeleteGame
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.delete('/:game_id', async (req, res, next) => {
     const { game_id } = req.params;
     try {
@@ -248,8 +374,30 @@ router.delete('/:game_id', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-})
+});
 
+/**
+ * @api {post} /games/:game-id/follow Follow games
+ * @apiName FollowGames
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_GAME_NOT_FOUND
+ * @apiError GAME_DUPLICATE Already follow this game
+ * @apiErrorExample GAME_DUPLICATE:
+ *      HTTP/1.1 409 Conflict
+ *      {
+ *          code: "GAME_DUPLICATE",
+ *          "message": "Already follow this game"
+ *      }
+ */
 router.post('/:game_id/follow', async (req, res, next) => {
     const { game_id } = req.params;
     try {
@@ -258,15 +406,28 @@ router.post('/:game_id/follow', async (req, res, next) => {
         res.status(204).json();
     } catch (err) {
         if (err.errno === 1062) {
-            next({status: 409, message: "Already follow this game"});
+            next({status: 409, code:"GAME_DUPLICATE", message: "Already follow this game"});
         } else if (err.errno === 1452) {
-            next({status: 404, message: "Game not found"});
+            next({status: 404, code: "GAME_NOT_FOUND", message: "Game not found"});
         } else {
             next(err);
         }
     }
-})
+});
 
+/**
+ * @api {delete} /games/:game-id/follow Cancle follow games
+ * @apiName CancleFollowGames
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.delete('/:game_id/follow', async (req, res, next) => {
     const { game_id } = req.params;
     try {
@@ -276,8 +437,25 @@ router.delete('/:game_id/follow', async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-})
+});
 
+/**
+ * @api {put} /games/:game-id/score Rate game score
+ * @apiName RateGameScore
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * @apiParam {Obeject} body
+ * @apiParam {Number} body.score Score of the game
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_GAME_NOT_FOUND
+ */
 router.put('/:game_id/score', async (req, res, next) => {
     const { game_id } = req.params;
     const { score } = req.body;
@@ -291,12 +469,31 @@ router.put('/:game_id/score', async (req, res, next) => {
         }
         res.status(204).json();
     } catch (err) {
-        if (err.errno === 1452)
-            err = { status: 400, message: 'Game not found' }
-        next(err);
+        if (err.errno === 1452) {
+            next({ status: 404, code: "GAME_NOT_FOUND", message: 'Game not found' });
+        } else {
+            next(err);
+        }
     }
 });
 
+/**
+ * @api {post} /games/:game-id/comments Add game comments
+ * @apiName AddGameComments
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * @apiParam {Obeject} body
+ * @apiParam {Number} body.value Content of game comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_GAME_NOT_FOUND
+ */
 router.post('/:game_id/comments', async (req, res, next) => {
     const { game_id } = req.params;
     const { value } = req.body;
@@ -310,10 +507,52 @@ router.post('/:game_id/comments', async (req, res, next) => {
         } 
         res.status(204).json();
     } catch (err) {
-        next(err);
+        if (err.errno === 1452) {
+            next({ status: 404, code: "GAME_NOT_FOUND", message: 'Game not found' });
+        } else {
+            next(err);
+        }
     }
 });
 
+/**
+ * @api {GET} /games/:game-id/comments GET game comments
+ * @apiName GeeGameComments
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * 
+ * @apiSuccess {Json[]} comments
+ * @apiSuccess {Json} comment
+ * @apiSuccess {Number} comment.id The ID of the comment
+ * @apiSuccess {String} comment.value Content of the comments
+ * @apiSuccess {Number} comment.user_id The ID of the user
+ * @apiSuccess {String} comment.user_name Name of the user
+ * @apiSuccess {DateTime} comment.created_at The time the comment was added
+ * @apiSuccess {Number} comment.recommends Number of comment recommends
+ * @apiSuccess {Number} comment.disrecommends Number of comment disrecommends
+ * @apiSuccessExample Success:
+ *      HTTP/1.1 200 OK
+ *      {
+            "comments": [
+                {
+                    "id": 97,
+                    "value": "ㅋㅋㅋㅋㅋㅋㅋㅋ",
+                    "created_at": "2019-03-11 03:12:03",
+                    "user_id": 12,
+                    "user_name": "개발담당",
+                    "recommends": 0,
+                    "disrecommends": 0,
+                }
+            ]
+        }
+ * 
+ * @apiUse ERROR_GAME_NOT_FOUND
+ */
 router.get(`/:game_id/comments`, async (req, res, next) => {
     const { game_id } = req.params;
     try {
@@ -333,6 +572,20 @@ router.get(`/:game_id/comments`, async (req, res, next) => {
     }
 });
 
+/**
+ * @api {delete} /games/:game-id/comments/:comment-id Delete game comment
+ * @apiName DeleteGameComment
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.delete(`/:game_id/comments/:comment_id`, async (req, res, next) => {
     const { game_id, comment_id } = req.params;
     try {
@@ -343,6 +596,29 @@ router.delete(`/:game_id/comments/:comment_id`, async (req, res, next) => {
     }
 });
 
+/**
+ * @api {post} /games/:game-id/comments/:comment-id/recommends Recommends the game comment
+ * @apiName RecommendGameComment
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_COMMENT_NOT_FOUND
+ * @apiError COMMENT_DUPLICATE Already recommended this comment
+ * @apiErrorExample COMMENT_DUPLICATE:
+ *      HTTP/1.1 409 Conflict
+ *      {
+ *          code: "COMMENT_DUPLICATE",
+ *          "message": "Already recommended this comment"
+ *      }
+ */
 router.post('/:game_id/comments/:comment_id/recommends', async (req, res, next) => {
     const { game_id, comment_id } = req.params;
     try {
@@ -360,6 +636,21 @@ router.post('/:game_id/comments/:comment_id/recommends', async (req, res, next) 
     }
 });
 
+/**
+ * @api {post} /games/:game-id/comments/:comment-id/recommends Cancle recommends the game comment
+ * @apiName CancleRecommendGameComment
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ */
 router.delete('/:game_id/comments/:comment_id/recommends', async (req, res, next) => {
     const { game_id, comment_id } = req.params;
     try {
@@ -371,6 +662,29 @@ router.delete('/:game_id/comments/:comment_id/recommends', async (req, res, next
     }
 });
 
+/**
+ * @api {post} /games/:game-id/comments/:comment-id/disrecommends Disrecommends the game comment
+ * @apiName DisrecommendGameComment
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_COMMENT_NOT_FOUND
+ * @apiError COMMENT_DUPLICATE Already disrecommended this comment
+ * @apiErrorExample COMMENT_DUPLICATE:
+ *      HTTP/1.1 409 Conflict
+ *      {
+ *          code: "COMMENT_DUPLICATE",
+ *          "message": "Already disrecommended this comment"
+ *      }
+ */
 router.post('/:game_id/comments/:comment_id/disrecommends', async (req, res, next) => {
     const { game_id, comment_id } = req.params;
     try {
@@ -388,6 +702,21 @@ router.post('/:game_id/comments/:comment_id/disrecommends', async (req, res, nex
     }
 });
 
+/**
+ * @api {post} /games/:game-id/comments/:comment-id/disrecommends Cancle disrecommends the game comment
+ * @apiName CancleDisrecommendGameComment
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ */
 router.delete('/:game_id/comments/:comment_id/disrecommends', async (req, res, next) => {
     const { game_id, comment_id } = req.params;
     try {
