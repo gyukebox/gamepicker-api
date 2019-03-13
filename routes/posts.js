@@ -570,20 +570,40 @@ router.put('/:post_id/comments/:comment_id', async (req, res, next) => {
  * @apiName DeletePostComment
  * @apiGroup Posts
  * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
  */
 router.delete('/:post_id/comments/:comment_id', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
         const user_id = await cert.user(req);
-        const [rows] = await pool.query(`DELETE FROM post_comments WHERE user_id = ? AND post_id = ? AND id = ?`,[user_id, post_id, comment_id]);
-        if (rows.affectedRows === 0)
-            throw { status: 404, message: 'Comment not found' }
+        await pool.query(`DELETE FROM post_comments WHERE user_id = ? AND post_id = ? AND id = ?`,[user_id, post_id, comment_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
     }
-})
+});
 
+/**
+ * @api {post} /posts/:post-id/comments/:comment-id/recommends Recommend post comment
+ * @apiName RecommendPostComment
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.post('/:post_id/comments/:comment_id/recommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
@@ -595,6 +615,20 @@ router.post('/:post_id/comments/:comment_id/recommends', async (req, res, next) 
     }
 });
 
+/**
+ * @api {delete} /posts/:post-id/comments/:comment-id/recommends Cancel recommend post comment
+ * @apiName CancelRecommendPostComment
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.delete('/:post_id/comments/:comment_id/recommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
@@ -606,6 +640,20 @@ router.delete('/:post_id/comments/:comment_id/recommends', async (req, res, next
     }
 });
 
+/**
+ * @api {post} /posts/:post-id/comments/:comment-id/disrecommends Disrecommend post comment
+ * @apiName DisrecommendPostComment
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.post('/:post_od/comments/:comment_id/disrecommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
@@ -617,6 +665,20 @@ router.post('/:post_od/comments/:comment_id/disrecommends', async (req, res, nex
     }
 });
 
+/**
+ * @api {delete} /posts/:post-id/comments/:comment-id/disrecommends Cancle disrecommend post comment
+ * @apiName CancleDisrecommendPostComment
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.post-id The ID of the post
+ * @apiParam {Number} params.comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
 router.delete('/:post_id/comments/:comment_id/disrecommends', async (req, res, next) => {
     const { post_id, comment_id } = req.params;
     try {
