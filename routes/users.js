@@ -495,8 +495,6 @@ router.get('/:user_id/games/comments/disrecommends', async (req, res, next) => {
 router.get('/:user_id/games/features', async (req, res, next) => {
     try {
         const user_id = await cert(req);
-        if (user_id !== Number(req.params.user_id))
-            throw { status: 401, code: "AUTHORIZATION_FAILED", message: "Authorization token and user id do not match"}
         const [games] = await pool.query(`
         SELECT 
             game_id AS id,
@@ -522,6 +520,196 @@ router.get('/:user_id/games/features', async (req, res, next) => {
             LEFT JOIN games ON games.id = game_features.game_id
         WHERE user_id = ?`, [user_id]);
         res.status(200).json({ games });
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {put} /users/:user-id Update user information
+ * @apiName UpdateUser
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} user-id The ID of the user
+ * @apiParam {Object} body
+ * @apiParam {String} body.introduce Introduce of the user
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
+router.put('/:user_id', async (req, res, next) => {
+    const { introduce } = req.body;
+    try {
+        const user_id = await cert(req);
+        await pool.query(`UPDATE users SET introduce = ? WHERE id = ?`,[introduce, user_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {post} /users/:user-id/profile Upload user profile
+ * @apiName UploadUserProfile
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} user-id The ID of the user
+ * @apiParam {Object} file
+ * @apiParam {File} file.profile Profile image file
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_FILE_NOT_FOUND
+ */
+router.post('/:user_id/profile', require('../controller/upload').single('profile'), async (req, res, next) => {
+    if (!req.file)
+        res.status(404).json({ code: "FILE_NOT_FOUND", message: "File not found" });
+    else
+        res.status(204).json();
+});
+
+/**
+ * @api {delete} /users/:user-id/profile Delete user profile
+ * @apiName DeleteUserProfile
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} user-id The ID of the user
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
+router.delete('/:user_id/profile', async (req, res, next) => {
+    try {
+        const user_id = await cert(req);
+        const filename = jwt.encode({
+            user_id,
+            object: 'profile'
+        })
+        fs.unlinkSync(`uploads/${filename}.jpg`);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {put} /users/:user-id/password Update user password
+ * @apiName UpdateUserPassword
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} user-id The ID of the user
+ * @apiParam {Object} body
+ * @apiParam {String} body.password Password of the user
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
+router.put('/:user_id/password', async (req, res, next) => {
+    const { password } = req.body;
+    const encrypt = require('../controller/encrypt');
+    try {
+        const user_id = await cert(req);
+        const {salt, hash} = await encrypt(password);
+        await pool.query('UPDATE users SET salt = ?, password = ? WHERE id = ?', [salt, hash, user_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {get} /users/:user-id/push Check push notification agree
+ * @apiName CheckPushNotificationAgree
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} user-id The ID of the user
+ * @apiParam {Object} body
+ * @apiParam {String} body.reg_id Register ID of the user from FCM
+ * 
+ * @apiSuccess {Boolean} agree Boolean value user has agreed push notification
+ * @apiSuccessExample Success:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "agree": true
+ *      }
+ */
+router.get('/:user_id/push', async (req, res, next) => {
+    const { reg_id } = req.body;
+    try {
+        const user_id = await cert(req);
+        const [[user]] = await pool.query(`SELECT reg_id FROM users WHERE id = ?`, [user_id]);
+        const agree = user.reg_id===reg_id;
+        res.status(200).json({ agree });
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {post} /users/:user-id/push Agree push notification
+ * @apiName AgreePushNotification
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} user-id The ID of the user
+ * @apiParam {Object} body
+ * @apiParam {String} body.os_type OS type of the user
+ * @apiParam {String} body.reg_id Register ID of the user from FCM
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
+router.post('/:user_id/push', async (req, res, next) => {
+    const { os_type, reg_id } = req.body;
+    try {
+        const user_id = await cert(req);
+        await pool.query(`UPDATE users SET os_type = ?, reg_id = ? WHERE id = ?`,[os_type, reg_id, user_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {post} /users/:user-id/push Disagree push notification
+ * @apiName DisagreePushNotification
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} user-id The ID of the user
+ * @apiParam {Object} body
+ * @apiParam {String} body.os_type OS type of the user
+ * @apiParam {String} body.reg_id Register ID of the user from FCM
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
+router.delete('/:user_id/push', async (req, res, next) => {
+    try {
+        const user_id = await cert(req);
+        await pool.query(`UPDATE users SET reg_id = ? WHERE id = ?`, [null, user_id]);
+        res.status(204).json();
     } catch (err) {
         next(err);
     }

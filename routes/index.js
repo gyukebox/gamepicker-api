@@ -125,6 +125,16 @@ module.exports = router;
  *      }
  */
 
+/**
+ * @apiDefine ERROR_FILE_NOT_FOUND
+ * @apiError FILE_NOT_FOUND File not found
+ * @apiErrorExample Error-response:
+ *      HTTP/1.1 404 Not Found
+ *      {
+ *          "message": "File not found"
+ *      }
+ */
+
  /**
   * @apiDefine SUCCESS_EMPTY
   * @apiSuccessExample SUCCESS:
