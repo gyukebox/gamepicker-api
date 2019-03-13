@@ -715,4 +715,28 @@ router.delete('/:user_id/push', async (req, res, next) => {
     }
 });
 
+router.get('/:user_id/posts/recommend', async (req, res, next) => {
+    try {
+        const user_id = await cert(req);
+        const [posts] = await pool.query(`
+        SELECT 
+            posts.id, posts.title, views, posts.created_at,
+            users.name, users.id as user_id,  
+            post_category.value AS category,
+            games.title AS game_title,
+            (SELECT COUNT(1) FROM post_recommends WHERE post_id = posts.id) as recommends,
+            (SELECT COUNT(1) FROM post_disrecommends WHERE post_id = posts.id) as disrecommends,
+            (SELECT COUNT(1) FROM post_comments WHERE post_id = posts.id) as comment_count 
+        FROM post_recommends 
+            LEFT JOIN posts ON posts.id = post_recommends.post_id
+            LEFT JOIN users ON users.id = posts.user_id
+            LEFT JOIN games ON games.id = posts.game_id
+            LEFT JOIN post_category ON post_category.id = posts.category_id
+        WHERE post_recommends.user_id = ?`, [user_id]);
+        res.status(200).json({ posts });
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;

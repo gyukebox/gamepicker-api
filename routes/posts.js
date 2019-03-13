@@ -54,7 +54,7 @@ const cert = require('../controller/certification')();
  */
 router.get('/', async (req, res, next) => {
     const { limit, offset, game_id, category } = req.query;
-    let sql = `game_id 
+    let sql = ` 
     SELECT
         posts.id, posts.title, views, posts.created_at,
         users.name, users.id as user_id,  
