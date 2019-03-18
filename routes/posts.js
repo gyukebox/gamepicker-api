@@ -657,4 +657,83 @@ router.delete('/:post_id/comments/:comment_id/disrecommends', async (req, res, n
         next(err);
     }
 });
+
+/**
+ * @api {post} /posts/:post-id/report Report the post
+ * @apiName ReportPost
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} post-id The ID of the post
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_POST_NOT_FOUND
+ * @apiError POST_DUPLICATE Already report this post
+ * @apiErrorExample POST_DUPLICATE:
+ *      HTTP/1.1 409 Conflict
+ *      {
+ *          code: "POST_DUPLICATE",
+ *          message: "Already report this post"
+ *      }
+ */
+router.post('/:post_id/report', async (req, res, next) => {
+    const { post_id } = req.params;
+    try {
+        const user_id = await cert.user(req);
+        await pool.query(`INSERT INTO report (user_id, post_id) VALUES (?, ?)`, [user_id, post_id]);
+        res.status(204).json();
+    } catch (err) {
+        if (err.errno === 1452) {
+            next({ status: 404, code: "POST_NOT_FOUND", message: "Post not found"});
+        } else if(err.errno === 1062) {
+            next({ status: 409, code: "POST_DUPLICATE", message: "Already report this post"});
+        } else {
+            next(err);
+        }
+    }
+});
+
+/**
+ * @api {post} /posts/:post-id/comments/:comment-id/report Report the post
+ * @apiName ReportPost
+ * @apiGroup Posts
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} post-id The ID of the post
+ * @apiParam {Number} comment-id The ID of the comment
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_COMMENT_NOT_FOUND
+ * @apiError COMMENT_DUPLICATE Already report this post
+ * @apiErrorExample COMMENT_DUPLICATE:
+ *      HTTP/1.1 409 Conflict
+ *      {
+ *          code: "COMMENT_DUPLICATE",
+ *          message: "Already report this comment"
+ *      }
+ */
+router.post('/:post_id/comments/:comment_id/report', async (req, res, next) => {
+    const { post_id, comment_id } = req.params;
+    try {
+        const user_id = await cert.user(req);
+        await pool.query(`INSERT INTO report (user_id, comment_id) VALUES (?, ?)`, [user_id, comment_id]);
+        res.status(204).json();
+    } catch (err) {
+        if (err.errno === 1452) {
+            next({ status: 404, code: "COMMENT_NOT_FOUND", message: "Comment not found"});
+        } else if(err.errno === 1062) {
+            next({ status: 409, code: "COMMENT_DUPLICATE", message: "Already report this comment"});
+        } else {
+            next(err);
+        }
+    }
+});
 module.exports = router;
