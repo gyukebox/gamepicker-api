@@ -698,8 +698,8 @@ router.post('/:post_id/report', async (req, res, next) => {
 });
 
 /**
- * @api {post} /posts/:post-id/comments/:comment-id/report Report the post
- * @apiName ReportPost
+ * @api {post} /posts/:post-id/comments/:comment-id/report Report the post comment
+ * @apiName ReportPostComment
  * @apiGroup Posts
  * 
  * @apiUse HEADERS_AUTHENTICATION
