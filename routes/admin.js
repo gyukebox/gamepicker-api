@@ -261,4 +261,84 @@ router.post('/push', async (req, res, next) => {
     }
 });
 
+/**
+ * @api {get} /admin/report Get reported posts, comments
+ * @apiName GetReports
+ * @apiGroup Admin
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiSuccess {Json[]} posts
+ * @apiSuccess {Json} post
+ * @apiSuccess {Number} post.id The ID of the post
+ * @apiSuccess {String} post.title Title of the post
+ * @apiSuccess {Number} post.count Number of reports
+ * @apiSuccess {Json[]} comments
+ * @apiSuccess {Number} comment.id The ID of the comment
+ * @apiSuccess {String} comment.value Content of the comment
+ * @apiSuccess {Number} comment.post_id The ID of the post related the comment
+ * @apiSuccess {Number} comment.count Number of reports
+ * 
+ */
+router.get('/report', async (req, res ,next) => {
+    try {
+        await cert(req);
+        const [posts] = await pool.query(`
+            SELECT posts.id, posts.title, COUNT(report.user_id) AS count
+            FROM report LEFT JOIN posts ON posts.id = report.post_id
+            WHERE report.comment_id IS NULL
+            GROUP BY post_id`);
+        const [comments] = await pool.query(`
+            SELECT post_comments.id, post_comments.value, post_comments.post_id, COUNT(report.user_id) AS count
+            FROM report LEFT JOIN post_comments ON post_comments.id = report.comment_id
+            WHERE report.post_id IS NULL
+            GROUP BY comment_id`);
+        res.status(200).json({ posts, comments });
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {delete} /admin/posts/:post-id Forces to delete post
+ * @apiName ForceDeletePost
+ * @apiGroup Admin
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
+router.delete('/posts/:post_id', async (req, res, next) => {
+    const { post_id } = req.params;
+    try {
+        await cert(req);
+        await pool.query(`DELETE FROM posts WHERE id = ?`, [post_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {delete} /admin/posts/:post-id/comments/:comment-id Forces to delete post comment
+ * @apiName ForceDeletePostComment
+ * @apiGroup Admin
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * @apiUse HEADERS_AUTHORIZATION
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
+router.delete('/posts/:post_id/comments/:comment_id', async (req, res, next) => {
+    const { post_id, comment_id } = req.params;
+    try {
+        await cert(req);
+        await pool.query(`DELETE FROM post_comments WHERE id = ? AND post_id = ?`, [comment_id, post_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
 module.exports = router;

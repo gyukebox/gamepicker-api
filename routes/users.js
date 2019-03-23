@@ -715,4 +715,78 @@ router.delete('/:user_id/push', async (req, res, next) => {
     }
 });
 
+/**
+ * @api {get} /users/:user-id/games/recommend Get recommend games
+ * @apiName GetRecommendGame
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} user-id The ID of the user
+ * 
+ * @apiSuccess {Json[]} games
+ * @apiSuccess {Json} game
+ * @apiSuccess {Number} game.id The ID of the game
+ */
+router.get('/:user_id/games/recommend', async (req, res, next) => {
+    try {
+        const user_id = await cert(req);
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {get} /users/:user-id/games/analyze Analyze own game tendency
+ * @apiName AnalyzeUserGame
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} user-id The ID of the user
+ * 
+ * @apiSuccess {Json} game.features
+ * @apiSuccess {Number} features.게임성 "게임성" score of this game
+ * @apiSuccess {Number} features.조작성 "조작성" score of this game
+ * @apiSuccess {Number} features.난이도 "난이도" score of this game
+ * @apiSuccess {Number} features.스토리 "스토리" score of this game
+ * @apiSuccess {Number} features.몰입도 "몰입도" score of this game
+ * @apiSuccess {Number} features.BGM "BGM" score of this game
+ * @apiSuccess {Number} features.공포성 "공포성" score of this game
+ * @apiSuccess {Number} features.과금유도 "과금유도" score of this game
+ * @apiSuccess {Number} features.노가다성 "노가다성" score of this game
+ * @apiSuccess {Number} features.진입장벽 "진입장벽" score of this game
+ * @apiSuccess {Number} features.필요성능 "필요성능" score of this game
+ * @apiSuccess {Number} features.플레이타임 "플레이타임" score of this game
+ * @apiSuccess {Number} features.가격 "가격" score of this game
+ * @apiSuccess {Number} features.DLC "DLC" score of this game
+ * @apiSuccess {Number} features.버그 "버그" score of this game
+ * @apiSuccess {Number} features.그래픽 "그래픽" score of this game
+ */
+router.get('/:user_id/games/analyze', async (req, res, next) => {
+    const game_features = ["게임성","조작성","난이도","스토리","몰입도","BGM","공포성","과금유도","노가다성","진입장벽","필요성능","플레이타임","가격","DLC","버그","그래픽"];
+    const selectSQL = game_features.map(feature => `AVG(${feature}) AS ${feature}`).toString();
+    try {
+        const user_id = await cert(req);
+        const [[features]] = await pool.query(`
+        SELECT
+            ${selectSQL}
+        FROM (
+            SELECT
+                ${selectSQL}
+            FROM favor
+                LEFT JOIN game_features ON game_features.game_id = favor.game_id
+            WHERE favor.user_id = ?
+            GROUP BY favor.game_id
+        ) AS tmp`, [user_id]);
+        res.status(200).json({ features });
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;
