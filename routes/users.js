@@ -725,14 +725,106 @@ router.delete('/:user_id/push', async (req, res, next) => {
  * 
  * @apiParam {Object} params
  * @apiParam {Number} user-id The ID of the user
+ * @apiParam {Object} query
+ * @apiUse QUERY_LIMIT
  * 
  * @apiSuccess {Json[]} games
  * @apiSuccess {Json} game
  * @apiSuccess {Number} game.id The ID of the game
+ * @apiSuccess {String} game.title Title of the game
+ * @apiSuccess {String} game.developer Developer of the game
+ * @apiSuccess {String} game.publisher Publisher of the game
+ * @apiSuccess {String} game.summary Summary of the game
+ * @apiSuccess {String} game.age_rate Age rating of the game
+ * @apiSuccess {DateTime} game.created_at The time the game was added
+ * @apiSuccess {String[]} game.images Array of image links
+ * @apiSuccess {String[]} game.videos Array of video links
+ * @apiSuccess {String[]} game.platforms Array of platforms
+ * @apiSuccess {Number} game.score Average score of the game
+ * @apiSuccess {Number} game.score_count Number of user rate the game
+ *      HTTP/1.1 200 OK
+ *      {
+            "game": {
+                "id": 1,
+                "title": "Super Smash Bros. Melee",
+                "developer": "HAL Laboratory",
+                "publisher": "Nintendo",
+                "created_at": "2019-03-03 14:01:27",
+                "summary": "A classic and legendary Nintendo title, this game was the number one seller of all time for the Nintendo GameCube. To this day, this game still maintains a very strong competitive following.",
+                "age_rate": "전체이용가",
+                "images": [
+                    "https://i.kym-cdn.com/entries/icons/original/000/026/290/maxresdefault.jpg"
+                ],
+                "videos": [],
+                "platforms": [
+                    "Nintendo GameCube"
+                ],
+                "score": null,
+                "score_count": 0
+            }
+        }
+ *      
  */
 router.get('/:user_id/games/recommend', async (req, res, next) => {
+    const game_features = ["게임성","조작성","난이도","스토리","몰입도","BGM","공포성","과금유도","노가다성","진입장벽","필요성능","플레이타임","가격","DLC","버그","그래픽"];
+    const selectSQL = game_features.map(feature => `AVG(${feature}) AS ${feature}`).toString();
+    const { limit } = req.query;
+    const getDistance = (p0, p) => {
+        const dimension = p0.length;
+        let sum = 0;
+        for(let i=0;i<dimension;i++) {
+            sum += Math.pow(p0[i]-p[i], 2);
+        }
+        return Math.sqrt(sum);
+    }
+    const getDisList = (user, list) => {
+        const data = [];
+        list.forEach(item => {
+            data.push({
+                id: item.game_id, 
+                distance: getDistance(user.features, item.features)
+            });
+        });
+        data.sort((first, second) => {
+            return first.distance - second.distance;
+        });
+        return data;
+    }
     try {
         const user_id = await cert(req);
+        const [[user]] = await pool.query(`
+        SELECT
+            JSON_ARRAY(${game_features.toString()}) as features
+        FROM (
+            SELECT
+                ${selectSQL}
+            FROM favor
+                LEFT JOIN game_features ON game_features.game_id = favor.game_id
+            WHERE favor.user_id = ?
+            GROUP BY favor.game_id
+        ) AS tmp`, [user_id]);
+        
+        const [list] = await pool.query(`
+            SELECT JSON_ARRAY(${game_features.toString()}) as features, game_id
+            FROM game_features
+        `);
+        const data = getDisList(user, list).slice(0, limit||5);
+        const [games] = await pool.query(`
+        SELECT
+            id,
+            title,
+            developer,
+            publisher,
+            created_at,
+            (SELECT JSON_ARRAYAGG(link) FROM game_images WHERE game_id = games.id) AS images,
+            (SELECT JSON_ARRAYAGG(link) FROM game_videos WHERE game_id = games.id) AS videos,
+            (SELECT JSON_ARRAYAGG(value) FROM game_platforms LEFT JOIN platforms ON platforms.id = game_platforms.platform_id WHERE game_id = games.id) AS platforms,
+            (SELECT AVG(score) FROM game_score WHERE game_id = games.id) AS score,
+            (SELECT COUNT(score) FROM game_score WHERE game_id = games.id) AS score_count
+        FROM games
+        WHERE id IN (${data.map(item => item.id).toString()})
+        `)
+        res.status(200).json({ games });
     } catch (err) {
         next(err);
     }
