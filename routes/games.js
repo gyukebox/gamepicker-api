@@ -728,4 +728,71 @@ router.delete('/:game_id/comments/:comment_id/disrecommends', async (req, res, n
     }
 });
 
+/**
+ * @api {post} /games/:game-id/favorite Game favorites
+ * @apiName GameFavorites
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiError GAME_NOT_FOUND The ID of the Game was not found
+ * @apiErrorExample Error-response:
+ *      HTTP/1.1 404 Not Found
+ *      {
+ *          "message": "Game not found"
+ *      }
+ * @apiError FAVORITES_DUPLICATE You already favorites this game
+ * @apiErrorExample Error-response:
+ *      HTTP/1.1 404 Not Found
+ *      {
+ *          "message": "You already favorites this game"
+ *      }
+ */
+router.post('/:game_id/favorites', async (req, res, next) => {
+    const { game_id } = req.params;
+    try {
+        const user_id = await cert.user(req);
+        await pool.query(`INSERT INTO game_favorites (game_id, user_id) VALUES (?, ?)`, [game_id, user_id]);
+        res.status(204).json();
+    } catch (err) {
+        if (err.errno == 1452) {
+            err = { status: 404, code: "GAME_NOT_FOUND", message: `Game not found` }
+        }
+        if (err.errno == 1062) {
+            err = { status: 409, code: "FAVORITES_DUPLICATE", message: "You already favorites this game"}
+        }
+        next(err);
+    }
+});
+
+/**
+ * @api {delete} /games/:game-id/favorite Cancel game favorites
+ * @apiName CancelGameFavorites
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
+router.delete('/:game_id/favorites', async (req, res, next) => {
+    const { game_id } = req.params;
+    try {
+        const user_id = await cert.user(req);
+        await pool.query(`DELETE FROM game_favorites WHERE game_id = ? AND user_id = ?)`, [game_id, user_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;

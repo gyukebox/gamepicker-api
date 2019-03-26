@@ -881,4 +881,37 @@ router.get('/:user_id/games/analyze', async (req, res, next) => {
     }
 });
 
+/**
+ * @api {get} /users/:user-id/games/favorites Get games user favorites
+ * @apiName GetGamesUserFavorites
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.user-id The ID of the user
+ * 
+ * @apiSuccess {Json[]} games
+ * @apiSuccess {Json} game
+ * @apiSuccess {Number} game.id The ID of the game
+ * @apiSuccessExample Success:
+ *      HTTP/1.1 200 OK
+ *      {
+            "games": [
+                {
+                    "id": 1
+                }
+            ]
+        }
+ */
+router.get('/:user_id/games/favorites', async (req, res, next) => {
+    const user_id = await cert(req);
+    try {
+        const [games] = await pool.query(`SELECT game_id AS id FROM game_favorites WHERE user_id = ?`, [user_id]);
+        res.json({ games });
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;
