@@ -278,21 +278,46 @@ router.get('/:user_id/games/follow', async (req, res, next) => {
  * @apiSuccess {Json[]} games
  * @apiSuccess {Json} game
  * @apiSuccess {Number} game.id The ID of the game
+ * @apiSuccess {Number} game.score The score of the game user rated
+ * @apiSuccess {String} game.title The title of the game
+ * @apiSuccess {String[]} game.images The Array of the game images
  * @apiSuccessExample Success:
  *      HTTP/1.1 OK
  *      {
-            "games": [
-                {
-                    "id": 1,
-                }
-            ]
-        }
+        "games": [
+            {
+                "score": 3.5,
+                "id": 247,
+                "title": "열일하는 UFO",
+                "images": [
+                    "https://lh3.googleusercontent.com/cyTiCYkpBIdJtoNIC4BFeC_MMXVgunrYStGMBNbNbTa0V2XBX5kFt4Lv5SMQFqCGWgoJ"
+                ]
+            },
+            {
+                "score": 5,
+                "id": 91,
+                "title": "The Last of Us",
+                "images": [
+                    "https://i.kinja-img.com/gawker-media/image/upload/s--SZzkpmHU--/c_scale,f_auto,fl_progressive,q_80,w_800/1044794481482396231.jpg"
+                ]
+            }
+        ]
+    }
  */
 router.get('/:user_id/games/score', async (req, res, next) => {
     const { user_id } = req.params;
     try {
+        /*
         const [scores] = await pool.query(`SELECT score, title, id AS game_id, link AS game_image FROM game_score LEFT JOIN games ON games.id = game_score.game_id LEFT JOIN game_images ON game_images.game_id = games.id WHERE user_id = ?`, [user_id]);
         res.status(200).json({ scores });
+        */
+        const [games] = await pool.query(`
+        SELECT score, id, title, JSON_ARRAY(link) AS images
+        FROM games 
+            LEFT JOIN game_score ON game_score.game_id = games.id
+            LEFT JOIN game_images ON game_images.game_id = games.id
+        WHERE game_score.user_id = ?`, [user_id]);
+        res.status(200).json({ games })
     } catch (err) {
         next(err);
     }
