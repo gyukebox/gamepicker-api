@@ -14,6 +14,7 @@ const cert = require('../controller/certification')();
  * @apiUse QUERY_LIMIT
  * @apiUse QUERY_OFFSET
  * @apiParam {Number} platform_id Returns the game corresponding to the platform_id
+ * @apiParam {Number} search Returns the game include 'search' string
  * @apiParam {String} sort Sorting options (random)
  * 
  * @apiSuccess {Json[]} games
@@ -52,7 +53,7 @@ const cert = require('../controller/certification')();
         }
  */
 router.get('/', async (req, res, next) => {
-    const { limit, offset, platform_id } = req.query;
+    const { limit, offset, platform_id, search } = req.query;
     const { sort } = req.query;
 
     let sql = `
@@ -73,6 +74,12 @@ router.get('/', async (req, res, next) => {
     if (platform_id) {
         sql += ` WHERE EXISTS (SELECT 1 FROM game_platforms WHERE game_id = games.id AND platform_id = ?)`;
         option.push(platform_id);
+    }
+    if (search) {
+        if (!platform_id) {
+            sql += `  WHERE`
+        }   
+        sql += ` games.title LIKE '%${search}%'`
     }
     switch (sort) {
         case "random":
