@@ -79,7 +79,7 @@ router.get('/', async (req, res, next) => {
         if (!platform_id) {
             sql += `  WHERE`
         }   
-        sql += ` games.title LIKE '%${search}%'`
+        sql += ` REPLACE(games.title, ' ', '') LIKE '%${search}%'`
     }
     switch (sort) {
         case "random":
