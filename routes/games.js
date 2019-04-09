@@ -292,7 +292,17 @@ router.post('/', async (req, res, next) => {
  */
 router.post('/:game_id/features', async (req, res, next) => {
     const { game_id } = req.params;
-    const { 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 } = req.body;
+    let { 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 } = req.body;
+
+    //안드로이드 요청으로 임시로 추가됨. 04.23일 이후에 롤백
+    const list = [ 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 ];
+    for (let i = 0; i < list.length; i++) {
+        if (list[i] === 'null')
+            list[i] = null;
+    }
+    [게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽] = list;
+    //위 주석부터 여기까지 지우면됨
+
     try {
         const user_id = await cert.user(req);
         const [rows] = await pool.query(`SELECT 1 FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user_id]);
