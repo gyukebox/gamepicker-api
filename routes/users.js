@@ -924,15 +924,16 @@ router.get('/:user_id/games/analyze', async (req, res, next) => {
  *      {
             "games": [
                 {
-                    "id": 1
+                    "id": 1,
+                    "title": "Super Smash Bros. Melee"
                 }
             ]
         }
  */
 router.get('/:user_id/games/favorites', async (req, res, next) => {
-    const user_id = await cert(req);
     try {
-        const [games] = await pool.query(`SELECT game_id AS id FROM game_favorites WHERE user_id = ?`, [user_id]);
+        const user_id = await cert(req);
+        const [games] = await pool.query(`SELECT games.id, games.title FROM game_favorites LEFT JOIN games ON games.id = game_favorites.game_id WHERE user_id = ?`, [user_id]);
         res.json({ games });
     } catch (err) {
         next(err);
