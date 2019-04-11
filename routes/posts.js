@@ -414,7 +414,7 @@ router.get('/:post_id/comments', async (req, res, next) => {
                 "id",c.id, 
                 "value",c.value, 
                 "user_id",c.user_id,
-                "created_at",c.created_at,
+                "created_at", DATE_FORMAT(c.created_at, "%Y-%m-%d %H:%i:%s"),
                 "name",(SELECT name FROM users WHERE id = c.user_id),
                 "recommends", (SELECT COUNT(*) FROM post_comment_recommends WHERE comment_id = c.id),
                 "disrecommends", (SELECT COUNT(*) FROM post_comment_disrecommends WHERE comment_id = c.id)
