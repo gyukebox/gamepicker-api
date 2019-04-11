@@ -746,7 +746,7 @@ router.delete('/:game_id/comments/:comment_id/disrecommends', async (req, res, n
 });
 
 /**
- * @api {post} /games/:game-id/favorite Game favorites
+ * @api {post} /games/:game-id/favorites Game favorites
  * @apiName GameFavorites
  * @apiGroup Games
  * 
@@ -789,7 +789,7 @@ router.post('/:game_id/favorites', async (req, res, next) => {
 });
 
 /**
- * @api {delete} /games/:game-id/favorite Cancel game favorites
+ * @api {delete} /games/:game-id/favorites Cancel game favorites
  * @apiName CancelGameFavorites
  * @apiGroup Games
  * 
@@ -805,7 +805,7 @@ router.delete('/:game_id/favorites', async (req, res, next) => {
     const { game_id } = req.params;
     try {
         const user_id = await cert.user(req);
-        await pool.query(`DELETE FROM game_favorites WHERE game_id = ? AND user_id = ?)`, [game_id, user_id]);
+        await pool.query(`DELETE FROM game_favorites WHERE game_id = ? AND user_id = ?`, [game_id, user_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
