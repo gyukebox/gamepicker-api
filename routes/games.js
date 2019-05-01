@@ -14,6 +14,7 @@ const cert = require('../controller/certification')();
  * @apiUse QUERY_LIMIT
  * @apiUse QUERY_OFFSET
  * @apiParam {Number} platform_id Returns the game corresponding to the platform_id
+ * @apiParam {Number} search Returns the game include 'search' string
  * @apiParam {String} sort Sorting options (random)
  * 
  * @apiSuccess {Json[]} games
@@ -52,7 +53,7 @@ const cert = require('../controller/certification')();
         }
  */
 router.get('/', async (req, res, next) => {
-    const { limit, offset, platform_id } = req.query;
+    const { limit, offset, platform_id, search } = req.query;
     const { sort } = req.query;
 
     let sql = `
@@ -73,6 +74,12 @@ router.get('/', async (req, res, next) => {
     if (platform_id) {
         sql += ` WHERE EXISTS (SELECT 1 FROM game_platforms WHERE game_id = games.id AND platform_id = ?)`;
         option.push(platform_id);
+    }
+    if (search) {
+        if (!platform_id) {
+            sql += `  WHERE`
+        }   
+        sql += ` REPLACE(games.title, ' ', '') LIKE '%${search}%'`
     }
     switch (sort) {
         case "random":
@@ -285,7 +292,17 @@ router.post('/', async (req, res, next) => {
  */
 router.post('/:game_id/features', async (req, res, next) => {
     const { game_id } = req.params;
-    const { 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 } = req.body;
+    let { 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 } = req.body;
+
+    //안드로이드 요청으로 임시로 추가됨. 04.23일 이후에 롤백
+    const list = [ 게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽 ];
+    for (let i = 0; i < list.length; i++) {
+        if (list[i] === 'null')
+            list[i] = null;
+    }
+    [게임성, 조작성, 난이도, 스토리, 몰입도, BGM, 공포성, 과금유도, 노가다성, 진입장벽, 필요성능, 플레이타임, 가격, DLC, 버그, 그래픽] = list;
+    //위 주석부터 여기까지 지우면됨
+
     try {
         const user_id = await cert.user(req);
         const [rows] = await pool.query(`SELECT 1 FROM game_features WHERE game_id = ? AND user_id = ?`, [game_id, user_id]);
@@ -722,6 +739,73 @@ router.delete('/:game_id/comments/:comment_id/disrecommends', async (req, res, n
     try {
         const user_id = await cert.user(req);
         await pool.query(`DELETE FROM game_comment_disrecommends WHERE user_id = ? AND comment_id = ?`, [user_id, comment_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {post} /games/:game-id/favorites Game favorites
+ * @apiName GameFavorites
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiError GAME_NOT_FOUND The ID of the Game was not found
+ * @apiErrorExample Error-response:
+ *      HTTP/1.1 404 Not Found
+ *      {
+ *          "message": "Game not found"
+ *      }
+ * @apiError FAVORITES_DUPLICATE You already favorites this game
+ * @apiErrorExample Error-response:
+ *      HTTP/1.1 404 Not Found
+ *      {
+ *          "message": "You already favorites this game"
+ *      }
+ */
+router.post('/:game_id/favorites', async (req, res, next) => {
+    const { game_id } = req.params;
+    try {
+        const user_id = await cert.user(req);
+        await pool.query(`INSERT INTO game_favorites (game_id, user_id) VALUES (?, ?)`, [game_id, user_id]);
+        res.status(204).json();
+    } catch (err) {
+        if (err.errno == 1452) {
+            err = { status: 404, code: "GAME_NOT_FOUND", message: `Game not found` }
+        }
+        if (err.errno == 1062) {
+            err = { status: 409, code: "FAVORITES_DUPLICATE", message: "You already favorites this game"}
+        }
+        next(err);
+    }
+});
+
+/**
+ * @api {delete} /games/:game-id/favorites Cancel game favorites
+ * @apiName CancelGameFavorites
+ * @apiGroup Games
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} params.game-id The ID of the game
+ * 
+ * @apiUse SUCCESS_EMPTY
+ */
+router.delete('/:game_id/favorites', async (req, res, next) => {
+    const { game_id } = req.params;
+    try {
+        const user_id = await cert.user(req);
+        await pool.query(`DELETE FROM game_favorites WHERE game_id = ? AND user_id = ?`, [game_id, user_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
