@@ -471,27 +471,31 @@ router.post('/:post_id/comments', async (req, res, next) => {
         const user_id = await cert.user(req);
         await pool.query(`INSERT INTO post_comments (user_id, post_id, value, parent_id) VALUES (?, ?, ?, ?)`,[user_id, post_id, value, parent_id]);
         const push = require('../controller/notification');
-        if (parent_id) {
-            const [[write_user]] = await pool.query(`SELECT name FROM users WHERE id = ?`, [user_id]);
-            const [[user]] = await pool.query(`SELECT reg_id, users.id FROM post_comments LEFT JOIN users ON users.id = post_comments.user_id WHERE post_comments.id = ?`, [parent_id]);
-            if (user.reg_id && user.id !== user_id) {
-                await push(user.reg_id, {
-                    body: write_user.name + '님이 회원님의 댓글에 답글을 남겻습니다.'
-                },{
-                    post_id,
-                    comment_id: parent_id
-                });
+        try {
+            if (parent_id) {
+                const [[write_user]] = await pool.query(`SELECT name FROM users WHERE id = ?`, [user_id]);
+                const [[user]] = await pool.query(`SELECT reg_id, users.id FROM post_comments LEFT JOIN users ON users.id = post_comments.user_id WHERE post_comments.id = ?`, [parent_id]);
+                if (user.reg_id && user.id !== user_id) {
+                    await push(user.reg_id, {
+                        body: write_user.name + '님이 회원님의 댓글에 답글을 남겻습니다.'
+                    },{
+                        post_id,
+                        comment_id: parent_id
+                    });
+                }
+            } else {
+                const [[write_user]] = await pool.query(`SELECT name FROM users WHERE id = ?`, [user_id]);
+                const [[user]] = await pool.query(`SELECT reg_id, users.id FROM posts LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?`, [post_id]);
+                if (user.reg_id && user.id !== user_id) {
+                    await push(user.reg_id, {
+                        body: write_user.name + '님이 회원님의 게시물에 댓글을 남겻습니다.'
+                    },{
+                        post_id
+                    });
+                }
             }
-        } else {
-            const [[write_user]] = await pool.query(`SELECT name FROM users WHERE id = ?`, [user_id]);
-            const [[user]] = await pool.query(`SELECT reg_id, users.id FROM posts LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?`, [post_id]);
-            if (user.reg_id && user.id !== user_id) {
-                await push(user.reg_id, {
-                    body: write_user.name + '님이 회원님의 게시물에 댓글을 남겻습니다.'
-                },{
-                    post_id
-                });
-            }
+        } catch (err) {
+
         }
         res.status(204).json();
     } catch (err) {
