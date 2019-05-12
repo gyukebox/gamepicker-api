@@ -249,12 +249,27 @@ router.delete('/notices/:notice_id', async (req, res, next) => {
  * @apiDeprecated Consider specific conditions.
  */
 router.post('/push', async (req, res, next) => {
-    const { age, gender, lastLogin, reserve } = req.body;
+    const { minAge, maxAge, gender } = req.body;
     const { title, content } = req.body;
-    const push = require('../controller/push-notification');
+    const push = require('../controller/notification')
+    const getRegId = async (minAge, maxAge, gender) => {
+        const year = new Date().getFullYear();
+        const month = new Date().getMonth()+1;
+        const date = new Date().getDate();
+        const minBirthday = year-(maxAge||100) + '-' + month + '-' + date;
+        const maxBirthday = year-(minAge||0) + '-' + month + '-' + date;
+        const [list] = await pool.query(`SELECT reg_id FROM users WHERE DATE(birthday) BETWEEN ? AND ? AND gender=?`,[minBirthday, maxBirthday, gender]);
+        return list.map(row => row.reg_id).filter(reg_id => !!reg_id);
+    }
     try {
         await cert(req);
-        await push(age, lastLogin, gender, reserve, title, content);
+        const list = await getRegId(minAge, maxAge, gender);
+        for (const reg_id of list) {
+            push(reg_id, {
+                title,
+                body: content
+            });
+        }
         res.status(204).json();
     } catch (err) {
         next(err);
