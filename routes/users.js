@@ -605,7 +605,8 @@ router.patch('/:user_id/cash', async (req, res, next) => {
                 message: 'Admin privileges required.'
             }
         }
-        await pool.query(`UPDATE users SET cash = ? WHERE id = ?`,[cash, user_id]);
+        const [[{_cash}]] = await pool.query(`SELECT cash FROM users WHERE id = ?`, [user_id]);
+        await pool.query(`UPDATE users SET cash = ? WHERE id = ?`,[cash+Number(_cash), user_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
