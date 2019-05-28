@@ -68,7 +68,7 @@ router.get('/', async (req, res, next) => {
  * @apiSuccess {String} user.email Email of the user
  * @apiSuccess {Date} user.birthday Birthday of the user
  * @apiSuccess {String} user.introduce Introduce of the user
- * @apiSuccess {Number} user.points Points of the user
+ * @apiSuccess {Number} user.cash Cash of the user
  * @apiSuccess {String} user.gender Gender of the user
  * @apiSuccess {String} user.profile Image link that provide user's profile picture
  * @apiSuccessExample Success:
@@ -80,7 +80,7 @@ router.get('/', async (req, res, next) => {
                 "birthday": "1998-01-07",
                 "introduce": null,
                 "gender": "M",
-                "points": 0,
+                "cash": 0,
                 "profile": null
             }
         }
@@ -88,7 +88,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:user_id', async (req, res, next) => {
     const { user_id } = req.params;
     try {
-        const [[user]] = await pool.query(`SELECT name, email, birthday, introduce, gender, points FROM users WHERE id = ?`,[user_id]);
+        const [[user]] = await pool.query(`SELECT name, email, birthday, introduce, gender, cash FROM users WHERE id = ?`,[user_id]);
         if (!user)
             throw { status: 404, code: "USER_NOT_FOUND", message: 'User not found' }
         const filename = jwt.encode({
@@ -570,6 +570,42 @@ router.put('/:user_id', async (req, res, next) => {
     try {
         const user_id = await cert(req);
         await pool.query(`UPDATE users SET introduce = ? WHERE id = ?`,[introduce, user_id]);
+        res.status(204).json();
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * @api {post} /users/:user-id/cash Charge users cash
+ * @apiName Charging cash
+ * @apiGroup Users
+ * 
+ * @apiUse HEADERS_AUTHORIZATION
+ * @apiUse HEADERS_AUTHENTICATION
+ * 
+ * @apiParam {Object} params
+ * @apiParam {Number} user-id The ID of the user
+ * @apiParam {Object} body
+ * @apiParam {Number} cash The amount of charged
+ * 
+ * @apiUse SUCCESS_EMPTY
+ * 
+ * @apiUse ERROR_FILE_NOT_FOUND
+ */
+
+router.patch('/:user_id/cash', async (req, res, next) => {
+    const { cash } = req.body;
+    try {
+        const user_id = await cert(req);
+        const [rows] = await pool.query(`SELECT * FROM admin WHERE user_id = ?`, [user_id]);
+        if (rows.length === 0) {
+            throw {
+                status: 401,
+                message: 'Admin privileges required.'
+            }
+        }
+        await pool.query(`UPDATE users SET cash = ? WHERE id = ?`,[cash, user_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
