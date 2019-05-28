@@ -577,7 +577,7 @@ router.put('/:user_id', async (req, res, next) => {
 });
 
 /**
- * @api {post} /users/:user-id/cash Charge users cash
+ * @api {patch} /users/:user-id/cash Charge users cash
  * @apiName Charging cash
  * @apiGroup Users
  * 
@@ -595,9 +595,9 @@ router.put('/:user_id', async (req, res, next) => {
  */
 
 router.patch('/:user_id/cash', async (req, res, next) => {
+    const { user_id } = req.params;
     const { cash } = req.body;
     try {
-        const user_id = await cert(req);
         const [rows] = await pool.query(`SELECT * FROM admin WHERE user_id = ?`, [user_id]);
         if (rows.length === 0) {
             throw {
@@ -605,8 +605,8 @@ router.patch('/:user_id/cash', async (req, res, next) => {
                 message: 'Admin privileges required.'
             }
         }
-        const [[{_cash}]] = await pool.query(`SELECT cash FROM users WHERE id = ?`, [user_id]);
-        await pool.query(`UPDATE users SET cash = ? WHERE id = ?`,[cash+Number(_cash), user_id]);
+        const [[user]] = await pool.query(`SELECT cash FROM users WHERE id = ?`, [user_id]);
+        await pool.query(`UPDATE users SET cash = ? WHERE id = ?`,[cash+Number(user.cash), user_id]);
         res.status(204).json();
     } catch (err) {
         next(err);
