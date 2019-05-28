@@ -7,7 +7,7 @@ const cert = require('../controller/certification')().user;
 router.get('/', async (req, res, next) => {
     try {
         const user_id = await cert(req);
-        const [[user]] = await pool.query(`SELECT name, email, birthday, introduce, gender, points FROM users WHERE id = ?`,[user_id]);
+        const [[user]] = await pool.query(`SELECT name, email, birthday, introduce, gender, cash FROM users WHERE id = ?`,[user_id]);
         if (!user)
             throw { status: 404, message: 'User not found' }
         const filename = jwt.encode({
