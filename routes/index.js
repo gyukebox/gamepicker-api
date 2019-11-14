@@ -1,34 +1,46 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const games = require('./games');
-const users = require('./users');
-const posts = require('./posts');
-const platforms = require('./platforms');
-const admin = require('./admin');
-const me = require('./me');
+const games = require("./games");
+const users = require("./users");
+const posts = require("./posts");
+const platforms = require("./platforms");
+const admin = require("./admin");
+const me = require("./me");
 
 router.use(async (req, res, next) => {
-    const auth_token = req.headers['authorization'];
-    try {
-        if (!auth_token) {
-            throw { status: 400, code: "AUTHENTICATION_REQUIRED", message: "Authentication token required" };
-        }
-        const [rows] = await pool.query(`SELECT 1 FROM authorization WHERE token = ?`, [auth_token]);
-        if (rows.length === 0)
-            throw { status: 401, code: "AUTHENTICATION_FAILED", message: 'Invalid authentication token'};
-        next();
-    } catch (err) {
-        next(err);
+  const auth_token = req.headers["authorization"];
+  try {
+    if (!auth_token) {
+      throw {
+        status: 400,
+        code: "AUTHENTICATION_REQUIRED",
+        message: "Authentication token required"
+      };
     }
-})
+    const [
+      rows
+    ] = await pool.query(`SELECT 1 FROM authorization WHERE token = ?`, [
+      auth_token
+    ]);
+    if (rows.length === 0)
+      throw {
+        status: 401,
+        code: "AUTHENTICATION_FAILED",
+        message: "Invalid authentication token"
+      };
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
-router.use('/games', games);
-router.use('/users', users);
-router.use('/posts', posts);
-router.use('/platforms', platforms);
-router.use('/admin', admin);
-router.use('/me', me);
+router.use("/games", games);
+router.use("/users", users);
+router.use("/posts", posts);
+router.use("/platforms", platforms);
+router.use("/admin", admin);
+router.use("/me", me);
 
 module.exports = router;
 
@@ -135,14 +147,14 @@ module.exports = router;
  *      }
  */
 
- /**
-  * @apiDefine SUCCESS_EMPTY
-  * @apiSuccessExample SUCCESS:
+/**
+ * @apiDefine SUCCESS_EMPTY
+ * @apiSuccessExample SUCCESS:
  *      HTTP/1.1 204 No Content
  *      {
- *          
+ *
  *      }
-  */
+ */
 
 /**
  * @apiDefine QUERY_LIMIT

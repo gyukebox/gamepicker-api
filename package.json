@@ -29,6 +29,9 @@
   "apidoc": {
     "name": "Gamepicker API",
     "title": "Gamepicker API Documents",
-    "url" : "https://api.gamepicker.co.kr"
+    "url": "https://api.gamepicker.co.kr"
+  },
+  "devDependencies": {
+    "eslint": "^6.6.0"
   }
 }
